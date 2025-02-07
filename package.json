@@ -1,0 +1,17 @@
+{
+  "name": "synapze-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "landing",
+    "app",
+    "api",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

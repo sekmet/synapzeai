@@ -1,0 +1,24 @@
+{
+  "name": "@synapze/api",
+  "version": "0.0.1",
+  "module": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/dockerode": "^3.3.34",
+    "@types/tar-fs": "^2.0.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "dockerode": "^4.0.4",
+    "hono": "^4.7.0",
+    "stream": "^0.0.3",
+    "tar-fs": "^3.0.8"
+  }
+}

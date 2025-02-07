@@ -1,0 +1,628 @@
+// server.js
+import { Hono } from 'hono';
+import { logger } from 'hono/logger';
+import { prettyJSON } from 'hono/pretty-json';
+import Docker from 'dockerode';
+import tar from 'tar-fs';
+import { Writable } from 'stream';
+
+const apiPrefix = '/v1';
+
+// Create a default Docker instance using the UNIX socket.
+const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+
+export const app = new Hono();
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(logger());
+}
+
+// Add pretty JSON middleware for development
+if (process.env.NODE_ENV === 'development') {
+    app.use(prettyJSON({ space: 4 })) // With options: prettyJSON({ space: 4 })
+  }
+  
+  // Add secure headers middleware
+  //app.use('*', secureHeaders())
+  
+  // Add timing middleware
+  //app.use(timing())
+  
+  // API specs docs
+  //app.use('/docs/*', serveStatic({ precompressed: true, root: './' }));
+  //app.use('/favicon.ico', serveStatic({ path: './public/favicon.ico' }))
+  
+  // Error handling middleware
+  app.onError((err, c) => {
+    console.error(`${err}`)
+    return c.json({ error: 'Internal Server Error' }, 500)
+  })
+  
+  // Not Found handler
+  app.notFound((c) => {
+    return c.json({ error: 'Not Found' }, 404)
+  })
+  
+  // DB connection
+  
+  // Root route
+  app.get('/', (c) => c.text('SYNAPZE DOCKER API Server v0.0.1'))
+  
+  // Health check endpoint
+  app.get('/health', (c) => c.json({ status: 'OK' }))
+
+// A helper function to wrap docker.createContainer in a Promise.
+function createContainerPromise(options: any) {
+  return new Promise((resolve, reject) => {
+    docker.createContainer(options, (err, container) => {
+      if (err) reject(err);
+      else resolve(container);
+    });
+  });
+}
+
+/* ============================================================
+   1. Duplex Container Endpoint
+   URL: POST /containers/duplex
+   Request JSON may include:
+     - createOptions: object for container creation (defaults below)
+     - attachOptions: object for container.attach (defaults below)
+     - removeTimeout: number in ms before ending & removing (default: 5000)
+   ============================================================ */
+app.post(`${apiPrefix}/containers/duplex`, async (c) => {
+  try {
+    const {
+      createOptions,
+      attachOptions,
+      removeTimeout
+    } = await c.req.json().catch(() => ({}));
+
+    // Default options if not provided by the user.
+    const _createOptions = createOptions || {
+      Image: 'ubuntu:12.04',
+      Cmd: ['/bin/bash'],
+      OpenStdin: true,
+      Tty: true
+    };
+    const _attachOptions = attachOptions || { stream: true, stdin: true, stdout: true };
+    const _removeTimeout = removeTimeout || 5000;
+
+    const container: any = await createContainerPromise(_createOptions);
+    if (!container) {
+      throw new Error('Failed to create container');
+    }
+
+    const stream = await new Promise((resolve, reject) => {
+      container.start((err) => {
+        if (err) return reject(err);
+        container.attach(_attachOptions, (err, stream) => {
+          if (err) return reject(err);
+          resolve(stream);
+        });
+      });
+    });
+
+    await new Promise((resolve) => {
+      stream.end();
+      container.remove({ force: true }, () => resolve(void 0));
+    });
+
+    return c.json({ message: 'Duplex container created and removed successfully' });
+  } catch (err) {
+    console.error('Duplex container error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   2. Exec in Running Container Endpoint
+   URL: POST /containers/exec
+   Request JSON may include:
+     - createOptions: options for container creation (default: Ubuntu bash)
+     - startOptions: options for container.start (default: {})
+     - execOptions: options for container.exec (default provided below)
+   ============================================================ */
+app.post(`${apiPrefix}/containers/exec`, async (c) => {
+  try {
+    const {
+      createOptions,
+      startOptions,
+      execOptions
+    } = await c.req.json().catch(() => ({}));
+
+    const _createOptions = createOptions || { Image: 'ubuntu:latest', Cmd: ['/bin/bash'], Tty: true };
+    const _startOptions = startOptions || {};
+    const _execOptions = execOptions || {
+      Cmd: ['bash', '-c', 'echo test $VAR'],
+      Env: ['VAR=ttslkfjsdalkfj'],
+      AttachStdout: true,
+      AttachStderr: true
+    };
+
+    const container: any = await createContainerPromise(_createOptions);
+    if (!container) {
+      throw new Error('Failed to create container');
+    }
+
+    await new Promise((resolve, reject) => {
+      container.start(_startOptions, (err) => {
+        if (err) return reject(err);
+        resolve(void 0);
+      });
+    });
+
+    const execInstance = await new Promise((resolve, reject) => {
+      container.exec(_execOptions, (err, execInstance) => {
+        if (err) return reject(err);
+        resolve(execInstance);
+      });
+    });
+
+    const { stream, output } = await new Promise((resolve, reject) => {
+      let outputData = '';
+      execInstance.start((err, stream) => {
+        if (err) return reject(err);
+        container.modem.demuxStream(
+          stream,
+          { write(chunk) { outputData += chunk.toString('utf8'); } },
+          { write(chunk) { outputData += chunk.toString('utf8'); } }
+        );
+        stream.on('end', () => {
+          resolve({ stream, output: outputData });
+        });
+        stream.on('error', reject);
+      });
+    });
+
+    const data = await new Promise((resolve, reject) => {
+      execInstance.inspect((err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    return c.json({ execData: data, output });
+  } catch (err) {
+    console.error('Exec container error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   3. External Volume Endpoint
+   URL: POST /containers/volume
+   Request JSON may include:
+     - createOptions: object for container creation (defaults below)
+   ============================================================ */
+app.post(`${apiPrefix}/containers/volume`, async (c) => {
+  try {
+    const { createOptions } = await c.req.json().catch(() => ({}));
+    const _createOptions = createOptions || {
+      Image: 'ubuntu',
+      Cmd: ['/bin/ls', '/stuff'],
+      Volumes: { '/stuff': {} },
+      HostConfig: { Binds: ['/tmp:/stuff'] }
+    };
+    const container: any = await createContainerPromise(_createOptions);
+    let outputData = '';
+    await new Promise((resolve, reject) => {
+      container.start((err) => {
+        if (err) return reject(err);
+        container.attach({ stream: true, stdout: true, stderr: true, tty: true }, (err, stream) => {
+          if (err) return reject(err);
+          stream.on('data', (chunk) => { outputData += chunk.toString('utf8'); });
+          container.wait((err) => {
+            if (err) return reject(err);
+            resolve(void 0);
+          });
+        });
+      });
+    });
+    return c.json({ output: outputData });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   4. List Containers Endpoint
+   URL: GET /containers
+   Accepts query parameters:
+     - all (true/false)
+     - limit (number)
+     - filters (JSON string or plain string)
+   ============================================================ */
+app.get(`${apiPrefix}/containers`, async (c) => {
+  try {
+    const allParam = c.req.query('all');
+    const limitParam = c.req.query('limit');
+    const filtersParam = c.req.query('filters');
+    let opts = {};
+    if (allParam !== undefined) {
+      opts.all = (allParam === 'true');
+    }
+    if (limitParam) {
+      opts.limit = parseInt(limitParam, 10);
+    }
+    if (filtersParam) {
+      try {
+        opts.filters = JSON.parse(filtersParam);
+      } catch (e) {
+        opts.filters = filtersParam;
+      }
+    }
+    const containers = await new Promise((resolve, reject) => {
+      docker.listContainers(opts, (err, containers) =>
+        err ? reject(err) : resolve(containers)
+      );
+    });
+    return c.json({ containers });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   5. Container Logs Endpoint
+   URL: POST /containers/logs
+   Request JSON may include:
+     - createOptions: container creation options (default below)
+     - startOptions: options for container.start (default: {})
+     - logsOptions: options for container.logs (default below)
+     - logTimeout: timeout in ms to destroy the stream (default: 2000)
+   ============================================================ */
+app.post(`${apiPrefix}/containers/logs`, async (c) => {
+  try {
+    const {
+      createOptions,
+      startOptions,
+      logsOptions,
+      logTimeout
+    } = await c.req.json().catch(() => ({}));
+    const _createOptions = createOptions || {
+      Image: 'ubuntu:latest',
+      Cmd: ['/bin/bash', '-c', 'echo "test log"']
+    };
+    const _startOptions = startOptions || {};
+    const _logsOptions = logsOptions || { follow: true, stdout: true, stderr: true };
+    const _logTimeout = logTimeout || 2000;
+
+    const container: any = await createContainerPromise(_createOptions);
+    if (!container) {
+      throw new Error('Failed to create container');
+    }
+
+    await new Promise((resolve, reject) => {
+      container.start(_startOptions, (err) => {
+        if (err) return reject(err);
+        resolve(void 0);
+      });
+    });
+
+    const stream = await new Promise((resolve, reject) => {
+      container.logs(_logsOptions, (err, stream) => {
+        if (err) return reject(err);
+        resolve(stream);
+      });
+    });
+
+    let output = '';
+    container.modem.demuxStream(
+      stream,
+      { write(chunk) { output += chunk.toString('utf8'); } },
+      { write(chunk) { output += chunk.toString('utf8'); } }
+    );
+
+    await new Promise((resolve) => {
+      stream.on('end', resolve);
+      setTimeout(() => {
+        stream.destroy();
+        resolve(void 0);
+      }, _logTimeout);
+    });
+
+    await new Promise((resolve, reject) => {
+      container.remove((err) => {
+        if (err) return reject(err);
+        resolve(void 0);
+      });
+    });
+
+    return c.json({ output });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   6. Docker Run Shortcut Endpoint
+   URL: POST /containers/run
+   Request JSON must include (or default):
+     - image: container image name (default: "ubuntu")
+     - cmd: an array of command arguments (default: [])
+     - options: container run options (volumes, ports, labels, etc.)
+   ============================================================ */
+app.post(`${apiPrefix}/containers/run`, async (c) => {
+  try {
+    const { image, cmd, options } = await c.req.json().catch(() => ({}));
+    const _image = image || 'ubuntu:latest';
+    const _cmd = cmd || ['echo', 'test'];
+    const _options = options || {};
+
+    let outputData = '';
+    const outputStream = new Writable({
+      write(chunk, encoding, callback) {
+        outputData += chunk.toString('utf8');
+        callback();
+      }
+    });
+
+    const { data, container, waitData } = await new Promise((resolve, reject) => {
+      docker.run(_image, _cmd, outputStream, _options, (err, data, container) => {
+        if (err) return reject(err);
+        container.wait((err, waitData) => {
+          if (err) return reject(err);
+          resolve({ data, container, waitData });
+        });
+      });
+    });
+
+    if (!container) {
+      throw new Error('Failed to create container');
+    }
+
+    return c.json({
+      statusCode: data.StatusCode,
+      output: outputData,
+      containerId: container.id,
+      waitStatus: waitData
+    });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   7. Interactive Container Endpoint
+   URL: POST /containers/interactive
+   Request JSON may include:
+     - createOptions: object for container creation (defaults below)
+   Note: Since an HTTP API cannot stream an interactive TTY,
+         this endpoint returns the container ID for external attachment.
+   ============================================================ */
+app.post(`${apiPrefix}/containers/interactive`, async (c) => {
+  try {
+    const { createOptions } = await c.req.json().catch(() => ({}));
+    const _createOptions = createOptions || {
+      Hostname: '',
+      User: '',
+      AttachStdin: true,
+      AttachStdout: true,
+      AttachStderr: true,
+      Tty: true,
+      OpenStdin: true,
+      StdinOnce: false,
+      Env: null,
+      Cmd: ['bash'],
+      Dns: ['8.8.8.8', '8.8.4.4'],
+      Image: 'ubuntu',
+      Volumes: {},
+      VolumesFrom: []
+    };
+    const container: any = await createContainerPromise(_createOptions);
+    await new Promise((resolve, reject) => {
+      container.start((err) => {
+        if (err) return reject(err);
+        container.attach({ stream: true, stdin: true, stdout: true, stderr: true }, (err, stream) => {
+          if (err) return reject(err);
+          resolve(void 0);
+        });
+      });
+    });
+    return c.json({
+      message: 'Interactive container started. Attach via "docker attach <containerId>".',
+      containerId: container.id
+    });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   8. Container Top Endpoint
+   URL: GET /containers/:id/top
+   Accepts an optional query parameter "ps_args" (default: "aux")
+   ============================================================ */
+app.get(`${apiPrefix}/containers/:id/top`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    if (!id) {
+      return c.json({ error: 'Container ID is required' }, 400);
+    }
+
+    const ps_args = c.req.query('ps_args') || 'aux';
+    const container: any = docker.getContainer(id);
+
+    const data = await new Promise((resolve, reject) => {
+      container.inspect((err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    if (!data || !data.State || !data.State.Running) {
+      throw new Error('Container is not running');
+    }
+
+    const topData = await new Promise((resolve, reject) => {
+      container.top({ ps_args }, (err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    const response = { processes: topData.Processes, titles: topData.Titles };
+
+    await new Promise((resolve) => {
+      container.remove({ force: true }, () => resolve(void 0));
+    });
+
+    return c.json(response);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   9. Timeout Example Endpoint
+   URL: POST /containers/timeout
+   Request JSON may include:
+     - dockerOptions: options for new Docker instance (default below)
+     - createOptions: for container creation (default below)
+     - startOptions: for container.start (default: {})
+     - topOptions: for container.top (default below)
+   ============================================================ */
+app.post(`${apiPrefix}/containers/timeout`, async (c) => {
+  try {
+    const { dockerOptions, createOptions, startOptions, topOptions } = await c.req.json().catch(() => ({}));
+    const _dockerOptions = dockerOptions || { host: 'http://127.0.0.1', port: 2375, timeout: 100 };
+    const dockerTimeout = new Docker(_dockerOptions);
+    const _createOptions = createOptions || { Image: 'ubuntu', Cmd: ['/bin/bash'] };
+    const container: any = await new Promise((resolve, reject) => {
+      dockerTimeout.createContainer(_createOptions, (err, container) => err ? reject(err) : resolve(container));
+    });
+    const _startOptions = startOptions || {};
+    await new Promise((resolve, reject) => {
+      container.start(_startOptions, (err) => (err ? reject(err) : resolve(void 0)));
+    });
+    const _topOptions = topOptions || { ps_args: 'aux' };
+    const topData = await new Promise((resolve, reject) => {
+      container.top(_topOptions, (err, data) => err ? reject(err) : resolve(data));
+    });
+    return c.json({ top: topData });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   10. Build Image from Current Working Directory Endpoint
+   URL: POST /build/buildcwd
+   Request JSON may include:
+     - contextDir: directory to pack (default: process.cwd())
+     - tag: image tag (default: "imgcwd")
+   ============================================================ */
+app.post(`${apiPrefix}/build/buildcwd`, async (c) => {
+  try {
+    const { contextDir, tag } = await c.req.json().catch(() => ({}));
+    const _contextDir = contextDir || process.cwd();
+    const _tag = tag || 'imgcwd';
+    const tarStream = tar.pack(_contextDir);
+    const buildOutput = await new Promise((resolve, reject) => {
+      docker.buildImage(tarStream, { t: _tag }, (err, output) => {
+        if (err) return reject(err);
+        let outputData = '';
+        output.on('data', (chunk) => { outputData += chunk.toString('utf8'); });
+        output.on('end', () => resolve(outputData));
+        output.on('error', reject);
+      });
+    });
+    return c.json({ buildOutput });
+  } catch (err) {
+    console.error('Build CWD error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   11. Build Image from Specific Files Endpoint
+   URL: POST /build/buildfiles
+   Request JSON may include:
+     - contextDir: directory to pack (default: process.cwd())
+     - src: an array of filenames to include (default: ["Dockerfile", "run.js"])
+     - tag: image tag (default: "imgcwd")
+   ============================================================ */
+app.post(`${apiPrefix}/build/buildfiles`, async (c) => {
+  try {
+    const { contextDir, src, tag } = await c.req.json().catch(() => ({}));
+    const _contextDir = contextDir || process.cwd();
+    const _src = src || ['Dockerfile', 'run.js'];
+    const _tag = tag || 'imgcwd';
+    const tarStream = tar.pack(_contextDir, { entries: _src });
+    const buildOutput = await new Promise((resolve, reject) => {
+      docker.buildImage(tarStream, { t: _tag }, (err, output) => {
+        if (err) return reject(err);
+        let outputData = '';
+        output.on('data', (chunk) => { outputData += chunk.toString('utf8'); });
+        output.on('end', () => resolve(outputData));
+        output.on('error', reject);
+      });
+    });
+    return c.json({ buildOutput });
+  } catch (err) {
+    console.error('Build files error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+/* ============================================================
+   12. Build and Run Image from Tar File Endpoint
+   URL: POST /build/run
+   Request JSON must include:
+     - tarFilePath: path to the tar file for build
+   Request JSON may also include:
+     - tag: image tag (default: "chrome")
+     - containerOptions: options for container creation after build (default provided below)
+   ============================================================ */
+app.post(`${apiPrefix}/build/run`, async (c) => {
+  try {
+    const { tarFilePath, tag, containerOptions } = await c.req.json().catch(() => ({}));
+    if (!tarFilePath) {
+      return c.json({ error: 'tarFilePath is required' }, 400);
+    }
+    const _tag = tag || 'chrome';
+    const buildOutput = await new Promise((resolve, reject) => {
+      docker.buildImage(tarFilePath, { t: _tag }, (err, stream) => {
+        if (err) return reject(err);
+        let outputData = '';
+        stream.on('data', (chunk) => { outputData += chunk.toString('utf8'); });
+        stream.on('end', () => resolve(outputData));
+        stream.on('error', reject);
+      });
+    });
+    const _containerOptions = containerOptions || {
+      Image: _tag,
+      Cmd: ['/bin/bash', '-c', 'echo "test output"'],
+      Tty: true
+    };
+    const container: any = await createContainerPromise(_containerOptions);
+    let runOutput = '';
+    await new Promise((resolve, reject) => {
+      container.attach({ stream: true, stdout: true, stderr: true, tty: true }, (err, stream) => {
+        if (err) return reject(err);
+        stream.on('data', (chunk) => { runOutput += chunk.toString('utf8'); });
+        container.start((err) => {
+          if (err) return reject(err);
+          container.wait((err) => {
+            if (err) return reject(err);
+            resolve(void 0);
+          });
+        });
+      });
+    });
+
+    await new Promise((resolve, reject) => {
+      container.remove((err) => {
+        if (err) return reject(err);
+        resolve(void 0);
+      });
+    });
+
+    return c.json({ buildOutput, runOutput });
+  } catch (err) {
+    console.error('Build and run error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+export default app;
