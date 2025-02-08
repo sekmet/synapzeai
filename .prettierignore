@@ -1,0 +1,8 @@
+**/*/target
+**/*/dist
+
+# ignore lock files
+**/*-lock.yaml
+dev-dist
+
+**/CHANGELOG.md
