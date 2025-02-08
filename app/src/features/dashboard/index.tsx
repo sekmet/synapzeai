@@ -35,7 +35,7 @@ export default function Dashboard() {
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
           <div className='flex items-center space-x-2'>
-          <Link to='/agent'>
+          <Link to='/agent/new'>
             <Button>New Agent</Button>
           </Link> 
           </div>

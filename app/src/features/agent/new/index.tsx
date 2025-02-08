@@ -1,4 +1,4 @@
-//import { Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 //import { Card } from '@/components/ui/card'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -10,7 +10,7 @@ import { Upload, FileText, Layout } from "lucide-react";
 export default function NewAgent() {
   return (
     <>
-          <Header fixed>
+      <Header fixed>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
@@ -28,6 +28,7 @@ export default function NewAgent() {
       for reference.
     </p>
     <div className="w-full max-w-3xl mt-12 space-y-4">
+    <Link to='/agent/new/upload'>
       <button className="w-full p-6 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="flex items-center gap-4">
           <Upload className="w-8 h-8 text-gray-700 dark:text-gray-300" />
@@ -40,6 +41,8 @@ export default function NewAgent() {
         </div>
         <span className="text-2xl text-gray-700 dark:text-gray-300">→</span>
       </button>
+      </Link>
+      <Link to='/agent/new/from-scracth'>
       <button className="w-full p-6 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="flex items-center gap-4">
           <FileText className="w-8 h-8 text-gray-700 dark:text-gray-300" />
@@ -52,6 +55,8 @@ export default function NewAgent() {
         </div>
         <span className="text-2xl text-gray-700 dark:text-gray-300">→</span>
       </button>
+      </Link>
+      <Link to='/agent/new/template'>
       <button className="w-full p-6 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="flex items-center gap-4">
           <Layout className="w-8 h-8 text-gray-700 dark:text-gray-300" />
@@ -64,6 +69,7 @@ export default function NewAgent() {
         </div>
         <span className="text-2xl text-gray-700 dark:text-gray-300">→</span>
       </button>
+      </Link>
     </div>
   </Main>
   </>
