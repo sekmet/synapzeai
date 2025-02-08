@@ -621,8 +621,9 @@ export default function AgentConfigForm({ title }: { title: string }) {
               />
             </div>
           </div>
-
-          <Button className="w-full bg-yellow-300 hover:bg-yellow-500 text-black">Continue to Settings</Button>
+          <Link to='/agent/new/secrets'>
+          <Button className="w-full bg-yellow-300 hover:bg-yellow-500 text-black mt-6">Continue to Settings</Button>
+          </Link>
         </div>
       </div>
     </div>
