@@ -2,6 +2,17 @@
   "name": "synapze-monorepo",
   "private": true,
   "version": "0.1.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "format": "biome format --write .",
+    "lint": "biome lint . --write",
+    "check": "biome check --apply ."
+  },
+  "engines": {
+    "node": "23.3.0"
+  },
   "workspaces": [
     "landing",
     "app",
@@ -9,9 +20,12 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "biome": "^0.3.3",
+    "turbo": "^2.4.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "packageManager": "bun@1.2.2"
 }

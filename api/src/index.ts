@@ -47,9 +47,216 @@ if (process.env.NODE_ENV === 'development') {
   
   // Root route
   app.get('/', (c) => c.text('SYNAPZE DOCKER API Server v0.0.1'))
+
+// Docker Info endpoint
+app.get(`${apiPrefix}/docker/info`, async (c) => {
+  try {
+    const info = await new Promise((resolve, reject) => {
+      docker.info((err, info) => err ? reject(err) : resolve(info));
+    });
+    return c.json({ serverVersion: info.ServerVersion, ...info });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Docker Version endpoint
+app.get(`${apiPrefix}/docker/version`, async (c) => {
+  try {
+    const version = await new Promise((resolve, reject) => {
+      docker.version((err, version) => err ? reject(err) : resolve(version));
+    });
+    return c.json({ 
+      version: version.Version,
+      apiVersion: version.ApiVersion,
+      ...version 
+    });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Container Inspect endpoint
+app.get(`${apiPrefix}/containers/:id/inspect`, async (c) => {
+  try {
+    const container = docker.getContainer(c.req.param('id'));
+    const info = await new Promise((resolve, reject) => {
+      container.inspect((err, data) => err ? reject(err) : resolve(data));
+    });
+    return c.json(info);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+// Container Stats endpoint
+app.get(`${apiPrefix}/containers/:id/stats`, async (c) => {
+  try {
+    const container = docker.getContainer(c.req.param('id'));
+    console.log('ID STATS', c.req.param('id'))
+    const stats = await new Promise((resolve, reject) => {
+      container.stats({ stream: false }, (err, data) => err ? reject(err) : resolve(data));
+    });
+    return c.json(stats);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+// Container Top endpoint
+app.get(`${apiPrefix}/containers/:id/top`, async (c) => {
+  try {
+    const container = docker.getContainer(c.req.param('id'));
+    console.log('ID TOP', c.req.param('id'))
+    // First ensure container exists and get its state
+    const inspectData = await new Promise((resolve, reject) => {
+      container.inspect((err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    // If not running, start it
+    if (!inspectData.State.Running) {
+      await new Promise((resolve, reject) => {
+        container.start((err) => {
+          if (err) return reject(err);
+          resolve(void 0);
+        });
+      });
+
+      // Wait for container to be fully started
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    // Get processes
+    const processes = await new Promise((resolve, reject) => {
+      container.top({ps_args: 'aux'}, (err, data) => {
+        console.log('DATA', data)
+        console.log('ERR', err)
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    return c.json(processes);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// List Volumes endpoint
+app.get(`${apiPrefix}/volumes`, async (c) => {
+  try {
+    const data = await new Promise((resolve, reject) => {
+      docker.listVolumes((err, data) => err ? reject(err) : resolve(data));
+    });
+    return c.json({ volumes: data.Volumes || [] });
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+// List Images endpoint
+app.get(`${apiPrefix}/images`, async (c) => {
+  try {
+    const images = await new Promise((resolve, reject) => {
+      docker.listImages((err, data) => err ? reject(err) : resolve(data));
+    });
+    return c.json({ images });
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+// Image Inspect endpoint
+app.get(`${apiPrefix}/images/:id/inspect`, async (c) => {
+  try {
+    const image = docker.getImage(c.req.param('id'));
+    const info = await new Promise((resolve, reject) => {
+      image.inspect((err, data) => err ? reject(err) : resolve(data));
+    });
+    return c.json(info);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+// Docker Pull endpoint
+app.post(`${apiPrefix}/docker/pull`, async (c) => {
+  try {
+    const { imageName } = await c.req.json();
+    if (!imageName) {
+      return c.json({ error: 'imageName is required' }, 400);
+    }
+    let pullOutput = [];
+    await new Promise((resolve, reject) => {
+      docker.pull(imageName, (err, stream) => {
+        if (err) return reject(err);
+        docker.modem.followProgress(stream, (err, output) => {
+          if (err) return reject(err);
+          pullOutput = output.map(o => o.status || '').filter(Boolean);
+          resolve(void 0);
+        });
+      });
+    });
+    return c.json({ pullOutput: pullOutput.join('\n') });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+})
   
   // Health check endpoint
   app.get('/health', (c) => c.json({ status: 'OK' }))
+
+// Container logs without options endpoint
+app.post(`${apiPrefix}/containers/:id/logs`, async (c) => {
+  try {
+    const container = docker.getContainer(c.req.param('id'));
+    const logs = await new Promise((resolve, reject) => {
+      container.logs({ stdout: true, stderr: true }, (err, logs) => {
+        if (err) return reject(err);
+        resolve(logs);
+      });
+    });
+    return c.json({ output: logs ? logs.toString() : '' });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Container wait endpoint
+app.post(`${apiPrefix}/containers/:id/wait`, async (c) => {
+  try {
+    const container = docker.getContainer(c.req.param('id'));
+    const { options } = await c.req.json().catch(() => ({ options: { condition: 'next-exit' } }));
+    
+    // Start listening for container exit before starting it
+    const waitPromise = new Promise((resolve, reject) => {
+      container.wait(options || { condition: 'next-exit' }, (err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    // Start the container
+    await new Promise((resolve, reject) => {
+      container.start((err) => {
+        if (err) return reject(err);
+        resolve(void 0);
+      });
+    });
+
+    // Wait for container to exit
+    const waitResult = await waitPromise;
+    return c.json({ 
+      statusCode: waitResult.StatusCode || 0,
+      error: waitResult.Error || null
+    });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
 
 // A helper function to wrap docker.createContainer in a Promise.
 function createContainerPromise(options: any) {
@@ -69,50 +276,84 @@ function createContainerPromise(options: any) {
      - attachOptions: object for container.attach (defaults below)
      - removeTimeout: number in ms before ending & removing (default: 5000)
    ============================================================ */
-app.post(`${apiPrefix}/containers/duplex`, async (c) => {
-  try {
-    const {
-      createOptions,
-      attachOptions,
-      removeTimeout
-    } = await c.req.json().catch(() => ({}));
-
-    // Default options if not provided by the user.
-    const _createOptions = createOptions || {
-      Image: 'ubuntu:12.04',
-      Cmd: ['/bin/bash'],
-      OpenStdin: true,
-      Tty: true
-    };
-    const _attachOptions = attachOptions || { stream: true, stdin: true, stdout: true };
-    const _removeTimeout = removeTimeout || 5000;
-
-    const container: any = await createContainerPromise(_createOptions);
-    if (!container) {
-      throw new Error('Failed to create container');
-    }
-
-    const stream = await new Promise((resolve, reject) => {
-      container.start((err) => {
-        if (err) return reject(err);
+   app.post(`${apiPrefix}/containers/duplex`, async (c) => {
+    try {
+      // Parse JSON body (if any)
+      const { createOptions, attachOptions, removeTimeout } =
+        await c.req.json().catch(() => ({}));
+  
+      // Use defaults if options are not provided.
+      const _createOptions = createOptions || {
+        Image: 'ubuntu:latest',
+        Cmd: ['/bin/bash', '-c', 'sleep 1'],
+        OpenStdin: true,
+        Tty: true,
+        StopTimeout: 1,
+        AttachStdin: false,
+        AttachStdout: true,
+        AttachStderr: true
+      };
+      const _attachOptions = attachOptions || { stream: true, stdin: true, stdout: true };
+      const _removeTimeout = removeTimeout || 5000; // Use 5000ms as default for cleanup delay
+  
+      // Create the container
+      const container = await createContainerPromise(_createOptions);
+      if (!container) {
+        throw new Error('Failed to create container');
+      }
+  
+      // Attach to the container to get the stream
+      const stream = await new Promise((resolve, reject) => {
         container.attach(_attachOptions, (err, stream) => {
           if (err) return reject(err);
           resolve(stream);
         });
       });
-    });
-
-    await new Promise((resolve) => {
-      stream.end();
-      container.remove({ force: true }, () => resolve(void 0));
-    });
-
-    return c.json({ message: 'Duplex container created and removed successfully' });
-  } catch (err) {
-    console.error('Duplex container error:', err);
-    return c.json({ error: err.message }, 500);
-  }
-});
+  
+      // Start the container
+      await new Promise((resolve, reject) => {
+        container.start((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+  
+      // Wait until the container is running
+      await new Promise((resolve, reject) => {
+        const checkRunning = () => {
+          container.inspect((err, data) => {
+            if (err) return reject(err);
+            if (data.State.Running) {
+              resolve();
+            } else {
+              setTimeout(checkRunning, 100);
+            }
+          });
+        };
+        checkRunning();
+      });
+  
+      // Send the response immediately once the container is running.
+      c.json({ message: 'Container created and attached successfully' });
+  
+      // Schedule cleanup in the background after _removeTimeout milliseconds.
+      setTimeout(() => {
+        try {
+          if (stream) {
+            stream.end();
+          }
+        } catch (e) {
+          console.error('Error ending stream:', e);
+        }
+        container.stop(() => {
+          container.remove();
+        });
+      }, _removeTimeout);
+    } catch (err) {
+      console.error('Duplex container error:', err);
+      return c.json({ error: err.message }, 500);
+    }
+  });
 
 /* ============================================================
    2. Exec in Running Container Endpoint
@@ -403,7 +644,7 @@ app.post(`${apiPrefix}/containers/interactive`, async (c) => {
       OpenStdin: true,
       StdinOnce: false,
       Env: null,
-      Cmd: ['bash'],
+      Cmd: ['/bin/bash'],
       Dns: ['8.8.8.8', '8.8.4.4'],
       Image: 'ubuntu',
       Volumes: {},
@@ -621,6 +862,37 @@ app.post(`${apiPrefix}/build/run`, async (c) => {
     return c.json({ buildOutput, runOutput });
   } catch (err) {
     console.error('Build and run error:', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Container inspection
+app.get(`${apiPrefix}/containers/:id/inspect`, async (c) => {
+  try {
+    const container = docker.getContainer(c.req.param('id'));
+    const data = await container.inspect();
+    return c.json(data);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Image endpoints
+app.get(`${apiPrefix}/images`, async (c) => {
+  try {
+    const images = await docker.listImages();
+    return c.json({ images });
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Docker info/version
+app.get(`${apiPrefix}/docker/info`, async (c) => {
+  try {
+    const info = await docker.info();
+    return c.json(info);
+  } catch (err) {
     return c.json({ error: err.message }, 500);
   }
 });
