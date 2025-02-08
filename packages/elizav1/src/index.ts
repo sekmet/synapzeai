@@ -1,0 +1,1 @@
+console.log("ElizaOS v0.1.0 deployer!");

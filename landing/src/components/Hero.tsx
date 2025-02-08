@@ -1,4 +1,4 @@
-import React from "react";
+import { Link } from '@tanstack/react-router';
 import { Zap } from "lucide-react";
 export function Hero() {
   return <div className="flex flex-col items-center justify-center min-h-[30vh] px-4 text-center">
@@ -13,10 +13,12 @@ export function Hero() {
           Synapze is an AI hosting platform specifically designed to deploy
           autonomous agents built using the ElizaOS framework
         </p>
+        <Link to="https://app-synapze.open4glabs.xyz">
         <button className="inline-flex items-center px-6 py-3 text-lg font-medium bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 transition-colors">
           <Zap className="w-5 h-5 mr-2" />
           Get Started
         </button>
+        </Link>
       </div>
     </div>;
 }

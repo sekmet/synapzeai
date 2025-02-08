@@ -171,5 +171,8 @@ dist
 # IntelliJ based IDEs
 .idea
 
+# turbo
+.turbo
+
 # Finder (MacOS) folder config
 .DS_Store
