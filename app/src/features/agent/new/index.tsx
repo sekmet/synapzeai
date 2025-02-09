@@ -17,8 +17,8 @@ export default function NewAgent() {
           <ProfileDropdown />
         </div>
       </Header>
-      <Main className="flex flex-col items-center px-6 py-16 flex-1 text-white pt-[15vh] dark:text-gray-100">
-    <h1 className="text-6xl font-bold mb-8 text-gray-700 dark:text-gray-50">Get started</h1>
+      <Main className="flex flex-col max-w-5xl m-auto items-left px-6 py-16 flex-1 text-white pt-[10vh] dark:text-gray-100">
+    <h1 className="text-3xl font-bold mb-8 text-gray-700 dark:text-gray-50 items-left">Get started</h1>
     <p className="text-gray-700 text-lg mb-2 dark:text-gray-300">
       To start developing your AI agent, please select one of the options
       provided below. Check our{" "}
@@ -27,9 +27,9 @@ export default function NewAgent() {
       </a>{" "}
       for reference.
     </p>
-    <div className="w-full max-w-3xl mt-12 space-y-4">
+    <div className="w-full flex-col m-auto max-w-3xl mt-12 space-y-4 items-center">
     <Link to='/agent/new/upload'>
-      <button className="w-full p-6 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
+      <button className="w-full p-6 mb-3 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="flex items-center gap-4">
           <Upload className="w-8 h-8 text-gray-700 dark:text-gray-300" />
           <div className="text-left">
@@ -43,7 +43,7 @@ export default function NewAgent() {
       </button>
       </Link>
       <Link to='/agent/new/from-scracth'>
-      <button className="w-full p-6 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
+      <button className="w-full p-6 mb-3 bg-white rounded-lg flex items-center justify-between hover:bg-gray-300 transition-colors dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="flex items-center gap-4">
           <FileText className="w-8 h-8 text-gray-700 dark:text-gray-300" />
           <div className="text-left">

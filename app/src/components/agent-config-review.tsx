@@ -115,6 +115,7 @@ export default function AgentConfigReview() {
           ref={(ref) => {
             if (ref) console.log(ref);
           }}
+          className="border rounded-md overflow-hidden text-medium"
           value={JSON.stringify(sampleJson, null, 2)}
           extensions={[json()]}
           onChange={() => {}}
