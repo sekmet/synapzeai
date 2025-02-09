@@ -79,6 +79,9 @@ const AuthenticatedAgentNewTemplateLazyImport = createFileRoute(
 const AuthenticatedAgentNewSecretsLazyImport = createFileRoute(
   '/_authenticated/agent/new/secrets',
 )()
+const AuthenticatedAgentNewReviewLazyImport = createFileRoute(
+  '/_authenticated/agent/new/review',
+)()
 const AuthenticatedAgentNewFromScracthLazyImport = createFileRoute(
   '/_authenticated/agent/new/from-scracth',
 )()
@@ -341,6 +344,17 @@ const AuthenticatedAgentNewSecretsLazyRoute =
     ),
   )
 
+const AuthenticatedAgentNewReviewLazyRoute =
+  AuthenticatedAgentNewReviewLazyImport.update({
+    id: '/agent/new/review',
+    path: '/agent/new/review',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/agent/new/review.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedAgentNewFromScracthLazyRoute =
   AuthenticatedAgentNewFromScracthLazyImport.update({
     id: '/agent/new/from-scracth',
@@ -538,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentNewFromScracthLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/agent/new/review': {
+      id: '/_authenticated/agent/new/review'
+      path: '/agent/new/review'
+      fullPath: '/agent/new/review'
+      preLoaderRoute: typeof AuthenticatedAgentNewReviewLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/agent/new/secrets': {
       id: '/_authenticated/agent/new/secrets'
       path: '/agent/new/secrets'
@@ -607,6 +628,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
   AuthenticatedAgentNewFromScracthLazyRoute: typeof AuthenticatedAgentNewFromScracthLazyRoute
+  AuthenticatedAgentNewReviewLazyRoute: typeof AuthenticatedAgentNewReviewLazyRoute
   AuthenticatedAgentNewSecretsLazyRoute: typeof AuthenticatedAgentNewSecretsLazyRoute
   AuthenticatedAgentNewTemplateLazyRoute: typeof AuthenticatedAgentNewTemplateLazyRoute
   AuthenticatedAgentNewUploadLazyRoute: typeof AuthenticatedAgentNewUploadLazyRoute
@@ -625,6 +647,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
   AuthenticatedAgentNewFromScracthLazyRoute:
     AuthenticatedAgentNewFromScracthLazyRoute,
+  AuthenticatedAgentNewReviewLazyRoute: AuthenticatedAgentNewReviewLazyRoute,
   AuthenticatedAgentNewSecretsLazyRoute: AuthenticatedAgentNewSecretsLazyRoute,
   AuthenticatedAgentNewTemplateLazyRoute:
     AuthenticatedAgentNewTemplateLazyRoute,
@@ -661,6 +684,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
+  '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
   '/agent/new/template': typeof AuthenticatedAgentNewTemplateLazyRoute
   '/agent/new/upload': typeof AuthenticatedAgentNewUploadLazyRoute
@@ -691,6 +715,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
+  '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
   '/agent/new/template': typeof AuthenticatedAgentNewTemplateLazyRoute
   '/agent/new/upload': typeof AuthenticatedAgentNewUploadLazyRoute
@@ -725,6 +750,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
   '/_authenticated/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
+  '/_authenticated/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/_authenticated/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
   '/_authenticated/agent/new/template': typeof AuthenticatedAgentNewTemplateLazyRoute
   '/_authenticated/agent/new/upload': typeof AuthenticatedAgentNewUploadLazyRoute
@@ -759,6 +785,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/users'
     | '/agent/new/from-scracth'
+    | '/agent/new/review'
     | '/agent/new/secrets'
     | '/agent/new/template'
     | '/agent/new/upload'
@@ -788,6 +815,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/users'
     | '/agent/new/from-scracth'
+    | '/agent/new/review'
     | '/agent/new/secrets'
     | '/agent/new/template'
     | '/agent/new/upload'
@@ -820,6 +848,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
     | '/_authenticated/agent/new/from-scracth'
+    | '/_authenticated/agent/new/review'
     | '/_authenticated/agent/new/secrets'
     | '/_authenticated/agent/new/template'
     | '/_authenticated/agent/new/upload'
@@ -893,6 +922,7 @@ export const routeTree = rootRoute
         "/_authenticated/tasks/",
         "/_authenticated/users/",
         "/_authenticated/agent/new/from-scracth",
+        "/_authenticated/agent/new/review",
         "/_authenticated/agent/new/secrets",
         "/_authenticated/agent/new/template",
         "/_authenticated/agent/new/upload",
@@ -993,6 +1023,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/agent/new/from-scracth": {
       "filePath": "_authenticated/agent/new/from-scracth.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/agent/new/review": {
+      "filePath": "_authenticated/agent/new/review.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/agent/new/secrets": {

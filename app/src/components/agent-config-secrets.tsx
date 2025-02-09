@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useRouter, useCanGoBack } from '@tanstack/react-router'
 import { useState } from "react";
 import { ChevronLeft, X } from "lucide-react";
-import { Button } from "@/components/ui/button"
+//import { Button } from "@/components/ui/button"
 
 interface AdditionalSecret {
   id: number;
@@ -102,7 +102,7 @@ export default function AgentConfigSecrets() {
             </div>
           </div>
           <Link to="/agent/new/review">
-            <Button className="text-medium w-full py-2 bg-yellow-300 hover:bg-yellow-400 rounded-lg text-black mt-6">Review character</Button>
+            <button className="text-medium w-full py-2 bg-yellow-300 hover:bg-yellow-400 rounded-lg text-black mt-6">Review character</button>
           </Link>
         </div>
       </div>
