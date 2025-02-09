@@ -1,0 +1,35 @@
+{
+    "name": "plugin-hyperlane",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "tsup": "^8.3.5"
+    },
+    "dependencies": {
+        "@elizaos/core": "0.25.6-alpha.1",
+        "@elizaos/plugin-evm": "^0.1.8",
+        "@ethersproject/abstract-provider": "^5.7.0",
+        "@ethersproject/abstract-signer": "^5.7.0",
+        "@ethersproject/bytes": "^5.7.0",
+        "@ethersproject/providers": "^5.7.2",
+        "@ethersproject/wallet": "^5.7.0",
+        "@hyperlane-xyz/registry": "^7.2.2",
+        "@hyperlane-xyz/sdk": "^8.1.0",
+        "@hyperlane-xyz/utils": "^8.4.0",
+        "@types/dockerode": "^3.3.34",
+        "dockerode": "^4.0.4",
+        "ethers": "^5.7.2",
+        "ethers-types": "^3.18.1",
+        "pino": "^9.6.0",
+        "pino-pretty": "^13.0.0",
+        "viem": "2.21.58",
+        "yaml": "^2.7.0"
+    }
+}
