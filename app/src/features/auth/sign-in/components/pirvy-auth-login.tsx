@@ -1,6 +1,7 @@
-import { HTMLAttributes } from 'react'
+import { HTMLAttributes, useEffect } from 'react'
 import { usePrivy, useLogin } from '@privy-io/react-auth'
 //import { Link } from '@tanstack/react-router'
+import { useAuthStore, AuthUser } from '@/stores/authStore'
 import { useNavigate } from '@tanstack/react-router'
 
 import { cn } from '@/lib/utils'
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button'
 type PrivyAuthFormProps = HTMLAttributes<HTMLDivElement>
 
 export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
+  const { setUser } = useAuthStore((state) => state.auth)
   const {ready, authenticated } = usePrivy();
   // Disable login when Privy is not ready or the user is already authenticated
   const disableLogin = !ready || (ready && authenticated);
@@ -22,6 +24,7 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
           //
           // For already-`authenticated` users, we redirect them to their profile page.
           console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
+          setUser(user as AuthUser) // authUser being the new format
           navigate({ to: '/' })
       } else {
           // In this case, the user was not already `authenticated` when the component was mounted
@@ -32,7 +35,7 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
           if (isNewUser) {
               // If the user is new, create it in your backend
               console.log("NEW USER", isNewUser)
-              login();
+              navigate({ to: '/sign-in-2' })
               /*await fetch('/signin', {
                   method: 'POST',
                   body: JSON.stringify(user)
@@ -40,6 +43,7 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
           } else {
               // If the user is returning, fetch their data from your backend
               console.log("RETURNING USER", user)
+              navigate({ to: '/' })
               /*await fetch(`your-find-user-endpoint/${user.id}`, {
                   method: 'GET',
               });*/
@@ -51,6 +55,14 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
       // Any logic you'd like to execute after a user exits the login flow or there is an error
     },
   });
+
+  useEffect(() => {
+    if (ready && authenticated) {
+      navigate({ to: '/' })
+    } else {
+      navigate({ to: '/sign-in-2' })
+    }
+  }, [ready, authenticated, login]);
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>

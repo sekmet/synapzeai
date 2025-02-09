@@ -1,13 +1,29 @@
 import Cookies from 'js-cookie'
 import { create } from 'zustand'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
+const ACCESS_TOKEN = 'ff3a33a442aa0a1b84e815254ee429f2df53ac0f2f0b924410d84497cec51af9'
+
+interface LinkedAccount {
+  address: string
+  type: string
+  verifiedAt: string
+  firstVerifiedAt: string
+  latestVerifiedAt: string
+}
+
+interface EmailInfo {
+  address: string
+}
 
 interface AuthUser {
-  accountNo: string
-  email: string
-  role: string[]
-  exp: number
+  id: string
+  createdAt: string
+  linkedAccounts: LinkedAccount[]
+  email: EmailInfo
+  delegatedWallets: any[]
+  mfaMethods: any[]
+  hasAcceptedTerms: boolean
+  isGuest: boolean
 }
 
 interface AuthState {
