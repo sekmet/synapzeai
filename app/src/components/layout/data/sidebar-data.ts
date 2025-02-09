@@ -1,21 +1,21 @@
 import {
   //IconBarrierBlock,
-  //IconBrowserCheck,
+  IconBrowserCheck,
   //IconBug,
   IconChecklist,
   //IconError404,
-  //IconHelp,
+  IconHelp,
   IconLayoutDashboard,
   //IconLock,
   //IconLockAccess,
   //IconMessages,
-  //IconNotification,
+  IconNotification,
   IconPackages,
-  //IconPalette,
+  IconPalette,
   //IconServerOff,
-  //IconSettings,
-  //IconTool,
-  //IconUserCog,
+  IconSettings,
+  IconTool,
+  IconUserCog,
   //IconUserOff,
   //IconUsers,
 } from '@tabler/icons-react'
@@ -139,7 +139,7 @@ export const sidebarData: SidebarData = {
         },
       ],
     },*/
-    /*{
+    {
       title: 'Other',
       items: [
         {
@@ -179,6 +179,6 @@ export const sidebarData: SidebarData = {
           icon: IconHelp,
         },
       ],
-    },*/
+    },
   ],
 }

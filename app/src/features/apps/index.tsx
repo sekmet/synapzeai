@@ -19,30 +19,46 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { apps } from './data/apps'
+import { useQuery } from "@tanstack/react-query";
+//import { apps } from './data/apps'
+import { fetchPlugins } from './data/apps'
+
+interface Plugin {
+  logo: any;
+  name: string;
+  version: string;
+  description: string;
+  author: string;
+  githubUrl: string;
+  installed: boolean;
+}
 
 const appText = new Map<string, string>([
   ['all', 'All Plugins'],
-  ['connected', 'Connected'],
-  ['notConnected', 'Not Connected'],
+  ['installed', 'Installed'],
+  ['notInstalled', 'Not Installed'],
 ])
 
 export default function Apps() {
   const [sort, setSort] = useState('ascending')
   const [appType, setAppType] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const { data: apps } = useQuery({
+    queryKey: ['apps'],
+    queryFn: () => fetchPlugins(),
+  })
 
-  const filteredApps = apps
+  const filteredApps = (apps as Plugin[] ?? [])
     .sort((a, b) =>
       sort === 'ascending'
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     )
     .filter((app) =>
-      appType === 'connected'
-        ? app.connected
-        : appType === 'notConnected'
-          ? !app.connected
+      appType === 'installed'
+        ? app.installed
+        : appType === 'notInstalled'
+          ? !app.installed
           : true
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -82,8 +98,8 @@ export default function Apps() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Plugins</SelectItem>
-                <SelectItem value='connected'>Connected</SelectItem>
-                <SelectItem value='notConnected'>Not Connected</SelectItem>
+                <SelectItem value='installed'>Installed</SelectItem>
+                <SelectItem value='notInstalled'>Not Installed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -126,14 +142,14 @@ export default function Apps() {
                 <Button
                   variant='outline'
                   size='sm'
-                  className={`${app.connected ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
+                  className={`${app.installed ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
                 >
-                  {app.connected ? 'Connected' : 'Connect'}
+                  {app.installed ? 'Installed' : 'Install'}
                 </Button>
               </div>
               <div>
                 <h2 className='mb-1 font-semibold'>{app.name}</h2>
-                <p className='line-clamp-2 text-gray-500'>{app.desc}</p>
+                <p className='line-clamp-2 text-gray-500'>{app.description}</p>
               </div>
             </li>
           ))}

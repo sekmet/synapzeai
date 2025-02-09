@@ -2,17 +2,27 @@ import React, { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useNavigate } from '@tanstack/react-router'
 import { usePrivy, useLogin } from '@privy-io/react-auth'
+import { useQuery } from "@tanstack/react-query";
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
   fixed?: boolean
   ref?: React.Ref<HTMLElement>
 }
 
+const fetchCurrentUser = async (id: string) => {
+  const response = await fetch(`/api/db/v1/users/${id}`);
+  return response.json();
+};
+
 export const Main = ({ fixed, ...props }: MainProps) => {
   const {ready, authenticated } = usePrivy();
   // Disable login when Privy is not ready or the user is already authenticated
   //const disableLogin = !ready || (ready && authenticated);
-  
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => fetchCurrentUser('did:privy:cm6xfuy4700f5116hioyuda2d'),
+  })
+
   const navigate = useNavigate()
   const { login } = useLogin({
 
@@ -22,6 +32,7 @@ export const Main = ({ fixed, ...props }: MainProps) => {
           //
           // For already-`authenticated` users, we redirect them to their profile page.
           console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
+          console.log(currentUser.farcaster)
           navigate({ to: '/' })
       } else {
           // In this case, the user was not already `authenticated` when the component was mounted

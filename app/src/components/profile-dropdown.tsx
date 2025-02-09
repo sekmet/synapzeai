@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useLogout } from '@privy-io/react-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +14,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ProfileDropdown() {
+  const { logout } = useLogout({
+    onSuccess: () => {
+      console.log('User logged out');
+      // Any logic you'd like to execute after a user successfully logs out
+    },
+  });
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -55,7 +63,7 @@ export function ProfileDropdown() {
           {/*<DropdownMenuItem>New Team</DropdownMenuItem>*/}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={logout}>
           Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>

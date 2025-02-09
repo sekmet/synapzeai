@@ -10,6 +10,18 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: ["app-synapze.open4glabs.xyz"],
+    proxy: {
+      '/api/db': {
+          target: 'http://localhost:8787',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/db/, '')
+      },
+      '/api/agent': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/agent/, '')
+      },
+    }
   },
   resolve: {
     alias: {
