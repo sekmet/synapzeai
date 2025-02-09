@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useAuthStore } from '@/stores/authStore'
+import { ThemeProvider } from './context/theme-context'
 import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
 import './index.css';
@@ -96,7 +97,9 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
     <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
         <RouterProvider router={router} />
+    </ThemeProvider>
     </QueryClientProvider>
     </StrictMode>
 )

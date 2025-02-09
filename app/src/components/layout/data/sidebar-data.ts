@@ -1,22 +1,22 @@
 import {
-  //IconBarrierBlock,
+  IconBarrierBlock,
   IconBrowserCheck,
-  //IconBug,
+  IconBug,
   IconChecklist,
-  //IconError404,
+  IconError404,
   IconHelp,
   IconLayoutDashboard,
-  //IconLock,
-  //IconLockAccess,
+  IconLock,
+  IconLockAccess,
   //IconMessages,
   IconNotification,
   IconPackages,
   IconPalette,
-  //IconServerOff,
+  IconServerOff,
   IconSettings,
   IconTool,
   IconUserCog,
-  //IconUserOff,
+  IconUserOff,
   //IconUsers,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
@@ -77,7 +77,7 @@ export const sidebarData: SidebarData = {
         }
       ],
     },
-    /*{
+    {
       title: 'Pages',
       items: [
         {
@@ -138,7 +138,7 @@ export const sidebarData: SidebarData = {
           ],
         },
       ],
-    },*/
+    },
     {
       title: 'Other',
       items: [

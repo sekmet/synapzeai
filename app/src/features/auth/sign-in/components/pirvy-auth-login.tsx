@@ -1,14 +1,18 @@
-import React from 'react'
-import { cn } from '@/lib/utils'
+import { HTMLAttributes } from 'react'
+import { usePrivy, useLogin } from '@privy-io/react-auth'
+//import { Link } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
-import { useLogin } from '@privy-io/react-auth';
 
-interface MainProps extends React.HTMLAttributes<HTMLElement> {
-  fixed?: boolean
-  ref?: React.Ref<HTMLElement>
-}
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
-export const Main = ({ fixed, ...props }: MainProps) => {
+type PrivyAuthFormProps = HTMLAttributes<HTMLDivElement>
+
+export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
+  const {ready, authenticated } = usePrivy();
+  // Disable login when Privy is not ready or the user is already authenticated
+  const disableLogin = !ready || (ready && authenticated);
+  
   const navigate = useNavigate()
   const { login } = useLogin({
 
@@ -49,15 +53,10 @@ export const Main = ({ fixed, ...props }: MainProps) => {
   });
 
   return (
-    <main
-      className={cn(
-        'peer-[.header-fixed]/header:mt-16',
-        'px-4 py-6',
-        fixed && 'fixed-main flex flex-grow flex-col overflow-hidden'
-      )}
-      {...props}
-    />
+    <div className={cn('grid gap-6', className)} {...props}>
+            <Button className='mt-2' disabled={disableLogin} onClick={login}>
+              Sign in to Synapze
+            </Button>
+    </div>
   )
 }
-
-Main.displayName = 'Main'

@@ -12,6 +12,7 @@ import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
+import {PrivyProvider} from '@privy-io/react-auth';
 import './index.css'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
@@ -97,6 +98,7 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
+      <PrivyProvider appId="cm6xcmmbg01a92e4ck4x3is92">
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
@@ -104,6 +106,7 @@ if (!rootElement.innerHTML) {
           </FontProvider>
         </ThemeProvider>
       </QueryClientProvider>
+      </PrivyProvider>
     </StrictMode>
   )
 }

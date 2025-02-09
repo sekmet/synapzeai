@@ -1,5 +1,6 @@
 import SynapzeLogo from '@/assets/logo-synapze.png'
-import { UserAuthForm } from './components/user-auth-form'
+//import { UserAuthForm } from './components/user-auth-form'
+import { PrivyAuthLogin } from './components/pirvy-auth-login'
 
 export default function SignIn2() {
   return (
@@ -29,20 +30,20 @@ export default function SignIn2() {
             <p className='text-lg'>
               &ldquo;Code less. Create more. Effortless AI. Instant Synapze.&rdquo;
             </p>
-            <footer className='text-sm'>Synapze AI Team</footer>
+            <footer className='text-sm'>Synapze AI</footer>
           </blockquote>
         </div>
       </div>
       <div className='lg:p-8'>
         <div className='mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[350px]'>
           <div className='flex flex-col space-y-2 text-left'>
-            <h1 className='text-2xl font-semibold tracking-tight'>Login</h1>
+            <h1 className='text-2xl font-semibold tracking-tight'>Login to Synapze</h1>
             <p className='text-sm text-muted-foreground'>
               Enter your email and password below <br />
               to log into your account
             </p>
           </div>
-          <UserAuthForm />
+          <PrivyAuthLogin />
           <p className='px-8 text-center text-sm text-muted-foreground'>
             By clicking login, you agree to our{' '}
             <a
