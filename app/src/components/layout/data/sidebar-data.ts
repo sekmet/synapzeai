@@ -67,7 +67,7 @@ export const sidebarData: SidebarData = {
         },*/
         {
           title: 'Logs',
-          url: '/tasks',
+          url: '/logs',
           icon: IconChecklist,
         },
         {

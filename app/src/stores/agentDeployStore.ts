@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface AgentEnvironmentVars {
+export interface AgentEnvironmentVars {
   // ####################################
   // #### Server & DB Configurations ####
   // ####################################
@@ -166,6 +166,9 @@ interface AgentEnvironmentVars {
   // Akash Chat API
   AKASH_CHAT_API_KEY?: string
   AKASH_CHAT_API_URL?: string
+  SMALL_AKASH_CHAT_API_MODEL?: string
+  MEDIUM_AKASH_CHAT_API_MODEL?: string
+  LARGE_AKASH_CHAT_API_MODEL?: string
 
   // Galadriel
   GALADRIEL_API_KEY?: string
@@ -948,112 +951,100 @@ interface AgentConfig {
   adjectives?: string[]
 }
 
-interface AgentDeployState {
-  agent: {
+interface AgentDeploySettings {
     config: AgentConfig | null
     env: AgentEnvironmentVars
     setConfig: (config: AgentConfig | null) => void
+    getConfig: () => AgentConfig | null
     updateSettings: (settings: Partial<AgentSettings>) => void
+    setEnv: (env: AgentEnvironmentVars) => void
+    getEnv: () => AgentEnvironmentVars
     updateEnv: (env: Partial<AgentEnvironmentVars>) => void
     addPlugin: (plugin: AgentPlugin) => void
     removePlugin: (pluginName: string) => void
     addClient: (client: AgentClient) => void
     removeClient: (clientName: string) => void
     reset: () => void
-  }
 }
+
+export interface AgentDeployState extends AgentDeploySettings {}
 
 export const useAgentDeployStore = create<AgentDeployState>()(
   persist(
-    (set) => ({
-      agent: {
+    (set, get) => ({
         config: null,
         env: {},
         setConfig: (config) =>
-          set((state) => ({ ...state, agent: { ...state.agent, config } })),
+          set((state) => ({ ...state, config })),
+        getConfig: () => get().config,
         updateSettings: (settings) =>
           set((state) => ({
             ...state,
-            agent: {
-              ...state.agent,
-              config: state.agent.config
-                ? {
-                    ...state.agent.config,
-                    settings: { ...state.agent.config.settings, ...settings },
-                  }
-                : null,
-            },
+            config: state.config
+              ? {
+                  ...state.config,
+                  settings: { ...state.config.settings, ...settings },
+                }
+              : null,
           })),
         addPlugin: (plugin) =>
           set((state) => ({
             ...state,
-            agent: {
-              ...state.agent,
-              config: state.agent.config
-                ? {
-                    ...state.agent.config,
-                    plugins: [...state.agent.config.plugins, plugin],
-                  }
-                : null,
-            },
+            config: state.config
+              ? {
+                  ...state.config,
+                  plugins: [...state.config.plugins, plugin],
+                }
+              : null,
           })),
         removePlugin: (pluginName) =>
           set((state) => ({
             ...state,
-            agent: {
-              ...state.agent,
-              config: state.agent.config
-                ? {
-                    ...state.agent.config,
-                    plugins: state.agent.config.plugins.filter(
-                      (p) => p.name !== pluginName
-                    ),
-                  }
-                : null,
-            },
+            config: state.config
+              ? {
+                  ...state.config,
+                  plugins: state.config.plugins.filter(
+                    (p) => p.name !== pluginName
+                  ),
+                }
+              : null,
           })),
         addClient: (client) =>
           set((state) => ({
             ...state,
-            agent: {
-              ...state.agent,
-              config: state.agent.config
-                ? {
-                    ...state.agent.config,
-                    clients: [...state.agent.config.clients, client],
-                  }
-                : null,
-            },
+            config: state.config
+              ? {
+                  ...state.config,
+                  clients: [...state.config.clients, client],
+                }
+              : null,
           })),
         removeClient: (clientName) =>
           set((state) => ({
             ...state,
-            agent: {
-              ...state.agent,
-              config: state.agent.config
-                ? {
-                    ...state.agent.config,
-                    clients: state.agent.config.clients.filter(
-                      (c) => c.name !== clientName
-                    ),
-                  }
-                : null,
-            },
+            config: state.config
+              ? {
+                  ...state.config,
+                  clients: state.config.clients.filter(
+                    (c) => c.name !== clientName
+                  ),
+                }
+              : null,
           })),
+        setEnv: (env) =>
+          set((state) => ({ ...state, env })),
+        getEnv: () => get().env,
         updateEnv: (env) =>
           set((state) => ({
             ...state,
-            agent: {
-              ...state.agent,
-              env: { ...state.agent.env, ...env },
-            },
+            env: { ...state.env, ...env },
           })),
         reset: () =>
           set((state) => ({
             ...state,
-            agent: { ...state.agent, config: null, env: {} },
+            config: null,
+            env: {},
           })),
-      },
     }),
     {
       name: 'agent-deploy-storage',
@@ -1061,4 +1052,4 @@ export const useAgentDeployStore = create<AgentDeployState>()(
   )
 )
 
-export const useAgentDeploy = () => useAgentDeployStore((state) => state.agent)
+//export const useAgentDeploy = () => useAgentDeployStore((state) => state)

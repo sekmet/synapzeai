@@ -13,7 +13,7 @@ import { TagInput } from '@/components/ui/tag-input'
 import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { getAvailableTemplates, loadTemplate } from '@/lib/templates'
+import { getAvailableTemplates, loadTemplate, saveTemplateState } from '@/lib/templates'
 
 interface ListItem {
   id: string
@@ -24,6 +24,19 @@ interface MessageExample {
   id: string
   userMessage: string
   assistantMessage: string
+}
+
+interface AgentVoiceSettings {
+  model: string
+  provider?: string
+}
+
+interface AgentSettings {
+  secrets: Record<string, string>
+  voice?: AgentVoiceSettings
+  transcriptionProvider?: string
+  modelProvider?: string
+  customModelEndpoint?: string
 }
 
 interface Plugin {
@@ -81,7 +94,9 @@ const plugins: Plugin[] = [
 
 export default function AgentConfigTemplateForm({ title }: { title: string }) {
   const [name, setName] = useState("")
+  const [settings, setSettings] = useState<AgentSettings>()
   const [modelProvider, setModelProvider] = useState("")
+  const [postExamples, setPostExamples] = useState<string[]>([])
   const [topics, setTopics] = useState<string[]>(["star wars"])
   const [newTopic, setNewTopic] = useState("")
   const [adjectives, setAdjectives] = useState<string[]>([
@@ -138,6 +153,42 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
   const [selectedPlugins, setSelectedPlugins] = useState<string[]>([])
   //const [openTemplates, setOpenTemplates] = useState(false)
   const templates = getAvailableTemplates()
+
+  // Effect to save state changes
+  useEffect(() => {
+    const saveState = async () => {
+      const template = {
+        name,
+        clients: selectedClients,
+        modelProvider,
+        settings: settings as AgentSettings,
+        plugins: selectedPlugins,
+        bio: bioItems.map(item => item.content),
+        lore: loreItems.map(item => item.content),
+        knowledge: knowledgeItems.map(item => item.content),
+        messageExamples: messageExamples.map(ex => [{
+          user: ex.userMessage,
+          content: { text: ex.assistantMessage }
+        }]),
+        postExamples,
+        style: {
+          all: styleAllItems.map(item => item.content),
+          chat: styleChatItems.map(item => item.content),
+          post: stylePostItems.map(item => item.content),
+        },
+        topics,
+        adjectives
+      }
+      
+      if (name && selectedTemplate) { // Only save if we have a name set
+        await saveTemplateState(template)
+      }
+    }
+
+    saveState()
+  }, [name, settings, selectedClients, modelProvider, selectedPlugins, bioItems, 
+      loreItems, knowledgeItems, messageExamples, topics, 
+      styleAllItems, styleChatItems, stylePostItems, adjectives, selectedTemplate])
 
   const handleAddTopic = (e: KeyboardEvent) => {
     if (e.key === "Enter" && newTopic.trim()) {
@@ -237,9 +288,11 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
     
     if (template) {
       setName(template.name)
+      setSettings(template.settings || {})
       setModelProvider(template.modelProvider || '')
       setSelectedClients(template.clients || [])
       setSelectedPlugins(template.plugins || [])
+      setPostExamples(template.postExamples || [])
       setTopics(template.topics || [])
       setAdjectives(template.adjectives || [])
       setBioItems(template.bio?.map((content, index) => ({ id: (index + 1).toString(), content })) || [])
@@ -364,10 +417,6 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
       </Button>
     </div>
   )
-
-  useEffect(() => {
-    console.log({selectedTemplate})
-  }, [selectedTemplate]);
 
   return (
     <div className="min-h-screen bg-background p-6">

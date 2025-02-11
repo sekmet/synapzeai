@@ -14,6 +14,18 @@ const fetchCurrentUser = async (id: string) => {
   return response.json();
 };
 
+const createUser = async (id: string, emailAddress: string, linkedAccounts: any[], mfaMethods: any[], hasAcceptedTerms: boolean, createdAt: string | Date) => {
+  const response = await fetch(`/api/db/v1/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, emailAddress, linkedAccounts, mfaMethods, hasAcceptedTerms, createdAt }),
+  });
+  return response.json();
+};
+
+
 export const Main = ({ fixed, ...props }: MainProps) => {
   const {ready, authenticated } = usePrivy();
   // Disable login when Privy is not ready or the user is already authenticated
@@ -32,7 +44,11 @@ export const Main = ({ fixed, ...props }: MainProps) => {
           //
           // For already-`authenticated` users, we redirect them to their profile page.
           console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
-          console.log(currentUser.farcaster)
+          console.log({currentUser})
+          if (currentUser === undefined) {
+              // If the user is new, create it in your backend
+              createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)
+          }
           navigate({ to: '/' })
       } else {
           // In this case, the user was not already `authenticated` when the component was mounted

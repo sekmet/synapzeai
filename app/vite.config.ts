@@ -17,7 +17,7 @@ export default defineConfig({
           rewrite: (path) => path.replace(/^\/api\/db/, '')
       },
       '/api/agent': {
-          target: 'http://localhost:3000',
+          target: 'https://api.synapze.xyz',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/agent/, '')
       },

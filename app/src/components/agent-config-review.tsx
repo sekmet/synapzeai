@@ -1,13 +1,16 @@
 import { Link } from '@tanstack/react-router'
 //import { useState } from "react";
+import { useRouter, useCanGoBack } from '@tanstack/react-router'
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
+import { ChevronLeft } from "lucide-react";
+import { useAgentDeployStore } from '@/stores/agentDeployStore';
 //import { Moon, Sun } from "lucide-react";
 //import { basicSetup } from "@codemirror/basic-setup";
 //import { oneDark } from "@codemirror/theme-one-dark";
 //import { Editor } from "./editor";
 
-const sampleJson = {
+/*const sampleJson = {
     "name": "Dobby",
     "clients": [],
     "modelProvider": "openai",
@@ -97,13 +100,24 @@ const sampleJson = {
         "Protective",
         "Unconventional"
     ]
-};
+};*/
 
 export default function AgentConfigReview() {
+    const router = useRouter()
+    const canGoBack = useCanGoBack()
+    const agentDeploy = useAgentDeployStore.getState();
+    const characterConfig = agentDeploy.getConfig();
 
-  return <div className="min-h-screen w-full bg-background text-foreground">
+  return (
+  <div className="min-h-screen w-full bg-background text-foreground">
       <div className="container mx-auto p-8">
-        <div className="flex items-center justify-between mb-8">
+      {canGoBack ? (
+            <button onClick={() => router.history.back()} className="flex items-center text-yellow-500 dark:text-yellow-400 mb-6 hover:opacity-80">
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Settings
+          </button>
+        ): null}           
+        <div className="flex items-center justify-between mb-8">         
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Confirm agent details</h1>
         </div>
         <p className="text-gray-900 dark:text-white mb-8">
@@ -116,7 +130,7 @@ export default function AgentConfigReview() {
             if (ref) console.log(ref);
           }}
           className="border rounded-md overflow-hidden text-medium"
-          value={JSON.stringify(sampleJson, null, 2)}
+          value={JSON.stringify(characterConfig, null, 2)}
           extensions={[json()]}
           onChange={() => {}}
           basicSetup={{
@@ -130,5 +144,6 @@ export default function AgentConfigReview() {
             <button className="text-medium w-full py-2 bg-yellow-300 hover:bg-yellow-400 rounded-lg text-black mt-6">Deploy agent</button>
           </Link>
       </div>
-    </div>;
+    </div>
+  );
 }

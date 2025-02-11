@@ -15,7 +15,7 @@ export async function getUserById(id: string) {
         LEFT JOIN emails ON users.id = emails.user_id
         WHERE users.id = ${id}`.values();
 
-        console.log("USER PROFILE", userProfile)
+        //console.log("USER PROFILE", userProfile)
 
         const linkedAccounts = await Bun.sql`
         SELECT *
@@ -23,7 +23,7 @@ export async function getUserById(id: string) {
         WHERE user_id = ${id}`.values();
         //LEFT JOIN linked_accounts ON users.id = linked_accounts.user_id
 
-        console.log("LINKED ACCOUNTS", linkedAccounts)
+        //console.log("LINKED ACCOUNTS", linkedAccounts)
 
         const wallets = Bun.sql`
         SELECT *
@@ -31,7 +31,7 @@ export async function getUserById(id: string) {
         WHERE user_id = ${id}`.values();
         //LEFT JOIN  ON users.id = user_wallets.user_id
 
-        console.log("WALLETS", wallets)
+        //console.log("WALLETS", wallets)
 
         // set farcaster data
         let farcasterAccount: any = null;
@@ -49,7 +49,13 @@ export async function getUserById(id: string) {
         }
 
         const user = {
-          ...userProfile[0],
+          id: userProfile[0][0],
+          createdAt: userProfile[0][1],
+          email: userProfile[0][2],
+          verified: userProfile[0][3],
+          updatedAt: userProfile[0][4],
+          lastLogin: userProfile[0][5],
+          hasAcceptedTerms: userProfile[0][6],
           farcaster: farcasterAccount ?? null,
           linkedAccounts: linkedAccounts,
           wallets: wallets

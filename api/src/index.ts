@@ -5,6 +5,7 @@ import { prettyJSON } from 'hono/pretty-json';
 import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { Writable } from 'stream';
+import { generateDockerComposeFile } from './lib/compose';
 
 const apiPrefix = '/v1';
 
@@ -892,6 +893,35 @@ app.get(`${apiPrefix}/docker/info`, async (c) => {
   try {
     const info = await docker.info();
     return c.json(info);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Generate docker-compose file endpoint
+app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
+  try {
+    const { dockerImageName, envVars, agentServerPort } = await c.req.json();
+    
+    // Validate required parameters
+    if (!dockerImageName || !envVars || !agentServerPort) {
+      return c.json({ 
+        error: 'Missing required parameters. Please provide dockerImageName, envVars, and agentServerPort' 
+      }, 400);
+    }
+
+    // Call the generateDockerComposeFile function
+    const composePath = generateDockerComposeFile({
+      dockerImageName,
+      envVars,
+      agentServerPort
+    });
+
+    return c.json({ 
+      success: true, 
+      message: 'Docker compose file generated successfully',
+      composePath 
+    });
   } catch (err) {
     return c.json({ error: err.message }, 500);
   }
