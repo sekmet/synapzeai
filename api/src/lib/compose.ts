@@ -23,10 +23,10 @@ services:
             - eliza:/app/db.sqlite
         environment:
 {{ENV-VARS}}
-            - SERVER_PORT={{AGENT-SERVER-PORT}}
+            - SERVER_PORT=3000
             - WALLET_SECRET_SALT=secret_salt
         ports:
-            - "{{AGENT-SERVER-PORT}}:{{AGENT-SERVER-PORT}}"
+            - "{{AGENT-SERVER-PORT}}:3000"
         restart: always
 
 volumes:
@@ -45,8 +45,15 @@ volumes:
     .replace(/{{ENV-VARS}}/g, envVarsLines)
     .replace(/{{AGENT-SERVER-PORT}}/g, params.agentServerPort);
 
-  // Create a temporary directory.
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docker-compose-'));
+  // Define the 'agents' directory in the current working directory.
+  const agentsDir = path.join(process.cwd(), 'agents');
+  if (!fs.existsSync(agentsDir)) {
+    fs.mkdirSync(agentsDir, { recursive: true });
+  }
+
+  // Create a temporary directory inside the 'agents' directory.
+  // The directory name will be prefixed with "docker-compose-".
+  const tmpDir = fs.mkdtempSync(path.join(agentsDir, 'agent-'));
 
   // Define the full file path for docker-compose.yaml.
   const filePath = path.join(tmpDir, 'docker-compose.yaml');
