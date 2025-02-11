@@ -6,7 +6,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 //import { Upload, FileText, Layout } from "lucide-react";
-import AgentConfigForm from '@/components/agent-config-form'
+import AgentConfigTemplateForm from '@/components/agent-config-template-form'
 
 export default function NewAgentTemplate() {
   return (
@@ -19,7 +19,7 @@ export default function NewAgentTemplate() {
     </div>
     </Header>
     <Main className="flex flex-col items-center px-6 py-16 flex-1 text-white pt-[5vh] dark:text-gray-100">
-    <AgentConfigForm title="Start with a template" />
+    <AgentConfigTemplateForm title="Start with a template" />
     </Main>
     </>
   )

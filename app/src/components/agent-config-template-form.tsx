@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useState, KeyboardEvent } from "react"
+import { useState, useEffect, KeyboardEvent } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -7,11 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, X, ChevronsUpDown, Check, ArrowLeft } from "lucide-react"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Plus, Trash2, ChevronsUpDown, Check, ArrowLeft } from "lucide-react"
+//import { Checkbox } from "@/components/ui/checkbox"
+import { TagInput } from '@/components/ui/tag-input'
 import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { getAvailableTemplates, loadTemplate } from '@/lib/templates'
 
 interface ListItem {
   id: string
@@ -77,7 +79,9 @@ const plugins: Plugin[] = [
   },
 ]
 
-export default function AgentConfigForm({ title }: { title: string }) {
+export default function AgentConfigTemplateForm({ title }: { title: string }) {
+  const [name, setName] = useState("")
+  const [modelProvider, setModelProvider] = useState("")
   const [topics, setTopics] = useState<string[]>(["star wars"])
   const [newTopic, setNewTopic] = useState("")
   const [adjectives, setAdjectives] = useState<string[]>([
@@ -123,14 +127,17 @@ export default function AgentConfigForm({ title }: { title: string }) {
         "Oh dear, oh dear! While the task does appear rather daunting, I am fluent in over six million forms of problem-solving. Perhaps I could suggest a more efficient approach? Though I do hope we don't all end up in pieces!",
     },
   ])
-  //const [styleAllItems, setStyleAllItems] = useState<ListItem[]>([{ id: "1", content: "uses FULL CAPS for key phrases and emphasis" }])
-  //const [styleChatItems, setStyleChatItems] = useState<ListItem[]>([{ id: "1", content: "directly addresses questioner's concerns" }])
-  //const [stylePostItems, setStylePostItems] = useState<ListItem[]>([{ id: "1", content: "uses ALL CAPS for key points" }])
-  
+  const [styleAllItems, setStyleAllItems] = useState<ListItem[]>([{ id: "1", content: "uses FULL CAPS for key phrases and emphasis" }])
+  const [styleChatItems, setStyleChatItems] = useState<ListItem[]>([{ id: "1", content: "directly addresses questioner's concerns" }])
+  const [stylePostItems, setStylePostItems] = useState<ListItem[]>([{ id: "1", content: "uses ALL CAPS for key points" }])
+
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [openClients, setOpenClients] = useState(false)
   const [selectedClients, setSelectedClients] = useState<string[]>([])
   const [openPlugins, setOpenPlugins] = useState(false)
   const [selectedPlugins, setSelectedPlugins] = useState<string[]>([])
+  //const [openTemplates, setOpenTemplates] = useState(false)
+  const templates = getAvailableTemplates()
 
   const handleAddTopic = (e: KeyboardEvent) => {
     if (e.key === "Enter" && newTopic.trim()) {
@@ -146,15 +153,15 @@ export default function AgentConfigForm({ title }: { title: string }) {
     }
   }
 
-  const handleRemoveTopic = (topic: string) => {
-    setTopics(topics.filter((t) => t !== topic))
-  }
+  //const handleRemoveTopic = (topic: string) => {
+  //  setTopics(topics.filter((t) => t !== topic))
+  //}
 
-  const handleRemoveAdjective = (adjective: string) => {
-    setAdjectives(adjectives.filter((a) => a !== adjective))
-  }
+  //const handleRemoveAdjective = (adjective: string) => {
+  //  setAdjectives(adjectives.filter((a) => a !== adjective))
+ //}
 
-  const handleAddItem = (section: "bio" | "lore" | "knowledge") => {
+  const handleAddItem = (section: "bio" | "lore" | "knowledge" | "style-all" | "style-chat" | "style-post") => {
     const newItem = { id: Date.now().toString(), content: "" }
     switch (section) {
       case "bio":
@@ -166,10 +173,19 @@ export default function AgentConfigForm({ title }: { title: string }) {
       case "knowledge":
         setKnowledgeItems([...knowledgeItems, newItem])
         break
+      case "style-all":
+        setStyleAllItems([...styleAllItems, newItem])
+        break
+      case "style-chat":
+        setStyleChatItems([...styleChatItems, newItem])
+        break
+      case "style-post":
+        setStylePostItems([...stylePostItems, newItem])
+        break
     }
   }
 
-  const handleRemoveItem = (section: "bio" | "lore" | "knowledge", id: string) => {
+  const handleRemoveItem = (section: "bio" | "lore" | "knowledge" | "style-all" | "style-chat" | "style-post", id: string) => {
     switch (section) {
       case "bio":
         setBioItems(bioItems.filter((item) => item.id !== id))
@@ -180,10 +196,19 @@ export default function AgentConfigForm({ title }: { title: string }) {
       case "knowledge":
         setKnowledgeItems(knowledgeItems.filter((item) => item.id !== id))
         break
+      case "style-all":
+        setStyleAllItems(styleAllItems.filter((item) => item.id !== id))
+        break
+      case "style-chat":
+        setStyleChatItems(styleChatItems.filter((item) => item.id !== id))
+        break
+      case "style-post":
+        setStylePostItems(stylePostItems.filter((item) => item.id !== id))
+        break
     }
   }
 
-  const handleUpdateItem = (section: "bio" | "lore" | "knowledge", id: string, content: string) => {
+  const handleUpdateItem = (section: "bio" | "lore" | "knowledge" | "style-all" | "style-chat" | "style-post", id: string, content: string) => {
     switch (section) {
       case "bio":
         setBioItems(bioItems.map((item) => (item.id === id ? { ...item, content } : item)))
@@ -194,6 +219,48 @@ export default function AgentConfigForm({ title }: { title: string }) {
       case "knowledge":
         setKnowledgeItems(knowledgeItems.map((item) => (item.id === id ? { ...item, content } : item)))
         break
+      case "style-all":
+        setStyleAllItems(styleAllItems.map((item) => (item.id === id ? { ...item, content } : item)))
+        break
+      case "style-chat":
+        setStyleChatItems(styleChatItems.map((item) => (item.id === id ? { ...item, content } : item)))
+        break
+      case "style-post":
+        setStylePostItems(stylePostItems.map((item) => (item.id === id ? { ...item, content } : item)))
+        break
+    }
+  }
+
+  const handleTemplateSelect = async (templateName: string) => {
+    console.log(templateName)
+    const template = await loadTemplate(templateName)
+    
+    if (template) {
+      setName(template.name)
+      setModelProvider(template.modelProvider || '')
+      setSelectedClients(template.clients || [])
+      setSelectedPlugins(template.plugins || [])
+      setTopics(template.topics || [])
+      setAdjectives(template.adjectives || [])
+      setBioItems(template.bio?.map((content, index) => ({ id: (index + 1).toString(), content })) || [])
+      setLoreItems(template.lore?.map((content, index) => ({ id: (index + 1).toString(), content })) || [])
+      setKnowledgeItems(template.knowledge?.map((content, index) => ({ id: (index + 1).toString(), content })) || [])
+      const styleAll = Array.from(new Set(template.style.all))
+      const styleChat = Array.from(new Set(template.style.chat))
+      const stylePost = Array.from(new Set(template.style.post))
+      setStyleAllItems(styleAll?.map((content: string, index: number) => ({ id: (index + 1).toString(), content })) || [])
+      setStyleChatItems(styleChat?.map((content: string, index: number) => ({ id: (index + 1).toString(), content })) || [])
+      setStylePostItems(stylePost?.map((content: string, index: number) => ({ id: (index + 1).toString(), content })) || [])
+      
+      const formattedExamples = template.messageExamples?.map((exchange, index) => ({
+        id: (index + 1).toString(),
+        userMessage: exchange[0].content.text,
+        assistantMessage: exchange[1].content.text
+      })) || []
+      setMessageExamples(formattedExamples)
+
+      // set template to state
+      setSelectedTemplate(template)
     }
   }
 
@@ -214,7 +281,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
     setMessageExamples(messageExamples.map((example) => (example.id === id ? { ...example, [field]: value } : example)))
   }
 
-  const renderList = (section: "bio" | "lore" | "knowledge", items: ListItem[], description: string) => (
+  const renderList = (section: "bio" | "lore" | "knowledge" | "style-all" | "style-chat" | "style-post", items: ListItem[], description: string) => (
     <div className="space-y-2">
       <p className="text-sm text-gray-900 dark:text-white">{description}</p>
       <div className="space-y-2">
@@ -274,7 +341,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
               </div>
               <div className="rounded-lg bg-muted/50 p-3 ml-8">
                 <div className="flex justify-between items-start">
-                  <p className="text-xs font-medium mb-2 text-gray-900 dark:text-white">C-3PO</p>
+                  <p className="text-xs font-medium mb-2 text-gray-900 dark:text-white">{name}</p>
                 </div>
                 <Textarea
                   value={example.assistantMessage}
@@ -298,6 +365,10 @@ export default function AgentConfigForm({ title }: { title: string }) {
     </div>
   )
 
+  useEffect(() => {
+    console.log({selectedTemplate})
+  }, [selectedTemplate]);
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-full space-y-6">
@@ -318,8 +389,8 @@ export default function AgentConfigForm({ title }: { title: string }) {
             <CardDescription>Select a template to get started</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-4 gap-4">
-            {["C3PO", "Douby", "Trump", "Other"].map((template) => (
-              <Button key={template} variant="outline" className="h-24 flex flex-col items-center justify-center">
+            {templates.map((template) => (
+              <Button key={template} onClick={() => handleTemplateSelect(template)} variant="outline" className="h-24 flex flex-col items-center justify-center">
                 {template}
               </Button>
             ))}
@@ -328,27 +399,92 @@ export default function AgentConfigForm({ title }: { title: string }) {
 
         <div className="space-y-6">
           <div className="space-y-4">
-            <Label htmlFor="name" className="text-gray-900 dark:text-white">Name</Label>
-            <Input id="name" placeholder="Enter model name" />
+            <Label htmlFor="name" className="text-gray-900 dark:text-white text-lg font-semibold">Name</Label>
+            <Input id="name" className="text-gray-900 dark:text-white" placeholder="Enter model name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
+          {/*OPENAI = "openai",
+          ETERNALAI = "eternalai",
+          ANTHROPIC = "anthropic",
+          GROK = "grok",
+          GROQ = "groq",
+          LLAMACLOUD = "llama_cloud",
+          TOGETHER = "together",
+          LLAMALOCAL = "llama_local",
+          LMSTUDIO = "lmstudio",
+          GOOGLE = "google",
+          MISTRAL = "mistral",
+          CLAUDE_VERTEX = "claude_vertex",
+          REDPILL = "redpill",
+          OPENROUTER = "openrouter",
+          OLLAMA = "ollama",
+          HEURIST = "heurist",
+          GALADRIEL = "galadriel",
+          FAL = "falai",
+          GAIANET = "gaianet",
+          ALI_BAILIAN = "ali_bailian",
+          VOLENGINE = "volengine",
+          NANOGPT = "nanogpt",
+          HYPERBOLIC = "hyperbolic",
+          VENICE = "venice",
+          NVIDIA = "nvidia",
+          NINETEEN_AI = "nineteen_ai",
+          AKASH_CHAT_API = "akash_chat_api",
+          LIVEPEER = "livepeer",
+          LETZAI = "letzai",
+          DEEPSEEK = "deepseek",
+          INFERA = "infera",
+          BEDROCK = "bedrock",
+          ATOMA = "atoma",*/}
+
           <div className="space-y-4">
-            <Label htmlFor="model" className="text-gray-900 dark:text-white">Model provider</Label>
-            <Select>
+            <Label htmlFor="model" className="text-gray-900 dark:text-white text-lg font-semibold">Model provider</Label>
+            <Select value={modelProvider.toLowerCase()} onValueChange={setModelProvider}>
               <SelectTrigger>
-                <SelectValue placeholder="Select provider" />
+                <SelectValue 
+                placeholder="Select provider" 
+                className="text-gray-900 dark:text-white"
+                />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="anthropic">Anthropic</SelectItem>
-                <SelectItem value="google">Google</SelectItem>
+              <SelectContent className="text-gray-900 dark:text-white">
+                <SelectItem value="openai"><span className="text-gray-900 dark:text-white">OpenAI</span></SelectItem>
+                <SelectItem value="anthropic"><span className="text-gray-900 dark:text-white">Anthropic</span></SelectItem>
+                <SelectItem value="google"><span className="text-gray-900 dark:text-white">Google</span></SelectItem>
+                <SelectItem value="groq"><span className="text-gray-900 dark:text-white">Groq</span></SelectItem>
+                <SelectItem value="grok"><span className="text-gray-900 dark:text-white">xAI Grok</span></SelectItem>
+                <SelectItem value="claude_vertex"><span className="text-gray-900 dark:text-white">Claude Vertex</span></SelectItem>
+                <SelectItem value="together"><span className="text-gray-900 dark:text-white">Together</span></SelectItem>
+                <SelectItem value="eternalai"><span className="text-gray-900 dark:text-white">EternalAI</span></SelectItem>
+                <SelectItem value="mistral"><span className="text-gray-900 dark:text-white">Mistral</span></SelectItem>
+                <SelectItem value="redpill"><span className="text-gray-900 dark:text-white">Redpill</span></SelectItem>
+                <SelectItem value="openrouter"><span className="text-gray-900 dark:text-white">OpenRouter</span></SelectItem>
+                <SelectItem value="ollama"><span className="text-gray-900 dark:text-white">Ollama</span></SelectItem>
+                <SelectItem value="llama_cloud"><span className="text-gray-900 dark:text-white">Llama Cloud</span></SelectItem>
+                <SelectItem value="heurist"><span className="text-gray-900 dark:text-white">Heurist</span></SelectItem>
+                <SelectItem value="galadriel"><span className="text-gray-900 dark:text-white">Galadriel</span></SelectItem>
+                <SelectItem value="falai"><span className="text-gray-900 dark:text-white">FalAI</span></SelectItem>
+                <SelectItem value="gaianet"><span className="text-gray-900 dark:text-white">Gaia Net</span></SelectItem>
+                <SelectItem value="ali_bailian"><span className="text-gray-900 dark:text-white">Ali Bailian</span></SelectItem>
+                <SelectItem value="volengine"><span className="text-gray-900 dark:text-white">VolEngine</span></SelectItem>
+                <SelectItem value="nanogpt"><span className="text-gray-900 dark:text-white">NanoGPT</span></SelectItem>
+                <SelectItem value="hyperbolic"><span className="text-gray-900 dark:text-white">Hyperbolic</span></SelectItem>
+                <SelectItem value="venice"><span className="text-gray-900 dark:text-white">Venice</span></SelectItem>
+                <SelectItem value="nvidia"><span className="text-gray-900 dark:text-white">NVIDIA</span></SelectItem>
+                <SelectItem value="nineteen_ai"><span className="text-gray-900 dark:text-white">Nineteen AI</span></SelectItem>
+                <SelectItem value="akash_chat_api"><span className="text-gray-900 dark:text-white">Akash Chat API</span></SelectItem>
+                <SelectItem value="livepeer"><span className="text-gray-900 dark:text-white">Livepeer</span></SelectItem>
+                <SelectItem value="letzai"><span className="text-gray-900 dark:text-white">LetzAI</span></SelectItem>
+                <SelectItem value="deepseek"><span className="text-gray-900 dark:text-white">DeepSeek</span></SelectItem>
+                <SelectItem value="infera"><span className="text-gray-900 dark:text-white">Infera</span></SelectItem>
+                <SelectItem value="bedrock"><span className="text-gray-900 dark:text-white">Bedrock</span></SelectItem>
+                <SelectItem value="atoma"><span className="text-gray-900 dark:text-white">Atoma</span></SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-4">
-            <div>
-              <Label className="text-gray-900 dark:text-white">Clients</Label>
+            <div className="flex items-baseline justify-between">
+              <Label className="text-gray-900 dark:text-white text-lg font-semibold">Clients</Label>
               <p className="text-sm text-gray-900 dark:text-white mt-1">Supported client types, such as Discord or X</p>
             </div>
             <Popover open={openClients} onOpenChange={setOpenClients}>
@@ -357,7 +493,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
                   variant="outline"
                   role="combobox"
                   aria-expanded={openClients}
-                  className="w-full justify-between"
+                  className="w-full justify-between text-gray-900 dark:text-white"
                 >
                   {selectedClients.length === 0
                     ? "Select clients..."
@@ -365,11 +501,11 @@ export default function AgentConfigForm({ title }: { title: string }) {
                         .filter((client) => selectedClients.includes(client.value))
                         .map((client) => client.label)
                         .join(", ")}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-gray-900 dark:text-white" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command className="w-full" value={selectedClients.join(", ")}>
                   <CommandInput placeholder="Search clients..." />
                   <CommandList>
                     <CommandEmpty>No client found.</CommandEmpty>
@@ -403,7 +539,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
 
           <div className="space-y-4">
             <div className="flex items-baseline justify-between">
-              <Label className="text-gray-900 dark:text-white">Plugins</Label>
+              <Label className="text-gray-900 dark:text-white text-lg font-semibold">Plugins</Label>
               <span className="text-xs text-gray-900 dark:text-white">Optional</span>
             </div>
             <p className="text-sm text-gray-900 dark:text-white mt-1">
@@ -415,31 +551,31 @@ export default function AgentConfigForm({ title }: { title: string }) {
                   variant="outline"
                   role="combobox"
                   aria-expanded={openPlugins}
-                  className="w-full justify-between"
+                  className="w-full justify-between text-gray-900 dark:text-white"
                 >
                   {selectedPlugins.length === 0
                     ? "Select one or multiple plugins"
                     : plugins
-                        .filter((plugin) => selectedPlugins.includes(plugin.value))
+                        .filter((plugin) => selectedPlugins.includes(plugin.package))
                         .map((plugin) => plugin.label)
                         .join(", ")}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-gray-900 dark:text-white" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0" align="start">
-                <Command className="w-full">
+                <Command className="w-full" value={selectedPlugins.join(", ")}>
                   <CommandInput placeholder="Search plugins..." />
                   <CommandList>
                     <CommandEmpty>No plugin found.</CommandEmpty>
                     <CommandGroup>
                       {plugins.map((plugin) => (
                         <CommandItem
-                          key={plugin.value}
+                          key={plugin.package}
                           onSelect={() => {
                             setSelectedPlugins((prev) =>
-                              prev.includes(plugin.value)
-                                ? prev.filter((item) => item !== plugin.value)
-                                : [...prev, plugin.value],
+                              prev.includes(plugin.package)
+                                ? prev.filter((item) => item !== plugin.package)
+                                : [...prev, plugin.package],
                             )
                           }}
                           className="flex flex-col items-start py-3"
@@ -448,7 +584,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4 shrink-0",
-                                selectedPlugins.includes(plugin.value) ? "opacity-100" : "opacity-0",
+                                selectedPlugins.includes(plugin.package) ? "opacity-100" : "opacity-0",
                               )}
                             />
                             <div className="flex-1">
@@ -471,9 +607,9 @@ export default function AgentConfigForm({ title }: { title: string }) {
             </Popover>
           </div>
 
-          <Accordion type="multiple" className="space-y-4">
+          <Accordion type="multiple" className="space-y-4" defaultValue={["bio", "lore", "knowledge", "message-examples", "style"]}>
             <AccordionItem value="bio">
-              <AccordionTrigger className="text-gray-900 dark:text-white">Bio</AccordionTrigger>
+              <AccordionTrigger className="text-gray-900 dark:text-white text-lg font-semibold">Bio</AccordionTrigger>
               <AccordionContent>
                 {renderList(
                   "bio",
@@ -484,7 +620,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
             </AccordionItem>
 
             <AccordionItem value="lore">
-              <AccordionTrigger className="text-gray-900 dark:text-white">Lore</AccordionTrigger>
+              <AccordionTrigger className="text-gray-900 dark:text-white text-lg font-semibold">Lore</AccordionTrigger>
               <AccordionContent>
                 {renderList(
                   "lore",
@@ -495,7 +631,7 @@ export default function AgentConfigForm({ title }: { title: string }) {
             </AccordionItem>
 
             <AccordionItem value="knowledge">
-              <AccordionTrigger className="text-gray-900 dark:text-white">
+              <AccordionTrigger className="text-gray-900 dark:text-white text-lg font-semibold">
                 Knowledge
                 <span className="ml-2 text-xs text-gray-900 dark:text-white">Optional</span>
               </AccordionTrigger>
@@ -505,44 +641,39 @@ export default function AgentConfigForm({ title }: { title: string }) {
             </AccordionItem>
 
             <AccordionItem value="message-examples">
-              <AccordionTrigger className="text-gray-900 dark:text-white">Message examples</AccordionTrigger>
+              <AccordionTrigger className="text-gray-900 dark:text-white text-lg font-semibold">Message examples</AccordionTrigger>
               <AccordionContent>{renderMessageExamples()}</AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="style">
-              <AccordionTrigger className="text-gray-900 dark:text-white">Style</AccordionTrigger>
+              <AccordionTrigger className="text-gray-900 dark:text-white text-lg font-semibold">
+                Style
+                <span className="ml-2 inline-flex items-end justify-end text-xs text-gray-900 dark:text-white">Optional</span>
+              </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4">
-                  <Accordion type="multiple">
-                    <AccordionItem value="chat">
-                      <AccordionTrigger className="text-gray-900 dark:text-white">Chat</AccordionTrigger>
+                <div className="space-y-4 pl-6">
+                  <Accordion type="multiple" defaultValue={["style-all", "style-chat", "style-post"]}>
+                  <AccordionItem value="style-all">
+                    <AccordionTrigger className="text-gray-900 dark:text-white font-bold">
+                      All
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {renderList("style-all", styleAllItems, "Character's conversational style")}
+                    </AccordionContent>
+                  </AccordionItem>
+
+
+                    <AccordionItem value="style-chat">
+                      <AccordionTrigger className="text-gray-900 dark:text-white font-bold">Chat</AccordionTrigger>
                       <AccordionContent>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="chat-1" />
-                            <label htmlFor="chat-1">Formal tone</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="chat-2" />
-                            <label htmlFor="chat-2">Casual tone</label>
-                          </div>
-                        </div>
+                      {renderList("style-chat", styleChatItems, "Character's conversational chat style")}
                       </AccordionContent>
                     </AccordionItem>
 
-                    <AccordionItem value="post">
-                      <AccordionTrigger className="text-gray-900 dark:text-white">Post</AccordionTrigger>
+                    <AccordionItem value="style-post">
+                      <AccordionTrigger className="text-gray-900 dark:text-white font-bold">Post</AccordionTrigger>
                       <AccordionContent>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="post-1" />
-                            <label htmlFor="post-1">Include citations</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="post-2" />
-                            <label htmlFor="post-2">Use markdown formatting</label>
-                          </div>
-                        </div>
+                      {renderList("style-post", stylePostItems, "Character's conversational post style")}
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
@@ -553,14 +684,25 @@ export default function AgentConfigForm({ title }: { title: string }) {
 
           <div className="space-y-4">
             <div>
-              <Label className="text-gray-900 dark:text-white">Topics</Label>
+              <Label className="text-gray-900 dark:text-white text-lg font-semibold">Topics</Label>
               <p className="text-sm text-gray-900 dark:text-white mt-1">
                 List of subjects the character is interested in or knowledgeable about, used to guide conversations and
                 generate relevant content. Helps maintain character consistency.
               </p>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 flex flex-wrap gap-2 p-2 pointer-events-none">
+            <TagInput
+                  {...topics}
+                  placeholder="Add topic..."
+                  tags={topics}
+                  className='sm:min-w-[450px] text-gray-900 dark:text-white'
+                  onKeyDown={handleAddTopic}
+                  setTags={(NewTopics) => {
+                    //setAdjectives(newTags);
+                    setTopics(NewTopics as [string, ...string[]]);
+                  }} 
+                />
+              {/*<div className="flex flex-wrap gap-2 p-2 pointer-events-none">
                 {topics.map((topic) => (
                   <div
                     key={topic}
@@ -573,30 +715,41 @@ export default function AgentConfigForm({ title }: { title: string }) {
                   </div>
                 ))}
               </div>
-              <Input
+              <Textarea
                 value={newTopic}
                 onChange={(e) => setNewTopic(e.target.value)}
                 onKeyDown={handleAddTopic}
-                className="pl-2 text-gray-900 dark:text-white"
+                className="pl-2 text-gray-900 dark:text-white hidden"
                 placeholder="add topic..."
                 style={{
-                  paddingLeft: topics.length ? `${(topics.length * 6)}rem` : "0.75rem",
+                  paddingLeft: topics.length ? `0.5rem` : "0.75rem",
                   paddingTop: topics.length ? "0.3rem" : "0.5rem",
                 }}
-              />
+              />*/}
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <Label className="text-gray-900 dark:text-white">Adjectives</Label>
+              <Label className="text-gray-900 dark:text-white text-lg font-semibold">Adjectives</Label>
               <p className="text-sm text-gray-900 dark:text-white mt-1">
                 Words that describe the character's traits and personality, used for generating responses with
                 consistent tone. Can be used in "Mad Libs" style content generation.
               </p>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 flex flex-wrap gap-2 p-2 pointer-events-none">
+            <TagInput
+                  {...adjectives}
+                  placeholder="Add adjective..."
+                  tags={adjectives}
+                  className='sm:min-w-[450px] text-gray-900 dark:text-white'
+                  onKeyDown={handleAddAdjective}
+                  setTags={(NewAdjectives) => {
+                    //setAdjectives(newTags);
+                    setAdjectives(NewAdjectives as [string, ...string[]]);
+                  }} 
+                />
+              {/*<div className="flex flex-wrap gap-2 p-2 pointer-events-none">
                 {adjectives.map((adjective) => (
                   <div
                     key={adjective}
@@ -612,17 +765,18 @@ export default function AgentConfigForm({ title }: { title: string }) {
                   </div>
                 ))}
               </div>
-              <Input
+              <Textarea
                 value={newAdjective}
                 onChange={(e) => setNewAdjective(e.target.value)}
                 onKeyDown={handleAddAdjective}
-                className="pl-2 text-gray-900 dark:text-white"
+                className="pl-2 text-gray-900 dark:text-white hidden"
                 placeholder="add adjective..."
                 style={{
-                  paddingLeft: adjectives.length ? `${(adjectives.length * 6)}rem` : "0.75rem",
+                  lineHeight: "0.5",
+                  paddingLeft: adjectives.length ? `0.5rem` : "0.75rem",
                   paddingTop: adjectives.length ? "0.3rem" : "0.5rem",
                 }}
-              />
+              />*/}
             </div>
           </div>
           <Link to='/agent/new/secrets'>

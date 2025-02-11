@@ -897,4 +897,10 @@ app.get(`${apiPrefix}/docker/info`, async (c) => {
   }
 });
 
-export default app;
+// Start the Bun server
+Bun.serve({
+  fetch: app.fetch,
+  port: 8387,
+});
+
+console.log('🤖 Synapze Agent API server running on http://localhost:8387');
