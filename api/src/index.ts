@@ -6,6 +6,7 @@ import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { Writable } from 'stream';
 import { generateDockerComposeFile } from './lib/compose';
+import { runDeployment } from './lib/deploy/deploy-compose';
 
 const apiPrefix = '/v1';
 
@@ -924,6 +925,34 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
     });
   } catch (err) {
     return c.json({ error: err.message }, 500);
+  }
+});
+
+// Deploy docker-compose file endpoint
+app.post(`${apiPrefix}/docker/deploy-compose`, async (c) => {
+  try {
+    const { composePath } = await c.req.json();
+    
+    // Validate required parameter
+    if (!composePath) {
+      return c.json({ 
+        error: 'Missing required parameter: composePath' 
+      }, 400);
+    }
+
+    // Call the runDeployment function
+    const output = await runDeployment(composePath);
+
+    return c.json({ 
+      success: true, 
+      message: 'Docker compose deployment executed successfully',
+      output 
+    });
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to deploy docker-compose file'
+    }, 500);
   }
 });
 
