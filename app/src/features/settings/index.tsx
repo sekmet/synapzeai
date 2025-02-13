@@ -5,6 +5,7 @@ import {
   IconPalette,
   IconTool,
   IconUser,
+  IconRobot
 } from '@tabler/icons-react'
 import { Separator } from '@/components/ui/separator'
 import { Header } from '@/components/layout/header'
@@ -13,18 +14,23 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import SidebarNav from './components/sidebar-nav'
+import { useAuthStore } from '@/stores/authStore'
 
 export default function Settings() {
+  const { getOnboarding } = useAuthStore((state) => state)
+  const onboarding = !getOnboarding().completed
   return (
     <>
       {/* ===== Top Heading ===== */}
-      <Header>
+      {onboarding ? null : (
+        <Header>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
       </Header>
+      )}
 
       <Main fixed>
         <div className='space-y-0.5'>
@@ -50,6 +56,11 @@ export default function Settings() {
 }
 
 const sidebarNavItems = [
+  {
+    title: 'Agent',
+    icon: <IconRobot size={18} />,
+    href: '/settings/agent',
+  },
   {
     title: 'Profile',
     icon: <IconUser size={18} />,

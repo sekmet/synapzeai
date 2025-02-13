@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 const ACCESS_TOKEN = 'ff3a33a442aa0a1b84e815254ee429f2df53ac0f2f0b924410d84497cec51af9'
 
@@ -15,6 +16,11 @@ interface EmailInfo {
   address: string
 }
 
+interface OnboardingUser {
+  currentStep: number
+  completed?: boolean
+}
+
 export interface AuthUser {
   id: string
   createdAt: string | Date
@@ -27,45 +33,60 @@ export interface AuthUser {
 }
 
 interface AuthState {
-  auth: {
     user: AuthUser | null
     setUser: (user: AuthUser | null) => void
+    getUser: () => AuthUser | null
     accessToken: string
     setAccessToken: (accessToken: string) => void
     resetAccessToken: () => void
     reset: () => void
-  }
+    onboarding: OnboardingUser
+    setOnboarding: (onboarding: OnboardingUser) => void
+    getOnboarding: () => OnboardingUser
 }
 
-export const useAuthStore = create<AuthState>()((set) => {
+export const useAuthStore = create<AuthState>()(
+  persist(
+  (set, get) => {
   const cookieState = Cookies.get(ACCESS_TOKEN)
   const initToken = cookieState ? JSON.parse(cookieState) : ''
   return {
-    auth: {
       user: null,
+      onboarding: {
+        currentStep: 1,
+        completed: false
+      },
       setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
+        set((state) => ({ ...state, user })),
+      getUser: () => get().user,
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {
           Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken))
-          return { ...state, auth: { ...state.auth, accessToken } }
+          return { ...state, accessToken }
         }),
       resetAccessToken: () =>
         set((state) => {
           Cookies.remove(ACCESS_TOKEN)
-          return { ...state, auth: { ...state.auth, accessToken: '' } }
+          return { ...state, accessToken: '' }
         }),
       reset: () =>
         set((state) => {
           Cookies.remove(ACCESS_TOKEN)
           return {
-            ...state,
-            auth: { ...state.auth, user: null, accessToken: '' },
+            ...state, user: null, accessToken: '',
           }
         }),
-    },
+      getOnboarding: () => get().onboarding,
+      setOnboarding: (onboarding) =>
+        set((state) => ({
+          ...state, onboarding,
+        }))
   }
-})
+},
+{
+  name: 'auth-user',
+}
+))
 
-// export const useAuth = () => useAuthStore((state) => state.auth)
+// export const useAuth = () => useAuthStore((state) => state)

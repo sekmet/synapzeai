@@ -174,5 +174,8 @@ dist
 # turbo
 .turbo
 
+# agents directory
+agents/
+
 # Finder (MacOS) folder config
 .DS_Store

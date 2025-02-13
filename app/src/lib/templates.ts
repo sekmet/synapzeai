@@ -77,7 +77,12 @@ export async function loadTemplate(templateName: string): Promise<Template | nul
     if (!template) return null;
 
   try {
-    const response = await fetch(`/src/components/templates/${template.json}`);
+    const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/templates/${template.json}`,{
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        'Content-Type': 'application/json',
+      }
+    });
     if (!response.ok) {
       console.error(`Failed to load template ${template.name}:`, response.statusText);
       return null;

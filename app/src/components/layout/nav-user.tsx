@@ -9,7 +9,9 @@ import {
   LogOut,
   //Sparkles,
 } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+//import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar } from '@/components/ui/avatar'
+import Jazzicon from 'react-jazzicon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,8 +51,9 @@ export function NavUser({
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
               <Avatar className='h-8 w-8 rounded-lg'>
-                <AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
-                <AvatarFallback className='rounded-lg'>SK</AvatarFallback>
+                {/*<AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
+                <AvatarFallback className='rounded-lg'>SK</AvatarFallback>*/}
+                <Jazzicon diameter={32} seed={Number('did:privy:cm6xfuy4700f5116hioyuda2d')} />
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-semibold'>{'username'}</span>
@@ -68,8 +71,9 @@ export function NavUser({
             <DropdownMenuLabel className='p-0 font-normal'>
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                 <Avatar className='h-8 w-8 rounded-lg'>
-                  <AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
-                  <AvatarFallback className='rounded-lg'>SK</AvatarFallback>
+                  {/*<AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
+                  <AvatarFallback className='rounded-lg'>SK</AvatarFallback>*/}
+                  <Jazzicon diameter={32} seed={Number('did:privy:cm6xfuy4700f5116hioyuda2d')} />
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-semibold'>{'username'}</span>

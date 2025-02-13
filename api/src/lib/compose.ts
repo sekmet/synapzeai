@@ -24,7 +24,6 @@ services:
         environment:
 {{ENV-VARS}}
             - SERVER_PORT=3000
-            - WALLET_SECRET_SALT=secret_salt
         ports:
             - "{{AGENT-SERVER-PORT}}:3000"
         restart: always

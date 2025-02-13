@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 type PrivyAuthFormProps = HTMLAttributes<HTMLDivElement>
 
 export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
-  const { setUser } = useAuthStore((state) => state.auth)
+  const { setUser } = useAuthStore((state) => state)
   const {ready, authenticated } = usePrivy();
   // Disable login when Privy is not ready or the user is already authenticated
   const disableLogin = !ready || (ready && authenticated);
@@ -24,7 +24,7 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
           //
           // For already-`authenticated` users, we redirect them to their profile page.
           console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
-          setUser(user as AuthUser) // authUser being the new format
+          console.log(setUser(user as AuthUser)) // authUser being the new format
           navigate({ to: '/' })
       } else {
           // In this case, the user was not already `authenticated` when the component was mounted
@@ -43,6 +43,7 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
           } else {
               // If the user is returning, fetch their data from your backend
               console.log("RETURNING USER", user)
+              console.log(setUser(user as AuthUser)) // authUser being the new format
               navigate({ to: '/' })
               /*await fetch(`your-find-user-endpoint/${user.id}`, {
                   method: 'GET',

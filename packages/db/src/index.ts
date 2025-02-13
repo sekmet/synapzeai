@@ -1,14 +1,17 @@
 // server.js
 import { Hono } from 'hono';
+import { bearerAuth } from 'hono/bearer-auth'
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
+import { cors } from 'hono/cors'
 
 // Import functions from the various modules
 import {
   createAgent,
   getAgentById,
   updateAgent,
-  deleteAgent
+  deleteAgent,
+  getAgentsByOrganizationId
 } from './lib/agents';
 
 import {
@@ -36,7 +39,10 @@ import {
   createOrganization,
   getOrganizationById,
   updateOrganization,
-  deleteOrganization
+  deleteOrganization,
+  getOrganizationMember,
+  createOrganizationMember,
+  getOrganizationByUserId
 } from './lib/organizations';
 
 import {
@@ -58,6 +64,8 @@ import {
 } from './lib/users';
 
 const apiPrefix = '/v1';
+const authToken = process.env.JWT_DB_API ?? '';
+
 export const app = new Hono();
 
 // Use logger and pretty JSON middleware in development
@@ -68,6 +76,12 @@ if (process.env.NODE_ENV === 'development') {
   app.use(prettyJSON({ space: 4 }));
 }
 
+// CORS should be called before the route
+app.use(`${apiPrefix}/*`, cors())
+
+// Bearer auth middleware
+app.use(`${apiPrefix}/*`, bearerAuth({ token: authToken }))
+
 // Global error handler and not-found handler
 app.onError((err, c) => {
   console.error(err);
@@ -77,7 +91,7 @@ app.onError((err, c) => {
 app.notFound((c) => c.json({ error: 'Not Found' }, 404));
 
 // Root and health endpoints
-app.get('/', (c) => c.text('SYNAPZE DB API Server v0.0.2'));
+app.get('/', (c) => c.text('SYNAPZE DB API Server v0.0.3'));
 app.get('/health', (c) => c.text('OK'));
 
 /**
@@ -108,7 +122,7 @@ app.post(`${apiPrefix}/agents`, async (c) => {
 });
 
 // Get an agent by id (includes envVars, integrations, deployments, analytics, logs)
-app.get(`${apiPrefix}/agents/:id`, async (c) => {
+app.get(`${apiPrefix}/agent/:id`, async (c) => {
   try {
     const id = c.req.param('id');
     const agent = await getAgentById(id);
@@ -117,6 +131,18 @@ app.get(`${apiPrefix}/agents/:id`, async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ error: 'Failed to get agent' }, 500);
+  }
+});
+
+// Get agents by organization ID
+app.get(`${apiPrefix}/agents/:organizationId`, async (c) => {
+  try {
+    const organizationId = c.req.param('organizationId');
+    const agents = await getAgentsByOrganizationId(organizationId);
+    return c.json(agents);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to get agents by organization ID' }, 500);
   }
 });
 
@@ -153,6 +179,72 @@ app.delete(`${apiPrefix}/agents/:id`, async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ error: 'Failed to delete agent' }, 500);
+  }
+});
+
+/**
+ * =========================
+ * ORGANIZATION MEMBERS ENDPOINTS
+ * =========================
+ */
+
+// Add member to organization
+app.post(`${apiPrefix}/organizations/:id/members`, async (c) => {
+  try {
+    const organizationId = c.req.param('id');
+    const body = await c.req.json();
+    const { userId, role } = body;
+
+    if (!userId || !role) {
+      return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    const member = await createOrganizationMember(organizationId, userId, role);
+    return c.json(member);
+  } catch (error: any) {
+    console.error('Failed to add organization member:', error);
+    if (error.message === 'Organization not found') {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error.message === 'User is already a member of this organization') {
+      return c.json({ error: error.message }, 409);
+    }
+    return c.json({ error: 'Failed to add organization member' }, 500);
+  }
+});
+
+// Get organization member
+app.get(`${apiPrefix}/organizations/:id/members/:userId`, async (c) => {
+  try {
+    const organizationId = c.req.param('id');
+    const userId = c.req.param('userId');
+    const member = await getOrganizationMember(organizationId, userId);
+    
+    if (!member) {
+      return c.json({ error: 'Organization member not found' }, 404);
+    }
+    
+    return c.json(member);
+  } catch (error) {
+    console.error('Failed to get organization member:', error);
+    return c.json({ error: 'Failed to get organization member' }, 500);
+  }
+});
+
+// Get organization by user ID
+app.get(`${apiPrefix}/organizations/:userId/organization`, async (c) => {
+  try {
+    const userId = c.req.param('userId');
+    const organization = await getOrganizationByUserId(userId);
+    
+    if (!organization) {
+      return c.json({ error: 'Organization not found for user' }, 404);
+    }
+    
+    return c.json(organization);
+  } catch (error) {
+    console.error('Failed to get organization by user ID:', error);
+    return c.json({ error: 'Failed to get organization by user ID' }, 500);
   }
 });
 

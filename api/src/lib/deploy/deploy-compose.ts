@@ -1,11 +1,13 @@
 import { $ } from "bun";
+import * as path from 'path';
 
 export const runDeployment = async (
   composePath: string
 ) => {
+  const agentsComposeDir = path.join(process.cwd(), 'src', 'lib', 'deploy');
   try {
     const res =
-      await $`deploy-container.sh ${composePath}`;
+    await $`sh ${agentsComposeDir}/run_docker_compose.sh ${composePath}`;
 
     return res.stdout.toString();
   } catch (e) {

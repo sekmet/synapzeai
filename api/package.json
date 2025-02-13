@@ -10,6 +10,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/dockerode": "^3.3.34",
+    "@types/nodemailer": "^6.4.17",
     "@types/tar-fs": "^2.0.4"
   },
   "peerDependencies": {
@@ -18,6 +19,7 @@
   "dependencies": {
     "dockerode": "^4.0.4",
     "hono": "^4.7.0",
+    "nodemailer": "^6.10.0",
     "stream": "^0.0.3",
     "tar-fs": "^3.0.8"
   }

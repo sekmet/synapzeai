@@ -22,7 +22,7 @@ export async function getOrganizationById(id: string) {
     `.values();
 
     const members = await Bun.sql`
-      SELECT om.*, u.email
+      SELECT om.*, u.email_address
       FROM organization_members om
       LEFT JOIN users u ON om.user_id = u.id
       WHERE om.organization_id = ${id}
@@ -86,6 +86,75 @@ export async function deleteOrganization(id: string) {
     return result[0]?.id ? true : false;
   } catch (error) {
     console.error('Failed to delete organization:', error);
+    throw error;
+  }
+}
+
+export async function getOrganizationMember(organizationId: string, userId: string) {
+  try {
+    const result = await Bun.sql`
+      SELECT om.*, u.email_address
+      FROM organization_members om
+      LEFT JOIN users u ON om.user_id = u.id
+      WHERE om.organization_id = ${organizationId}
+      AND om.user_id = ${userId}
+    `.values();
+
+    return result[0] ?? null;
+  } catch (error) {
+    console.error('Failed to get organization member:', error);
+    throw error;
+  }
+}
+
+export async function createOrganizationMember(organizationId: string, userId: string, role: string) {
+  try {
+    // Check if organization exists
+    const org = await getOrganizationById(organizationId);
+    if (!org) {
+      throw new Error('Organization not found');
+    }
+
+    // Check if member already exists
+    const existingMember = await getOrganizationMember(organizationId, userId);
+    if (existingMember) {
+      throw new Error('User is already a member of this organization');
+    }
+
+    //updated_at = ${now}
+    const now = new Date().toISOString();
+    const result = await Bun.sql`
+      INSERT INTO organization_members (organization_id, user_id, role, created_at)
+      VALUES (${organizationId}, ${userId}, ${role}, ${now})
+      RETURNING *
+    `.values();
+
+    return result[0] ?? null;
+  } catch (error) {
+    console.error('Failed to create organization member:', error);
+    throw error;
+  }
+}
+
+export async function getOrganizationByUserId(userId: string) {
+  try {
+    // First find the organization_member record
+    const memberResult = await Bun.sql`
+      SELECT om.organization_id
+      FROM organization_members om
+      WHERE om.user_id = ${userId}
+      LIMIT 1
+    `.values();
+
+    if (!memberResult[0]) {
+      return null;
+    }
+
+    // Then get the organization details
+    const org = await getOrganizationById(memberResult[0]);
+    return org;
+  } catch (error) {
+    console.error('Failed to get organization by user ID:', error);
     throw error;
   }
 }

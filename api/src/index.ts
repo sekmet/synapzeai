@@ -1,14 +1,22 @@
 // server.js
 import { Hono } from 'hono';
+import { bearerAuth } from 'hono/bearer-auth'
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
+import { cors } from 'hono/cors'
 import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { Writable } from 'stream';
 import { generateDockerComposeFile } from './lib/compose';
 import { runDeployment } from './lib/deploy/deploy-compose';
+import { runCopyFile } from './lib/copy/copy-file';
+import * as path from 'path';
+import * as fs from 'fs';
+import nodemailer from 'nodemailer';
+import { z } from 'zod';
 
 const apiPrefix = '/v1';
+const authToken = process.env.JWT_AGENT_API ?? '';
 
 // Create a default Docker instance using the UNIX socket.
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
@@ -34,21 +42,147 @@ if (process.env.NODE_ENV === 'development') {
   //app.use('/docs/*', serveStatic({ precompressed: true, root: './' }));
   //app.use('/favicon.ico', serveStatic({ path: './public/favicon.ico' }))
   
+  // CORS should be called before the route
+  app.use(`${apiPrefix}/*`, cors())
+
+  // Bearer auth middleware
+  app.use(`${apiPrefix}/*`, bearerAuth({ token: authToken }))
+
   // Error handling middleware
   app.onError((err, c) => {
     console.error(`${err}`)
     return c.json({ error: 'Internal Server Error' }, 500)
   })
   
-  // Not Found handler
-  app.notFound((c) => {
-    return c.json({ error: 'Not Found' }, 404)
-  })
-  
+  // Health check endpoint
+  app.get('/health', (c) => c.json({ status: 'OK' }))
+
+  // Email verification endpoint
+app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
+  try {
+    // Validate request body
+    const schema = z.object({
+      email: z.string().email('Invalid email address'),
+      verificationToken: z.string().optional()//.min('Verification token is required')
+    });
+
+    const body = await c.req.json();
+    const { email, verificationToken } = schema.parse(body);
+
+    // Check if user exists and token is valid
+    const userQuery = await Bun.sql`
+      SELECT * FROM users WHERE email_address = ${email} LIMIT 1
+    `.values();
+
+    if (userQuery.length === 0) {
+      return c.json({ error: 'User not found' }, 404);
+    }
+    console.log({ userQuery })
+
+    const user = userQuery[0];
+    if (user[6] as boolean) { // verified status is at index 3
+      return c.json({ success: true, message: 'Email already verified' }, 200);
+    }
+
+    // Verify the token matches
+    if (user[7] !== verificationToken) {
+      
+      return c.json({ error: 'Invalid verification token' }, 400);
+    }
+
+    // Update user as verified
+    const now = new Date().toISOString();
+    await Bun.sql`
+      UPDATE users 
+      SET verified = true, 
+          verification_token = NULL,
+          updated_at = ${now}
+      WHERE email_address = ${email}
+    `;
+
+    // Check if user already exists and is verified
+    const existingUserQuery = await Bun.sql`
+      SELECT verified FROM users WHERE email_address = ${email} LIMIT 1
+    `.values();
+
+    if (existingUserQuery.length > 0 && existingUserQuery[0][1]) { // verified status is at index 3
+      return c.json({
+        success: true,
+        message: 'Email already verified',
+      });
+    }
+
+    // Create a verification token
+    let _verificationToken = null
+    if (!verificationToken) {
+    _verificationToken = Math.random().toString(36).substring(2, 15);
+    }
+
+    if (existingUserQuery.length > 0) {
+      // Update existing user with new verification token
+      await Bun.sql`
+        UPDATE users 
+        SET verification_token = ${_verificationToken},
+            updated_at = ${now}
+        WHERE email_address = ${email}
+      `;
+    } else {
+      // Create new user with verification token
+      const userId = crypto.randomUUID();
+      await Bun.sql`
+        INSERT INTO users (id, email_address, verification_token, verified, created_at, updated_at)
+        VALUES (${userId}, ${email}, ${_verificationToken}, false, ${now}, ${now})
+      `;
+    }
+
+    // Configure email transport (replace with your SMTP settings)
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // Send verification email
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || '"Synapze AI" <aisynapze@gmail.com>',
+      to: email,
+      subject: 'Verify your email address',
+      html: `
+        <h1>Email Verification</h1>
+        <p>Click the link below to verify your email address:</p>
+        <a href="${process.env.APP_URL}/verify-email?token=${verificationToken}">
+          Verify Email
+        </a>
+      `,
+    });
+
+    return c.json({
+      success: true,
+      message: 'Verification email sent successfully',
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json({ error: `${error.errors[0].path[0]}: ${error.errors[0].message}` }, 400);
+    }
+    console.error('Email verification error:', error);
+    return c.json({ error: 'Failed to send verification email' }, 500);
+  }
+});
+
+// Not Found handler
+app.notFound((c) => {
+  return c.json({ error: 'Not Found' }, 404)
+})
+
+
   // DB connection
   
   // Root route
-  app.get('/', (c) => c.text('SYNAPZE DOCKER API Server v0.0.1'))
+  app.get('/', (c) => c.text('SYNAPZE DOCKER API Server v0.0.2'))
 
 // Docker Info endpoint
 app.get(`${apiPrefix}/docker/info`, async (c) => {
@@ -207,9 +341,6 @@ app.post(`${apiPrefix}/docker/pull`, async (c) => {
     return c.json({ error: err.message }, 500);
   }
 })
-  
-  // Health check endpoint
-  app.get('/health', (c) => c.json({ status: 'OK' }))
 
 // Container logs without options endpoint
 app.post(`${apiPrefix}/containers/:id/logs`, async (c) => {
@@ -228,6 +359,49 @@ app.post(`${apiPrefix}/containers/:id/logs`, async (c) => {
 });
 
 // Container wait endpoint
+// Copy a local tar file to a container path
+app.post(`${apiPrefix}/containers/:id/copy-file`, async (c) => {
+  try {
+    const { srcPath, destPath } = await c.req.json();
+    
+    // Validate required parameters
+    if (!srcPath || !destPath) {
+      return c.json({ error: 'Both srcPath and destPath are required' }, 400);
+    }
+
+    // Verify source file exists
+    if (!fs.existsSync(srcPath)) {
+      return c.json({ error: 'Source file does not exist' }, 404);
+    }
+
+    const container = docker.getContainer(c.req.param('id'));
+    const containerId = c.req.param('id').substring(0, 12);
+
+    // Call the runDeployment function
+    const output = await runCopyFile(containerId, srcPath, destPath);
+
+    // Start the container
+    await new Promise((resolve, reject) => {
+      container.restart((err) => {
+        if (err) return reject(err);
+        resolve(void 0);
+      });
+    });
+
+    return c.json({ 
+      success: true,
+      message: 'File copied successfully and container restarted',
+      output
+    });
+  } catch (err: any) {
+    console.error('Error copying file to container:', err);
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to copy file to container'
+    }, 500);
+  }
+});
+
 app.post(`${apiPrefix}/containers/:id/wait`, async (c) => {
   try {
     const container = docker.getContainer(c.req.param('id'));
@@ -952,6 +1126,37 @@ app.post(`${apiPrefix}/docker/deploy-compose`, async (c) => {
     return c.json({ 
       success: false, 
       error: err.message || 'Failed to deploy docker-compose file'
+    }, 500);
+  }
+});
+
+// Get template file endpoint
+app.get(`${apiPrefix}/templates/:tplname`, async (c) => {
+  try {
+    const tplname = c.req.param('tplname');
+    if (!tplname) {
+      return c.json({ error: 'Template name is required' }, 400);
+    }
+
+    // Ensure the template name has .json extension
+    const fileName = tplname.endsWith('.json') ? tplname : `${tplname}.json`;
+    const templatesDir = path.join(process.cwd(), 'src', 'templates');
+    const filePath = path.join(templatesDir, fileName);
+
+    // Check if file exists and is within templates directory (prevent directory traversal)
+    if (!filePath.startsWith(templatesDir) || !fs.existsSync(filePath)) {
+      return c.json({ error: 'Template not found' }, 404);
+    }
+
+    // Read and parse the JSON file
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const jsonContent = JSON.parse(fileContent);
+
+    return c.json(jsonContent);
+  } catch (err) {
+    console.error('Error reading template:', err);
+    return c.json({ 
+      error: err instanceof SyntaxError ? 'Invalid JSON format' : 'Failed to read template file' 
     }, 500);
   }
 });

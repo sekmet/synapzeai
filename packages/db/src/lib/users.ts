@@ -1,3 +1,5 @@
+import { sql } from 'bun';
+
 export async function getUserById(id: string) {
     try {
         // Construct the SQL query
@@ -8,12 +10,10 @@ export async function getUserById(id: string) {
           values.push(id);
         }
 
+        //await Bun.sql`PREPARE user_profile AS SELECT * FROM users WHERE id = '$1'`;
+        //await Bun.sql`PREPARE user_profile AS SELECT * FROM users WHERE id = $1`;
         // Count all existing entries
-        const userProfile = await Bun.sql`
-        SELECT users.*, emails.address AS email
-        FROM users
-        LEFT JOIN emails ON users.id = emails.user_id
-        WHERE users.id = ${id}`.values();
+        const userProfile = await Bun.sql`SELECT * FROM users WHERE id = ${id}`.values();
 
         //console.log("USER PROFILE", userProfile)
 

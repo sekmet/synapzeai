@@ -1,7 +1,33 @@
+import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+interface UserData {
+  id: string
+  email: string
+  verified: boolean
+  createdAt: string
+  updatedAt: string
+  lastLogin: string
+  hasAcceptedTerms: boolean
+  farcaster?: {
+    bio: string
+    displayName: string
+    fid: string
+    ownerAddress: string
+    pfp: string
+    username: string
+  }
+  linkedAccounts: Array<{
+    type: string
+    address: string
+    bio?: string
+    username?: string
+  }>
+  wallets: any[]
+}
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -15,14 +41,55 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { useAuthStore } from '@/stores/authStore'
+
+// API function to send email verification
+const sendEmailVerification = async (email: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/auth/verify-email`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to send verification email')
+  }
+
+  return response.json()
+}
+
+// API function to update user profile
+const updateUserProfile = async (data: ProfileFormValues & { id: string }) => {
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/users/${data.id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      username: data.username,
+      email: data.email,
+      bio: data.bio,
+      linkedAccounts: data.urls?.map(url => ({
+        type: 'url',
+        address: url.value
+      })),
+      hasAcceptedTerms: true,
+      verified: true,
+      updatedAt: new Date().toISOString()
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to update profile')
+  }
+
+  return response.json()
+}
 
 const profileFormSchema = z.object({
   username: z
@@ -35,7 +102,7 @@ const profileFormSchema = z.object({
     }),
   email: z
     .string({
-      required_error: 'Please select an email to display.',
+      required_error: 'Please verify your email address.',
     })
     .email(),
   bio: z.string().max(160).min(4),
@@ -50,41 +117,173 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: 'I own a computer.',
-  urls: [
-    { value: 'https://shadcn.com' },
-    { value: 'http://twitter.com/shadcn' },
-  ],
+// Fetch user data from API
+const fetchUserProfile = async (userId: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/users/${userId}`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch user profile');
+  }
+  return response.json();
+};
+
+// Default values when no data is loaded
+let defaultValues: Partial<ProfileFormValues> = {
+  username: '',
+  email: '',
+  bio: '',
+  urls: [],
 }
 
-export default function ProfileForm() {
+export default function ProfileForm({ initialData }: { initialData?: ProfileFormValues }) {
+  const { user } = useAuthStore()
+  const { getOnboarding, setOnboarding } = useAuthStore((state) => state)
+  const queryClient = useQueryClient()
+  const [verifyEmailisLoading, setVerifyEmailisLoading] = useState(false)
+  const onboarding = !getOnboarding().completed
+
+  if (initialData) {
+    defaultValues = initialData
+  }
+  
+  // Fetch user data
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ['user', 'did:privy:cm6xfuy4700f5116hioyuda2d'],
+    queryFn: () => fetchUserProfile('did:privy:cm6xfuy4700f5116hioyuda2d') as unknown as UserData,
+    enabled: true, //!!user?.id,
+  })
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
+    defaultValues: userData ? {
+      username: userData.farcaster?.username || '',
+      email: userData.email || '',
+      bio: userData.farcaster?.bio || '',
+      urls: userData.linkedAccounts
+        ?.filter((account: any) => account.type === 'url')
+        ?.map((account: any) => ({ value: account.address })) || []
+    } : defaultValues,
     mode: 'onChange',
   })
 
-  const { fields, append } = useFieldArray({
-    name: 'urls',
+  // Update form values when user data is loaded
+  useEffect(() => {
+    if (userData) {
+      form.reset({
+        username: userData.farcaster?.username || '',
+        email: userData.email || '',
+        bio: userData.farcaster?.bio || '',
+        urls: userData.linkedAccounts
+          ?.filter((account: any) => account.type === 'url')
+          ?.map((account: any) => ({ value: account.address })) || []
+      })
+    }
+    if (userData?.verified && onboarding) {
+      setOnboarding({
+        currentStep: 2,
+        completed: false
+      })
+    }
+    console.log('USER STORE', user)
+    console.log(userData)
+  }, [userData, form])
+
+  const { fields, append } = useFieldArray<ProfileFormValues>({
     control: form.control,
+    name: "urls",
+  })
+
+  const verifyEmailMutation = useMutation<{ success: boolean; message: string }, Error, string>({
+    mutationFn: (email: string) => sendEmailVerification(email),
+    onSuccess: () => {
+      toast({
+        title: 'Verification Email Sent',
+        description: 'Please check your email to verify your account.',
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to send verification email. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const mutation = useMutation({
+    mutationFn: (data: ProfileFormValues) => updateUserProfile({ ...data, id: userData?.id || '' }),
+    onMutate: async (newData) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({queryKey: ['user', userData?.id]})
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['user', userData?.id])
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['user', userData?.id], (old: any) => ({
+        ...old,
+        ...newData,
+      }))
+
+      return { previousData }
+    },
+    onError: (_err: Error, _newData: ProfileFormValues, previousData) => {
+      // Roll back to the previous value if there's an error
+      queryClient.setQueryData(['user', userData?.id], previousData)
+      toast({
+        title: 'Error',
+        description: 'Failed to update profile. Please try again.',
+        variant: 'destructive',
+      })
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Your profile has been updated.',
+      })
+      // Invalidate and refetch
+      queryClient.invalidateQueries({queryKey: ['user', userData?.id]})
+    },
   })
 
   function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
+    if (!userData?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to update your profile.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    mutation.mutate(data)
+  }
+
+  function onVerifyEmail(email: string) {
+    if (!email) {
+      toast({
+        title: 'Error',
+        description: 'Please enter an email address.',
+        variant: 'destructive',
+      })
+      return
+    }
+    setVerifyEmailisLoading(true)
+    verifyEmailMutation.mutate(email)
+    setVerifyEmailisLoading(false)
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+      {isLoading || verifyEmailisLoading ? (
+      <p>Loading...</p>
+    ) : null}
+
         <FormField
           control={form.control}
           name='username'
@@ -92,7 +291,7 @@ export default function ProfileForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder='shadcn' {...field} />
+                <Input placeholder='Your username' {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name. It can be your real name or a
@@ -108,7 +307,15 @@ export default function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Input type="email" onChange={field.onChange} defaultValue={field.value} placeholder="Your email" />
+              <Button 
+              type="button" 
+              disabled={!field.value || verifyEmailisLoading} 
+              onClick={() => onVerifyEmail(field.value)}
+              className='text-gray-200 bg-orange-400 hover:bg-orange-600 hover:text-white'>
+                {verifyEmailisLoading ? 'Sending...' : 'Verify Email'}
+              </Button>
+              {/*<Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a verified email to display' />
@@ -123,7 +330,7 @@ export default function ProfileForm() {
               <FormDescription>
                 You can manage verified email addresses in your{' '}
                 <Link to='/'>email settings</Link>.
-              </FormDescription>
+              </FormDescription>*/}
               <FormMessage />
             </FormItem>
           )}
@@ -181,7 +388,7 @@ export default function ProfileForm() {
             Add URL
           </Button>
         </div>
-        <Button type='submit'>Update profile</Button>
+        <Button type='submit' disabled={isLoading}>Update profile</Button>
       </form>
     </Form>
   )

@@ -58,7 +58,7 @@ const queryClient = new QueryClient({
             variant: 'destructive',
             title: 'Session expired!',
           })
-          useAuthStore.getState().auth.reset()
+          useAuthStore.getState().reset()
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in-2', search: { redirect } })
         }

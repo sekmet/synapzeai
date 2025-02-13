@@ -15,23 +15,39 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Overview } from './components/overview'
+import { useAuthStore } from '@/stores/authStore'
 //import { RecentSales } from './components/recent-sales'
+import { Onboarding } from './components/onboarding'
 
 export default function Dashboard() {
+  const { getOnboarding } = useAuthStore((state) => state)
+  const isOnboarding = !getOnboarding().completed
+
   return (
     <>
       {/* ===== Top Heading ===== */}
       <Header>
         {/*<TopNav links={topNav} />*/}
-        <div className='ml-auto flex items-center space-x-4'>
+        {isOnboarding ? (
+          <div className='ml-auto flex items-center space-x-4'>
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
+        ) : 
+        (<div className='ml-auto flex items-center space-x-4'>
           <Search />
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
+      )}
       </Header>
 
       {/* ===== Main ===== */}
       <Main>
+        {isOnboarding ? (
+          <Onboarding />
+        ) : (
+          <>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
           <div className='flex items-center space-x-2'>
@@ -164,6 +180,8 @@ export default function Dashboard() {
             </div>
           </TabsContent>
         </Tabs>
+        </>
+        )}
       </Main>
     </>
   )
