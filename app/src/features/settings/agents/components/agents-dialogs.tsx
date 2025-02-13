@@ -3,9 +3,20 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useAgents } from '../context/agents-context'
 //import { AgentsImportDialog } from './agents-import-dialog'
 //import { AgentsMutateDrawer } from './agents-mutate-drawer'
+import { useQuery } from "@tanstack/react-query";
+import { fetchUserAgents } from '@/components/layout/data/sidebar-data'
+import { useAgentActiveStore } from '@/stores/agentActive'
+import { deleteAgent } from '@/lib/api/agent'
 
 export function AgentsDialogs() {
   const { open, setOpen, currentAgent, setCurrentAgent } = useAgents()
+  const { setRefresh, refresh, setAgent } = useAgentActiveStore()
+
+  const { data: userAgentsActive } = useQuery({
+    queryKey: ['userAgentsActive', refresh],
+    queryFn: () => fetchUserAgents(currentAgent?.id ?? ''),
+  })
+
   return (
     <>
       {/*<AgentsMutateDrawer
@@ -40,21 +51,25 @@ export function AgentsDialogs() {
             open={open === 'delete'}
             onOpenChange={() => {
               setOpen('delete')
-              setTimeout(() => {
+              /*setTimeout(() => {
                 setCurrentAgent(null)
-              }, 500)
+              }, 500)*/
             }}
             handleConfirm={() => {
               setOpen(null)
               setTimeout(() => {
+                deleteAgent(currentAgent.id)
+                setRefresh(new Date().getTime())
                 setCurrentAgent(null)
+                setAgent(userAgentsActive[0])
+                setRefresh(new Date().getTime())
               }, 500)
               toast({
                 title: 'The following agent has been deleted:',
                 description: (
                   <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
                     <code className='text-white'>
-                      {JSON.stringify(currentAgent.id, null, 2)}
+                      {JSON.stringify({id: currentAgent.id, name: currentAgent.name}, null, 2)}
                     </code>
                   </pre>
                 ),

@@ -1102,6 +1102,83 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
   }
 });
 
+// Generate docker-compose file endpoint
+app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
+  try {
+    const agentId = c.req.param('agentId');
+    const { dockerImageName, envVars, agentServerPort } = await c.req.json();
+    
+    // Validate required parameters
+    if (!dockerImageName || !envVars || !agentServerPort) {
+      return c.json({ 
+        error: 'Missing required parameters. Please provide dockerImageName, envVars, and agentServerPort' 
+      }, 400);
+    }
+
+    // Call the generateDockerComposeFile function
+    const composePath = generateDockerComposeFile({
+      dockerImageName,
+      envVars,
+      agentServerPort
+    });
+
+    return c.json({ 
+      success: true, 
+      message: 'Docker compose file generated successfully',
+      agentId,
+      composePath 
+    });
+
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+
+// Deploy docker-compose file endpoint
+app.post(`${apiPrefix}/docker/:agentId/deploy-compose`, async (c) => {  
+  let output: any;
+  const agentId = c.req.param('agentId');
+
+  try {  
+    const { composePath } = await c.req.json();
+    
+    // Validate required parameter
+    if (!composePath) {
+      return c.json({ 
+        error: 'Missing required parameter: composePath' 
+      }, 400);
+    }
+
+    // Call the runDeployment function
+    try {
+      output = await runDeployment(composePath);
+    } catch (e) {
+      return c.json({ 
+        success: false, 
+        error: e.message || 'Failed to deploy docker-compose file'
+      }, 500);
+    }
+    
+    console.log({output})
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to deploy docker-compose file'
+    }, 500);
+  }
+
+  return c.json({ 
+    success: true, 
+    message: 'Docker compose deployment executed successfully',
+    agentId: agentId,
+    output: output
+  });
+
+});
+
+
 // Deploy docker-compose file endpoint
 app.post(`${apiPrefix}/docker/deploy-compose`, async (c) => {
   try {

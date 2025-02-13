@@ -11,7 +11,10 @@ import {
   getAgentById,
   updateAgent,
   deleteAgent,
-  getAgentsByOrganizationId
+  getAgentsByOrganizationId,
+  getAgentEnvVariables,
+  insertAgentEnvVariables,
+  updateAgentEnvVariables
 } from './lib/agents';
 
 import {
@@ -151,11 +154,12 @@ app.put(`${apiPrefix}/agents/:id`, async (c) => {
   try {
     const id = c.req.param('id');
     const body = await c.req.json();
-    const { name, description, status, version, configuration, metadata } = body;
+    const { name, description, container_id, status, version, configuration, metadata } = body;
     const updatedAgent = await updateAgent(
       id,
       name,
       description,
+      container_id,
       status,
       version,
       configuration,
@@ -634,6 +638,76 @@ app.delete(`${apiPrefix}/subscriptions/:id`, async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ error: 'Failed to delete subscription' }, 500);
+  }
+});
+
+/**
+ * =========================
+ * AGENT ENVIRONMENT VARIABLES ENDPOINTS
+ * =========================
+ */
+
+// Get agent environment variables
+app.get(`${apiPrefix}/agents/:id/env-variables`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const encryptionKey = process.env.ENV_VAR_ENCRYPTION_KEY;
+    if (!encryptionKey) {
+      return c.json({ error: 'Encryption key not configured' }, 500);
+    }
+    const variables = await getAgentEnvVariables(id, encryptionKey);
+    return c.json(variables);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to get agent environment variables' }, 500);
+  }
+});
+
+// Create agent environment variables
+app.post(`${apiPrefix}/agents/:id/env-variables`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const { variables } = body;
+    
+    if (!variables || typeof variables !== 'object') {
+      return c.json({ error: 'Invalid variables format' }, 400);
+    }
+
+    const encryptionKey = process.env.ENV_VAR_ENCRYPTION_KEY;
+    if (!encryptionKey) {
+      return c.json({ error: 'Encryption key not configured' }, 500);
+    }
+
+    const result = await insertAgentEnvVariables(id, variables, encryptionKey);
+    return c.json(result, 201);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to create agent environment variables' }, 500);
+  }
+});
+
+// Update agent environment variables
+app.put(`${apiPrefix}/agents/:id/env-variables`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const { variables } = body;
+    
+    if (!variables || typeof variables !== 'object') {
+      return c.json({ error: 'Invalid variables format' }, 400);
+    }
+
+    const encryptionKey = process.env.ENV_VAR_ENCRYPTION_KEY;
+    if (!encryptionKey) {
+      return c.json({ error: 'Encryption key not configured' }, 500);
+    }
+
+    const result = await updateAgentEnvVariables(id, variables, encryptionKey);
+    return c.json(result);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to update agent environment variables' }, 500);
   }
 });
 

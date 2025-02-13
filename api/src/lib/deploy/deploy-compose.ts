@@ -5,16 +5,16 @@ export const runDeployment = async (
   composePath: string
 ) => {
   const agentsComposeDir = path.join(process.cwd(), 'src', 'lib', 'deploy');
+  let result: any;
   try {
     const res =
     await $`sh ${agentsComposeDir}/run_docker_compose.sh ${composePath}`;
 
-    return res.stdout.toString();
+    result = res.stdout.toString().split('\n');
+
   } catch (e) {
     console.error("Error running deployment:", e);
-    throw {
-      success: false,
-      error: e,
-    };
   }
+
+  return result;
 };

@@ -23,4 +23,4 @@ DIR=$(dirname "$FILEPATH")
 cd "$DIR" || { echo "Error: Unable to change directory to $DIR"; exit 1; }
 
 # Execute docker compose command
-docker compose up -d
+docker compose up -d 2>&1

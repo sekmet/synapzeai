@@ -4,9 +4,10 @@ dotenv.config();
 
 export const db = new SQL({
     url:`postgres://${process.env.PGUSERNAME}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
-    maxLifetime: 0,
-    idleTimeout: 30,
-    max: 20, // Maximum 20 concurrent connections
+    max: 10, // Maximum 10 concurrent connections
+    idleTimeout: 30, // Close idle connections after 30s
+    maxLifetime: 3600, // Max connection lifetime 1 hour
+    connectionTimeout: 10, // Connection timeout 10s
     // Callbacks
     onconnect: (client:any) => {
         console.log("Connected to database", client);

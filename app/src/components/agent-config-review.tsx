@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useRouter, useCanGoBack } from '@tanstack/react-router'
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
@@ -6,18 +7,21 @@ import { useAgentDeployStore } from '@/stores/agentDeployStore';
 import { useAgentDeployment } from '@/hooks/useAgentDeployment';
 import { useAuthStore } from '@/stores/authStore';
 import { useAgentActiveStore } from '@/stores/agentActive';
+import { toast } from '@/hooks/use-toast'
+import { ToastAction } from "@/components/ui/toast"
 //import { Moon, Sun } from "lucide-react";
 //import { basicSetup } from "@codemirror/basic-setup";
 //import { oneDark } from "@codemirror/theme-one-dark";
 //import { Editor } from "./editor";
-
 export default function AgentConfigReview() {
     const router = useRouter()
     const canGoBack = useCanGoBack()
+    const [deploying, setDeploying] = useState(false)
     const { setRefresh } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
     const agentDeploy = useAgentDeployStore.getState();
     const characterConfig = agentDeploy.getConfig();
+    const characterEnvVars = agentDeploy.getEnv();
     const agentId = '';
     const isNewAgent = !agentId;
 
@@ -32,6 +36,15 @@ export default function AgentConfigReview() {
         console.error('No agent configuration found');
         return;
       }
+
+      setDeploying(true);
+      toast({
+        title: "🤖 Deploying agent, please wait...",
+        description: "Agent will be deployed in a few seconds.",
+        action: (
+          <ToastAction altText="Close">Close</ToastAction>
+        ),
+      })
 
       try {
         const currentUserId = getUser()?.id; //window.localStorage.getItem('userId'); // Assuming you store userId in localStorage after login
@@ -62,8 +75,11 @@ export default function AgentConfigReview() {
           metadata: {
             lastDeployedAt: new Date().toISOString(),
             isNewAgent,
-          }
+          },
+          envVars: characterEnvVars
         };
+
+        console.log({characterEnvVars})
 
         updateAgent(agentData);
         
@@ -74,8 +90,13 @@ export default function AgentConfigReview() {
         router.navigate({ to: '/' });
       } catch (error) {
         console.error('Failed to deploy agent:', error);
+        setDeploying(false);
       }
     };
+
+    useEffect(() => {
+
+    }, [deploying])
 
     return (
       <div className="min-h-screen w-full bg-background text-foreground">
@@ -121,10 +142,10 @@ export default function AgentConfigReview() {
           )}
           <button
             onClick={handleDeploy}
-            disabled={isUpdating}
+            disabled={isUpdating || deploying}
             className="text-medium w-full py-2 bg-yellow-300 hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-black mt-6"
           >
-            {isUpdating ? 'Deploying...' : 'Deploy agent'}
+            {isUpdating || deploying ? 'Deploying...' : 'Deploy agent'}
           </button>
         </div>
       </div>
