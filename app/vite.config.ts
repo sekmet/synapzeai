@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
         server: {
           host: true,
           port: 5173,
-          allowedHosts: ["app-synapze.open4glabs.xyz","app.synapze.xyz","db.synapaze.xyz","api.synapze.xyz"],
+          allowedHosts: ["app-synapze.open4glabs.xyz","app.synapze.xyz"],
           cors: false,
           headers: {
             'Access-Control-Allow-Origin': '*',
