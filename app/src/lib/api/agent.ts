@@ -360,7 +360,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       sleep(1000);
 
       // write the default character json file for the agent
-      const defaultCharacterJsonResult = await deployAgentDefaultCharacterJsonFile(agentId, composeResult.composePath, agentEnvVariables);
+      const defaultCharacterJsonResult = await deployAgentDefaultCharacterJsonFile(agentId, composeResult.composePath, agentData.configuration);
       sleep(1000);
       console.log({DEFAULTCHARACTERJSONRESULT: defaultCharacterJsonResult});
 
@@ -384,7 +384,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const containerId = container.Id;
       console.log({CONTAINERID: containerId});
 
-      await updateAgentContainerWithDefaultCharacterJson(containerId, composeResult.composePath, defaultCharacterJsonResult.characterFilePath);
+      await updateAgentContainerWithDefaultCharacterJson(containerId, defaultCharacterJsonResult.characterFilePath, '/app/characters' );
 
       await updateAgentContainerId(agentId, `${containerId}:${newAgentServerPort ?? '3300'}`);
       

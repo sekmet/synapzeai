@@ -1,10 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-interface ComposeConfig {
-  composePath: string;
-}
-
 /**
  * Writes the provided JSON configuration to a file named `default.character.json`
  * in the directory extracted from the provided compose configuration's composePath.
@@ -13,11 +9,11 @@ interface ComposeConfig {
  * @param jsonConfiguration - The JSON configuration to write to the file.
  */
 export function writeDefaultCharacterJson(
-  composeConfig: ComposeConfig,
+  composePath: string,
   jsonConfiguration: any
 ): void {
   // Extract the directory from the composePath.
-  const dirPath = path.dirname(composeConfig.composePath);
+  const dirPath = path.dirname(composePath);
 
   // Ensure the directory exists; if not, create it.
   if (!fs.existsSync(dirPath)) {
