@@ -13,7 +13,7 @@ export function Hero() {
           Synapze is an AI hosting platform specifically designed to deploy
           autonomous agents built using the ElizaOS framework
         </p>
-        <Link to="https://app-synapze.open4glabs.xyz">
+        <Link to="https://app.synapze.xyz">
         <button className="inline-flex items-center px-6 py-3 mt-6 text-lg font-medium bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 transition-colors">
           <Zap className="w-5 h-5 mr-2" />
           Get Started
