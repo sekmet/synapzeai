@@ -1077,10 +1077,10 @@ app.get(`${apiPrefix}/docker/info`, async (c) => {
 // Generate docker-compose file endpoint
 app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
   try {
-    const { dockerImageName, envVars, agentServerPort } = await c.req.json();
+    const { dockerImageName, envVars, agentServerPort, agentClientPort } = await c.req.json();
     
     // Validate required parameters
-    if (!dockerImageName || !envVars || !agentServerPort) {
+    if (!dockerImageName || !envVars || !agentServerPort || !agentClientPort) {
       return c.json({ 
         error: 'Missing required parameters. Please provide dockerImageName, envVars, and agentServerPort' 
       }, 400);
@@ -1090,7 +1090,8 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
     const composePath = generateDockerComposeFile({
       dockerImageName,
       envVars,
-      agentServerPort
+      agentServerPort,
+      agentClientPort
     });
 
     return c.json({ 
@@ -1107,10 +1108,10 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
 app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
   try {
     const agentId = c.req.param('agentId');
-    const { dockerImageName, envVars, agentServerPort } = await c.req.json();
+    const { dockerImageName, envVars, agentServerPort, agentClientPort } = await c.req.json();
     
     // Validate required parameters
-    if (!dockerImageName || !envVars || !agentServerPort) {
+    if (!dockerImageName || !envVars || !agentServerPort || !agentClientPort) {
       return c.json({ 
         error: 'Missing required parameters. Please provide dockerImageName, envVars, and agentServerPort' 
       }, 400);
@@ -1120,7 +1121,8 @@ app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
     const composePath = generateDockerComposeFile({
       dockerImageName,
       envVars,
-      agentServerPort
+      agentServerPort,
+      agentClientPort
     });
 
     return c.json({ 
