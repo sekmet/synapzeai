@@ -1154,11 +1154,14 @@ app.post(`${apiPrefix}/docker/:agentId/write-default-character-json`, async (c) 
       characterJson
     );
 
+    // Extract the directory from the composePath.
+    const dirPath = path.dirname(composePath);
+
     return c.json({ 
       success: true, 
       message: 'Default character JSON generated successfully',
       agentId,
-      characterFilePath: `${composePath}/default.character.json` 
+      characterFilePath: `${dirPath}/default.character.json` 
     });
 
   } catch (err) {
