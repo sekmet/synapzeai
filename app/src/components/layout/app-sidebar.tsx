@@ -15,9 +15,9 @@ import { useAuthStore } from '@/stores/authStore'
 import { useAgentActiveStore } from '@/stores/agentActive'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { getUser } = useAuthStore((state) => state)
+  const { getUser, getOnboarding } = useAuthStore((state) => state)
   const { refresh } = useAgentActiveStore((state) => state)
-  //const onboarding = !getOnboarding().completed
+  const onboarding = !getOnboarding().completed
 
   const { data: userAgents } = useQuery({
     queryKey: ['userAgents', refresh],
@@ -28,7 +28,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     //console.log({refresh})
   }, [refresh])
 
-  return (
+  return onboarding ? null : (
     <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
         {userAgents ? (

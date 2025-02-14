@@ -8,7 +8,7 @@ import {
   IconLayoutDashboard,
   //IconLock,
   //IconLockAccess,
-  //IconMessages,
+  IconMessages,
   IconNotification,
   IconPackages,
   IconPalette,
@@ -76,12 +76,12 @@ export const sidebarData: SidebarData = {
           url: '/',
           icon: IconLayoutDashboard,
         },
-        /*{
+        {
           title: 'Chats',
           url: '/chats',
-          badge: '3',
+          //badge: '3',
           icon: IconMessages,
-        },*/
+        },
         /*{
           title: 'Agents',
           url: '/users',
@@ -91,7 +91,7 @@ export const sidebarData: SidebarData = {
           title: 'Logs',
           url: '/logs',
           icon: IconChecklist,
-          badge: '139',
+          //badge: '139',
         },
         {
           title: 'Plugins',

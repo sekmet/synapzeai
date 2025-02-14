@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import Jazzicon from 'react-jazzicon'
 import { ChatUser } from '../data/chat-types'
 
 type User = Omit<ChatUser, 'messages'>
@@ -101,11 +102,14 @@ export function NewChat({ users, onOpenChange, open }: Props) {
                     className='flex items-center justify-between gap-2'
                   >
                     <div className='flex items-center gap-2'>
-                      <img
+                    <div className='h-8 w-8 rounded-full'>
+                      <Jazzicon diameter={32} seed={Number(user.username)} />
+                    </div>
+                      {/*<img
                         src={user.profile || '/placeholder.svg'}
                         alt={user.fullName}
                         className='h-8 w-8 rounded-full'
-                      />
+                      />*/}
                       <div className='flex flex-col'>
                         <span className='text-sm font-medium'>
                           {user.fullName}

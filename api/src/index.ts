@@ -8,6 +8,7 @@ import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { Writable } from 'stream';
 import { generateDockerComposeFile } from './lib/compose';
+import { writeDefaultCharacterJson } from './lib/defaultchar';
 import { runDeployment } from './lib/deploy/deploy-compose';
 import { runCopyFile } from './lib/copy/copy-file';
 import * as path from 'path';
@@ -1127,6 +1128,37 @@ app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
       message: 'Docker compose file generated successfully',
       agentId,
       composePath 
+    });
+
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// Generate docker-compose file endpoint
+app.post(`${apiPrefix}/docker/:agentId/write-default-character-json`, async (c) => {
+  try {
+    const agentId = c.req.param('agentId');
+    const { composePath, characterJson } = await c.req.json();
+    
+    // Validate required parameters
+    if (!composePath || !characterJson) {
+      return c.json({ 
+        error: 'Missing required parameters. Please provide composePath and characterJson' 
+      }, 400);
+    }
+
+    // Call the generateDockerComposeFile function
+    const defaultCharacterJson = writeDefaultCharacterJson(
+      composePath,
+      characterJson
+    );
+
+    return c.json({ 
+      success: true, 
+      message: 'Default character JSON generated successfully',
+      agentId,
+      characterFilePath: `${composePath}/default.character.json` 
     });
 
   } catch (err) {

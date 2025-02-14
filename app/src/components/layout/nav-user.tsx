@@ -53,7 +53,7 @@ export function NavUser({
               <Avatar className='h-8 w-8 rounded-lg'>
                 {/*<AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
                 <AvatarFallback className='rounded-lg'>SK</AvatarFallback>*/}
-                <Jazzicon diameter={32} seed={Number('did:privy:cm6xfuy4700f5116hioyuda2d')} />
+                <Jazzicon diameter={32} seed={Number(user?.id)} />
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-semibold'>{'username'}</span>
@@ -73,7 +73,7 @@ export function NavUser({
                 <Avatar className='h-8 w-8 rounded-lg'>
                   {/*<AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
                   <AvatarFallback className='rounded-lg'>SK</AvatarFallback>*/}
-                  <Jazzicon diameter={32} seed={Number('did:privy:cm6xfuy4700f5116hioyuda2d')} />
+                  <Jazzicon diameter={32} seed={Number(user?.id)} />
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-semibold'>{'username'}</span>

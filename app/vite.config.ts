@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
         server: {
           host: true,
           port: 5173,
-          allowedHosts: ["app-synapze.open4glabs.xyz","app.synapze.xyz"],
+          allowedHosts: ["app-synapze.open4glabs.xyz","app.synapze.xyz","db.synapaze.xyz","api.synapze.xyz"],
           cors: false,
           headers: {
             'Access-Control-Allow-Origin': '*',
@@ -31,12 +31,12 @@ export default defineConfig(({ mode }) => {
             '/api/db': {
                 target: env.API_DB_HOST_URL || "http://localhost:8787",
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api\/db/, '')
+                rewrite: (path) => path.replace(/^\/api\/db/, '/v1')
             },
             '/api/agent': {
                 target: env.API_HOST_URL || "http://localhost:8387",
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api\/agent/, '')
+                rewrite: (path) => path.replace(/^\/api\/agent/, '/v1')
             },
           }*/
         },
@@ -60,6 +60,9 @@ export default defineConfig(({ mode }) => {
             ),
             "import.meta.env.VITE_JWT_INTEGRATIONS_API": JSON.stringify(
               env.JWT_INTEGRATIONS_API || ""
+            ),
+            "import.meta.env.VITE_ENV_VAR_ENCRYPTION_KEY": JSON.stringify(
+              env.ENV_VAR_ENCRYPTION_KEY || ""
             ),
         },
         build: {

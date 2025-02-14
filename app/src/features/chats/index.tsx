@@ -15,7 +15,7 @@ import {
   IconVideo,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+//import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -24,6 +24,7 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import Jazzicon from 'react-jazzicon'
 import { NewChat } from './components/new-chat'
 import { type ChatUser, type Convo } from './data/chat-types'
 // Fake Data
@@ -80,7 +81,7 @@ export default function Chats() {
             <div className='sticky top-0 z-10 -mx-4 bg-background px-4 pb-3 shadow-md sm:static sm:z-auto sm:mx-0 sm:p-0 sm:shadow-none'>
               <div className='flex items-center justify-between py-2'>
                 <div className='flex gap-2'>
-                  <h1 className='text-2xl font-bold'>Inbox</h1>
+                  <h1 className='text-2xl font-bold'>Agent Chats</h1>
                   <IconMessages size={20} />
                 </div>
 
@@ -109,7 +110,7 @@ export default function Chats() {
 
             <ScrollArea className='-mx-3 h-full p-3'>
               {filteredChatList.map((chatUsr) => {
-                const { id, profile, username, messages, fullName } = chatUsr
+                const { id, username, messages, fullName } = chatUsr
                 const lastConvo = messages[0]
                 const lastMsg =
                   lastConvo.sender === 'You'
@@ -129,10 +130,13 @@ export default function Chats() {
                       }}
                     >
                       <div className='flex gap-2'>
-                        <Avatar>
+                        <div className='relative h-8 w-8' >
+                      <Jazzicon diameter={32} seed={Number(username)} />
+                      </div>
+                        {/*<Avatar>
                           <AvatarImage src={profile} alt={username} />
                           <AvatarFallback>{username}</AvatarFallback>
-                        </Avatar>
+                        </Avatar>*/}
                         <div>
                           <span className='col-start-2 row-span-2 font-medium'>
                             {fullName}
@@ -171,13 +175,14 @@ export default function Chats() {
                     <IconArrowLeft />
                   </Button>
                   <div className='flex items-center gap-2 lg:gap-4'>
-                    <Avatar className='size-9 lg:size-11'>
+                  <Jazzicon diameter={36} seed={Number(selectedUser.username)} />
+                    {/*<Avatar className='size-9 lg:size-11'> 
                       <AvatarImage
                         src={selectedUser.profile}
                         alt={selectedUser.username}
                       />
                       <AvatarFallback>{selectedUser.username}</AvatarFallback>
-                    </Avatar>
+                    </Avatar>*/}
                     <div>
                       <span className='col-start-2 row-span-2 text-sm font-medium lg:text-base'>
                         {selectedUser.fullName}
@@ -320,13 +325,13 @@ export default function Chats() {
                   <IconMessages className='h-8 w-8' />
                 </div>
                 <div className='space-y-2 text-center'>
-                  <h1 className='text-xl font-semibold'>Your messages</h1>
+                  <h1 className='text-xl font-semibold'>Your agent chats</h1>
                   <p className='text-sm text-gray-400'>
-                    Send a message to start a chat.
+                    Send a message to agent to start a chat.
                   </p>
                 </div>
                 <Button
-                  className='bg-blue-500 px-6 text-white hover:bg-blue-600'
+                  className='bg-orange-500 px-6 text-white hover:bg-orange-600'
                   onClick={() => setCreateConversationDialog(true)}
                 >
                   Send message

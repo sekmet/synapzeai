@@ -35,7 +35,7 @@ const createUser = async (id: string, emailAddress: string, linkedAccounts: any[
   const createdUser = await userResponse.json();
 
   // Check if user has an organization
-  const orgsResponse = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations`,{
+  /*const orgsResponse = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations`,{
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
       'Content-Type': 'application/json',
@@ -45,9 +45,23 @@ const createUser = async (id: string, emailAddress: string, linkedAccounts: any[
   
   const userOrg = organizations?.length > 0 && organizations?.find((org: any) => 
     org.members?.some((member: any) => member.user_id === id)
-  );
+  );*/
+  // Fetch current user's organization
+  const orgsResponse = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations/${id}/organization`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  const organization = await orgsResponse.json();
+  
+  //const userOrg = organizations?.length > 0 && organizations.find((org: any) => 
+  //  org.members?.some((member: any) => member.user_id === currentUserId)
+  //);
 
-  if (!userOrg) {
+  console.log({OERGANIZATION: organization})
+
+  if (!organization[0]) {
     // Create default organization
     const orgResponse = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations`, {
       method: 'POST',
@@ -109,7 +123,8 @@ export const Header = ({
           // For already-`authenticated` users, we redirect them to their profile page.
           console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
           console.log({currentUser: currentUser.id})
-           if (currentUser?.id === undefined) {
+          console.log(setUser(user as AuthUser)) // authUser being the new format
+          if (currentUser?.id === undefined) {
              // If the user is new, create it in your backend
              createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
           }
@@ -123,6 +138,8 @@ export const Header = ({
           if (isNewUser) {
               // If the user is new, create it in your backend
               console.log("NEW USER", isNewUser)
+              console.log(setUser(user as AuthUser)) // authUser being the new format
+              createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)
               navigate({ to: '/sign-in-2' })
               /*await fetch('/signin', {
                   method: 'POST',
@@ -131,6 +148,10 @@ export const Header = ({
           } else {
               // If the user is returning, fetch their data from your backend
               console.log("RETURNING USER", user)
+              if (currentUser?.id === undefined) {
+                // If the user is new, create it in your backend
+                createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
+             }
               console.log(setUser(user as AuthUser)) // authUser being the new format
               navigate({ to: '/' })
               /*await fetch(`your-find-user-endpoint/${user.id}`, {

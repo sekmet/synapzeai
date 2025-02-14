@@ -141,7 +141,7 @@ let defaultValues: Partial<ProfileFormValues> = {
 
 export default function ProfileForm({ initialData }: { initialData?: ProfileFormValues }) {
   const { user } = useAuthStore()
-  const { getOnboarding, setOnboarding } = useAuthStore((state) => state)
+  const { getOnboarding, setOnboarding, getUser } = useAuthStore((state) => state)
   const queryClient = useQueryClient()
   const [verifyEmailisLoading, setVerifyEmailisLoading] = useState(false)
   const onboarding = !getOnboarding().completed
@@ -152,9 +152,9 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
   
   // Fetch user data
   const { data: userData, isLoading } = useQuery({
-    queryKey: ['user', 'did:privy:cm6xfuy4700f5116hioyuda2d'],
-    queryFn: () => fetchUserProfile('did:privy:cm6xfuy4700f5116hioyuda2d') as unknown as UserData,
-    enabled: true, //!!user?.id,
+    queryKey: ['user', getUser()?.id],
+    queryFn: () => fetchUserProfile(getUser()?.id ?? '') as unknown as UserData,
+    enabled: true,
   })
 
   const form = useForm<ProfileFormValues>({

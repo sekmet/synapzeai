@@ -14,6 +14,47 @@ interface AgentData {
   envVars?: AgentEnvironmentVars;
 }
 
+
+interface Port {
+  IP?: string;
+  PrivatePort: number;
+  PublicPort?: number;
+  Type: string;
+}
+
+interface Container {
+  Id: string;
+  Names: string[];
+  Ports: Port[];
+}
+
+interface ContainersListing {
+  containers: Container[];
+}
+
+/**
+ * Extracts the largest PublicPort number from a containers listing.
+ *
+ * @param containersListing - An object containing an array of container definitions.
+ * @returns The largest PublicPort number found, or null if none is available.
+ */
+export function extractBiggestPublicPort(containersListing: ContainersListing): number | null {
+  let maxPublicPort: number | null = null;
+
+  for (const container of containersListing.containers) {
+    for (const port of container.Ports) {
+      // Only consider ports that have a PublicPort defined.
+      if (port.PublicPort !== undefined) {
+        if (maxPublicPort === null || port.PublicPort > maxPublicPort) {
+          maxPublicPort = port.PublicPort;
+        }
+      }
+    }
+  }
+
+  return maxPublicPort;
+}
+
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -65,6 +106,27 @@ export const getContainerInfoByName = async (name: string) => {
 
   return response.json();
 };
+
+export const getContainerListing= async () => {
+  
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers?all=true&limit=100`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null;
+    }
+    const error = await response.text();
+    throw new Error(`Failed to fetch agent: ${error}`);
+  }
+
+  return response.json();
+};
+
 
 
 export const getAgentById = async (id: string) => {
@@ -190,6 +252,49 @@ export const generateAgentDockerComposeFile = async (agentId: string, envVars: R
   return response.json();
 };
 
+export const deployAgentDefaultCharacterJsonFile = async (agentId: string, composePath: string, characterJson: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/write-default-character-json`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      composePath,
+      characterJson
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to deploy agent docker compose file: ${error}`);
+  }
+
+  return response.json();
+};
+
+export const updateAgentContainerWithDefaultCharacterJson = async (containerId: string, srcPath: string, destPath: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers/${containerId}/copy-file`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      containerId,
+      srcPath,
+      destPath
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to deploy agent docker compose file: ${error}`);
+  }
+
+  return response.json();
+};
+
 
 export const deployAgentDockerComposeFile = async (agentId: string, composePath: string) => {
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/deploy-compose`, {
@@ -244,9 +349,21 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       // get the agent env variables from the database
       const agentEnvVariables = await getAgentEnvVariables(agentId);
       console.log({agentEnvVariables});
+      // get agent server port to use
+      const containersListing = await getContainerListing();
+      const agentServerPort = extractBiggestPublicPort(containersListing);
+      console.log({Lastport: agentServerPort, Newport: Number(agentServerPort)+1});
+      const newAgentServerPort = String(Number(agentServerPort)+1);
+
       // write the docker compose file for the agent
-      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables);
+      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019c', newAgentServerPort ?? '3300');
       sleep(1000);
+
+      // write the default character json file for the agent
+      const defaultCharacterJsonResult = await deployAgentDefaultCharacterJsonFile(agentId, composeResult.composePath, agentEnvVariables);
+      sleep(1000);
+      console.log({DEFAULTCHARACTERJSONRESULT: defaultCharacterJsonResult});
+
       // deploy the agent docker compose file
       const deployResult = await deployAgentDockerComposeFile(agentId, composeResult.composePath);
       console.log({DEPLOYRESULT: deployResult});
@@ -267,7 +384,9 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const containerId = container.Id;
       console.log({CONTAINERID: containerId});
 
-      await updateAgentContainerId(agentId, containerId);
+      await updateAgentContainerWithDefaultCharacterJson(containerId, composeResult.composePath, defaultCharacterJsonResult.characterFilePath);
+
+      await updateAgentContainerId(agentId, `${containerId}:${newAgentServerPort ?? '3300'}`);
       
       return {agentId, containerId};
       
