@@ -24,7 +24,7 @@ services:
             - eliza:/app/db.sqlite
         environment:
 {{ENV-VARS}}
-            - SERVER_PORT=3000
+            - SERVER_PORT={{AGENT-SERVER-PORT}}
         ports:
             - "{{AGENT-SERVER-PORT}}:3000"
             - "{{AGENT-CLIENT-PORT}}:5173"

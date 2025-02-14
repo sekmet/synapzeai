@@ -361,7 +361,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       }
       console.log({Lastport: agentServerPort, Newport: Number(agentServerPort)+1});
       const newAgentServerPort = String(Number(agentServerPort)+1);
-      const newAgentClientPort = String(Number(agentServerPort)+2);
+      const newAgentClientPort = String(Number(agentServerPort)+30);
 
       // write the docker compose file for the agent
       const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019a', newAgentServerPort ?? '3300', newAgentClientPort ?? '5173');
