@@ -351,12 +351,18 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       console.log({agentEnvVariables});
       // get agent server port to use
       const containersListing = await getContainerListing();
-      const agentServerPort = extractBiggestPublicPort(containersListing);
+      let agentServerPort = extractBiggestPublicPort(containersListing);
+      if (agentServerPort && agentServerPort < 3000) {
+        agentServerPort = 3000;
+      }
+      if (!agentServerPort) {
+        agentServerPort = 3000;
+      }
       console.log({Lastport: agentServerPort, Newport: Number(agentServerPort)+1});
       const newAgentServerPort = String(Number(agentServerPort)+1);
 
       // write the docker compose file for the agent
-      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019c', newAgentServerPort ?? '3300');
+      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019a', newAgentServerPort ?? '3300');
       sleep(1000);
 
       // write the default character json file for the agent

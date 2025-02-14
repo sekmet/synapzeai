@@ -12,7 +12,8 @@ import LogsProvider from './context/logs-context'
 //import { logs } from './data/logs'
 import { useQuery } from "@tanstack/react-query";
 import { fetchAgentLogs, convertSplitedArrayToObjectArray } from './data/data'
-import { useAgentActiveStore } from '@/stores/agentActive';
+import { useAgentActiveStore, Agent } from '@/stores/agentActive';
+import { IconRobot } from '@tabler/icons-react';
 
 export default function Logs() {
   const { getAgent } = useAgentActiveStore()
@@ -23,6 +24,8 @@ export default function Logs() {
     refetchInterval: 10000
   })
 
+  const activeAgent = getAgent() as Agent ?? null;
+
   useEffect(() => {
     if (!!agentLogs && !agentLogs?.output) return
     const splitedArray = agentLogs?.output?.split('\n').reverse();
@@ -32,7 +35,7 @@ export default function Logs() {
     }
   }, [agentLogs])
 
-  return (
+  return activeAgent ? (
     <LogsProvider>
       <Header fixed>
         <Search />
@@ -59,5 +62,16 @@ export default function Logs() {
 
       <LogsDialogs />
     </LogsProvider>
+  ) : (
+    <div className='h-svh'>
+    <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
+      <IconRobot size={72} />
+      <h1 className='text-4xl font-bold leading-tight'>No active agent 👀</h1>
+      <p className='text-center text-muted-foreground'>
+        Please deploy an agent first. <br />
+        To start view the agent logs!
+      </p>
+    </div>
+  </div>
   )
 }

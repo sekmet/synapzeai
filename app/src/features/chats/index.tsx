@@ -13,6 +13,7 @@ import {
   IconSearch,
   IconSend,
   IconVideo,
+  IconRobot
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 //import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -27,17 +28,21 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import Jazzicon from 'react-jazzicon'
 import { NewChat } from './components/new-chat'
 import { type ChatUser, type Convo } from './data/chat-types'
+import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 // Fake Data
 import { conversations } from './data/convo.json'
 
 export default function Chats() {
   const [search, setSearch] = useState('')
+  const { getAgent } = useAgentActiveStore()
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null)
   const [mobileSelectedUser, setMobileSelectedUser] = useState<ChatUser | null>(
     null
   )
   const [createConversationDialogOpened, setCreateConversationDialog] =
     useState(false)
+
+  const activeAgent = getAgent() as Agent ?? null;
 
   // Filtered data based on the search query
   const filteredChatList = conversations.filter(({ fullName }) =>
@@ -63,7 +68,7 @@ export default function Chats() {
 
   const users = conversations.map(({ messages, ...user }) => user)
 
-  return (
+  return activeAgent ?(
     <>
       {/* ===== Top Heading ===== */}
       <Header>
@@ -347,5 +352,16 @@ export default function Chats() {
         />
       </Main>
     </>
-  )
+  ) : (
+    <div className='h-svh'>
+    <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
+      <IconRobot size={72} />
+      <h1 className='text-4xl font-bold leading-tight'>No active agent 👀</h1>
+      <p className='text-center text-muted-foreground'>
+        Please deploy an agent first. <br />
+        To start a chat with it!
+      </p>
+    </div>
+  </div>
+  );
 }

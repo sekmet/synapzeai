@@ -1,7 +1,7 @@
 {
     "name": "Omniflix",
     "clients": ["telegram"],
-    "modelProvider": "akash_chat_api",
+    "modelProvider": "openai",
     "settings": {
         "secrets": {},
         "voice": {

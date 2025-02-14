@@ -1,7 +1,7 @@
 {
     "name": "C-3PO",
     "clients": [],
-    "modelProvider": "akash_chat_api",
+    "modelProvider": "openai",
     "settings": {
         "secrets": {
         },

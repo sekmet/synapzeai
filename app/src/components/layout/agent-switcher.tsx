@@ -25,6 +25,7 @@ export function AgentSwitcher({
   const { isMobile } = useSidebar()
   const { getAgent, setAgent } = useAgentActiveStore()
   //const [activeAgent, setActiveAgent] = React.useState(getAgent() ?? agents[0])
+  console.log({agents})
   const activeAgent = getAgent() ?? agents[0];
 
   return activeAgent ? (

@@ -18,12 +18,17 @@ import { Overview } from './components/overview'
 import { useAuthStore } from '@/stores/authStore'
 //import { RecentSales } from './components/recent-sales'
 import { Onboarding } from './components/onboarding'
+import { IconRobot } from '@tabler/icons-react';
+import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 
 export default function Dashboard() {
   const { getOnboarding } = useAuthStore((state) => state)
   const isOnboarding = !getOnboarding().completed
+  const { getAgent } = useAgentActiveStore()
 
-  return (
+  const activeAgent = getAgent() as Agent
+
+  return activeAgent ? (
     <>
       {/* ===== Top Heading ===== */}
       <Header>
@@ -183,6 +188,45 @@ export default function Dashboard() {
         </>
         )}
       </Main>
+    </>
+  ) : (
+    <>
+      {/* ===== Top Heading ===== */}
+      <Header>
+        {/*<TopNav links={topNav} />*/}
+        {isOnboarding ? (
+          <div className='ml-auto flex items-center space-x-4'>
+            <ThemeSwitch />
+            <ProfileDropdown />
+          </div>
+        ) : 
+        (<div className='ml-auto flex items-center space-x-4'>
+          <Search />
+          <ThemeSwitch />
+          <ProfileDropdown />
+        </div>
+      )}
+      </Header>
+
+      {/* ===== Main ===== */}
+      <Main>
+    <div className='h-svh'>
+    <div className='m-auto flex h-[60vh] w-full flex-col items-center justify-center gap-2'>
+      <IconRobot size={72} />
+      <h1 className='text-4xl font-bold leading-tight'>No active agent 👀</h1>
+      <p className='text-center text-muted-foreground'>
+        Please deploy an agent first. <br />
+        To start a chat with it!
+      </p>
+      <div className='flex items-center space-x-2'>
+          <Link to='/agent/new'>
+            <Button>Deploy a New Agent</Button>
+          </Link> 
+          </div>
+
+    </div>
+  </div>
+  </Main>
     </>
   )
 }
