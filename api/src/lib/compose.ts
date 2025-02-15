@@ -42,7 +42,7 @@ volumes:
   const updatedYaml = yamlTemplate
     .replace(/{{DOCKER-IMAGE-NAME}}/g, params.dockerImageName)
     .replace(/{{ENV-VARS}}/g, envVarsLines)
-    .replace(/{{AGENT-CLIENT-PORT}}/g, params.agentServerPort);
+    .replace(/{{AGENT-SERVER-PORT}}/g, params.agentServerPort);
 
   // Define the 'agents' directory in the current working directory.
   const agentsDir = path.join(process.cwd(), 'agents');

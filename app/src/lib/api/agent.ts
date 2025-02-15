@@ -108,9 +108,9 @@ export const getContainerInfoByName = async (name: string) => {
   return response.json();
 };
 
-export const getContainerListing= async () => {
+export const getContainerListing = async () => {
   
-  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers?all=true&limit=100`,{
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers?all=true&limit=300&filters={"status": ["running"],"label":["com.docker.compose.service=eliza"]}`,{
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
       'Content-Type': 'application/json',
@@ -363,7 +363,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const newAgentServerPort = String(Number(agentServerPort)+1);
 
       // write the docker compose file for the agent
-      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019a', newAgentServerPort ?? '3300');
+      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019c', newAgentServerPort ?? '3300');
 
       // write the default character json file for the agent
       const defaultCharacterJsonResult = await deployAgentDefaultCharacterJsonFile(agentId, composeResult.composePath, agentData.configuration);
