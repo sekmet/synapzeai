@@ -23,10 +23,14 @@ export function AgentSwitcher({
   agents: Agent[]
 }) {
   const { isMobile } = useSidebar()
-  const { getAgent, setAgent } = useAgentActiveStore()
+  const { getAgent, setAgent, setRefresh } = useAgentActiveStore()
   //const [activeAgent, setActiveAgent] = React.useState(getAgent() ?? agents[0])
   console.log({agents})
   const activeAgent = getAgent() ?? agents[0];
+  const setActiveAgent = (agent: Agent) =>  {
+    setAgent(agent)
+    setRefresh(new Date().getTime())
+  }
 
   return activeAgent ? (
     <SidebarMenu>
@@ -61,7 +65,7 @@ export function AgentSwitcher({
             {agents.map((agent, index) => (
               <DropdownMenuItem
                 key={agent.name}
-                onClick={() => setAgent(agent)}
+                onClick={() => setActiveAgent(agent)}
                 className='gap-2 p-2'
               >
                 <div className='flex size-6 items-center justify-center rounded-sm border'>

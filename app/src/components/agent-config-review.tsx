@@ -17,7 +17,7 @@ export default function AgentConfigReview() {
     const router = useRouter()
     const canGoBack = useCanGoBack()
     const [deploying, setDeploying] = useState(false)
-    const { setRefresh } = useAgentActiveStore((state) => state)
+    const { setRefresh, setAgent } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
     const agentDeploy = useAgentDeployStore.getState();
     const characterConfig = agentDeploy.getConfig();
@@ -71,6 +71,7 @@ export default function AgentConfigReview() {
           name: characterConfig.name,
           configuration: characterConfig,
           organizationId: organization[0],
+          containerId: '',
           status: 'active',
           metadata: {
             lastDeployedAt: new Date().toISOString(),
@@ -78,8 +79,6 @@ export default function AgentConfigReview() {
           },
           envVars: characterEnvVars
         };
-
-        console.log({characterEnvVars})
 
         updateAgent(agentData);
         

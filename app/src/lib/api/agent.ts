@@ -5,6 +5,7 @@ import { AgentEnvironmentVars } from '@/stores/agentDeployStore';
 interface AgentData {
   id?: string;
   organizationId?: string;
+  containerId?: string;
   name?: string;
   description?: string;
   status?: string;
@@ -45,7 +46,7 @@ export function extractBiggestPublicPort(containersListing: ContainersListing): 
     for (const port of container.Ports) {
       // Only consider ports that have a PublicPort defined.
       if (port.PublicPort !== undefined) {
-        if (maxPublicPort === null || port.PublicPort > maxPublicPort || maxPublicPort < 5173) {
+        if (maxPublicPort === null || port.PublicPort > maxPublicPort) {
           maxPublicPort = port.PublicPort;
         }
       }
@@ -221,7 +222,7 @@ export const getAgentEnvVariables = async (id: string) => {
 };
 
 
-export const generateAgentDockerComposeFile = async (agentId: string, envVars: Record<string, string>, dockerImageName?: string, agentServerPort?: string, agentClientPort?: string) => {
+export const generateAgentDockerComposeFile = async (agentId: string, envVars: Record<string, string>, dockerImageName?: string, agentServerPort?: string) => {
 
   const agentEnvVars = []
   for (const [key, value] of Object.entries(envVars)) {
@@ -232,8 +233,7 @@ export const generateAgentDockerComposeFile = async (agentId: string, envVars: R
     agentId,
     dockerImageName: dockerImageName ?? "synapze/elizav019a",
     envVars: agentEnvVars,
-    agentServerPort: agentServerPort ?? "3001",
-    agentClientPort: agentClientPort ?? "5173"
+    agentServerPort: agentServerPort ?? "3001"
   }
 
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/write-compose-file`, {
@@ -361,15 +361,12 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       }
       console.log({Lastport: agentServerPort, Newport: Number(agentServerPort)+1});
       const newAgentServerPort = String(Number(agentServerPort)+1);
-      const newAgentClientPort = String(Number(agentServerPort)+30);
 
       // write the docker compose file for the agent
-      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019a', newAgentServerPort ?? '3300', newAgentClientPort ?? '5173');
-      sleep(1000);
+      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019a', newAgentServerPort ?? '3300');
 
       // write the default character json file for the agent
       const defaultCharacterJsonResult = await deployAgentDefaultCharacterJsonFile(agentId, composeResult.composePath, agentData.configuration);
-      sleep(1000);
       console.log({DEFAULTCHARACTERJSONRESULT: defaultCharacterJsonResult});
 
       // deploy the agent docker compose file
@@ -396,7 +393,10 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
 
       await updateAgentContainerId(agentId, `${containerId}:${newAgentServerPort ?? '3300'}`);
       
-      return {agentId, containerId};
+      // update the agent data with the container id
+      agentData.containerId = `${containerId}:${newAgentServerPort ?? '3300'}`;
+
+      return {agentId};
       
     } else {
       throw new Error("Failed to create agent env variables");
