@@ -17,7 +17,7 @@ export default function AgentConfigReview() {
     const router = useRouter()
     const canGoBack = useCanGoBack()
     const [deploying, setDeploying] = useState(false)
-    const { setRefresh, setAgent } = useAgentActiveStore((state) => state)
+    const { setRefresh, getAgent, setAgent } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
     const agentDeploy = useAgentDeployStore.getState();
     const characterConfig = agentDeploy.getConfig();
@@ -85,6 +85,7 @@ export default function AgentConfigReview() {
         // Mark onboarding as completed
         setOnboarding({ ...getOnboarding(), completed: true })
         setRefresh(new Date().getTime())
+        setAgent(getAgent()!);
         // Navigate to success page or dashboard
         router.navigate({ to: '/' });
       } catch (error) {

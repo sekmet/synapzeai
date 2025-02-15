@@ -1276,6 +1276,7 @@ app.get(`${apiPrefix}/templates/:tplname`, async (c) => {
 // Start the Bun server
 Bun.serve({
   fetch: app.fetch,
+  hostname: "0.0.0.0",
   port: 8387,
 });
 
