@@ -1262,7 +1262,7 @@ app.post(`${apiPrefix}/docker/:agentId/down-compose`, async (c) => {
 
     // Call the runComposeDown function
     try {
-      output = await runComposeDown(composePath);
+      output = await runComposeDown(`${composePath}/docker-compose.yaml`);
     } catch (e) {
       return c.json({ 
         success: false, 
@@ -1306,7 +1306,7 @@ app.post(`${apiPrefix}/docker/:agentId/remove-compose`, async (c) => {
 
     // Call the runComposeRemove function
     try {
-      output = await runComposeRemove(composePath);
+      output = await runComposeRemove(`${composePath}/docker-compose.yaml`);
     } catch (e) {
       return c.json({ 
         success: false, 
