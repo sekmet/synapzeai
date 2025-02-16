@@ -10,7 +10,9 @@ import { Writable } from 'stream';
 import { generateDockerComposeFile } from './lib/compose';
 import { writeDefaultCharacterJson } from './lib/defaultchar';
 import { runDeployment } from './lib/deploy/deploy-compose';
+import { runComposeDown } from './lib/down/compose-down';
 import { runCopyFile } from './lib/copy/copy-file';
+import { runComposeRemove } from './lib/remove/compose-remove';
 import * as path from 'path';
 import * as fs from 'fs';
 import nodemailer from 'nodemailer';
@@ -1241,6 +1243,95 @@ app.post(`${apiPrefix}/docker/deploy-compose`, async (c) => {
     }, 500);
   }
 });
+
+
+// Down docker-compose file endpoint
+app.post(`${apiPrefix}/docker/:agentId/down-compose`, async (c) => {  
+  let output: any;
+  const agentId = c.req.param('agentId');
+
+  try {  
+    const { composePath } = await c.req.json();
+    
+    // Validate required parameter
+    if (!composePath) {
+      return c.json({ 
+        error: 'Missing required parameter: composePath' 
+      }, 400);
+    }
+
+    // Call the runComposeDown function
+    try {
+      output = await runComposeDown(composePath);
+    } catch (e) {
+      return c.json({ 
+        success: false, 
+        error: e.message || 'Failed to down docker-compose file'
+      }, 500);
+    }
+    
+    console.log({output})
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to down docker-compose file'
+    }, 500);
+  }
+
+  return c.json({ 
+    success: true, 
+    message: 'Docker compose down executed successfully',
+    agentId: agentId,
+    output: output
+  });
+
+});
+
+
+// Remove docker-compose file endpoint
+app.post(`${apiPrefix}/docker/:agentId/remove-compose`, async (c) => {  
+  let output: any;
+  const agentId = c.req.param('agentId');
+
+  try {  
+    const { composePath } = await c.req.json();
+    
+    // Validate required parameter
+    if (!composePath) {
+      return c.json({ 
+        error: 'Missing required parameter: composePath' 
+      }, 400);
+    }
+
+    // Call the runComposeRemove function
+    try {
+      output = await runComposeRemove(composePath);
+    } catch (e) {
+      return c.json({ 
+        success: false, 
+        error: e.message || 'Failed to remove docker-compose file'
+      }, 500);
+    }
+    
+    console.log({output})
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to remove docker-compose file'
+    }, 500);
+  }
+
+  return c.json({ 
+    success: true, 
+    message: 'Docker compose remove executed successfully',
+    agentId: agentId,
+    output: output
+  });
+
+});
+
 
 // Get template file endpoint
 app.get(`${apiPrefix}/templates/:tplname`, async (c) => {

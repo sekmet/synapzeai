@@ -16,11 +16,11 @@ import { useAgentActiveStore, Agent } from '@/stores/agentActive';
 import { IconRobot } from '@tabler/icons-react';
 
 export default function Logs() {
-  const { getAgent } = useAgentActiveStore()
+  const { refresh, getAgent, getAgentContainerId} = useAgentActiveStore()
   const [logEntries, setLogEntries] = useState<any[]>([])
   const { data: agentLogs } = useQuery({
-    queryKey: ['agentLogs'],
-    queryFn: () => fetchAgentLogs(`${getAgent()?.container_id}`.split(':')[0] ?? ''),
+    queryKey: ['agentLogs', refresh],
+    queryFn: () => fetchAgentLogs(getAgentContainerId() ?? ''),
     refetchInterval: 10000
   })
 
@@ -33,7 +33,7 @@ export default function Logs() {
       //console.log(convertSplitedArrayToObjectArray(splitedArray))
       setLogEntries(convertSplitedArrayToObjectArray(splitedArray))
     }
-  }, [agentLogs])
+  }, [agentLogs, activeAgent])
 
   return activeAgent ? (
     <LogsProvider>

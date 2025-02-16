@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, ChevronsUpDown, Check, ArrowLeft } from "lucide-react"
 //import { Checkbox } from "@/components/ui/checkbox"
+import { toast } from '@/hooks/use-toast'
 import { TagInput } from '@/components/ui/tag-input'
 import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { getAvailableTemplates, loadTemplate, saveTemplateState } from '@/lib/templates'
+import { clsx } from 'clsx'
 
 interface ListItem {
   id: string
@@ -314,6 +316,12 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
 
       // set template to state
       setSelectedTemplate(template)
+
+      toast({
+        title: `🤖 ${template.name} template`,
+        description: "Agent template loaded...",
+        duration: 1000
+      })
     }
   }
 
@@ -439,7 +447,11 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
           </CardHeader>
           <CardContent className="grid grid-cols-4 gap-4">
             {templates.map((template) => (
-              <Button key={template} onClick={() => handleTemplateSelect(template)} variant="outline" className="h-24 flex flex-col items-center justify-center">
+              <Button 
+              key={template} 
+              onClick={() => handleTemplateSelect(template)} 
+              variant="outline" 
+              className={clsx("h-24 flex flex-col items-center justify-center", name === template && "ring-2 ring-foreground text-muted bg-muted-foreground")}>
                 {template}
               </Button>
             ))}

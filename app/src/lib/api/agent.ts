@@ -15,7 +15,6 @@ interface AgentData {
   envVars?: AgentEnvironmentVars;
 }
 
-
 interface Port {
   IP?: string;
   PrivatePort: number;
@@ -60,6 +59,19 @@ export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+export const getAgentContainerMetadata = async (composePath: string) => {
+
+    // Extract the directory from the composePath.
+    const _composePath = composePath.split('/');
+    _composePath.pop();
+    const dirPath = _composePath.join('/');
+    const agentAlias = dirPath.split('/').pop();
+
+    return {
+      composePath: dirPath,
+      agentAlias
+    }
+}
 
 /**
  * Extracts the container name from an array of output strings.
@@ -316,6 +328,43 @@ export const deployAgentDockerComposeFile = async (agentId: string, composePath:
 };
 
 
+export const downAgentDockerCompose = async (agentId: string, composePath: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/down-compose`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({composePath}),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to deploy agent docker compose file: ${error}`);
+  }
+
+  return response.json();
+};
+
+export const removeAgentDockerCompose = async (agentId: string, composePath: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/remove-compose`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({composePath}),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to deploy agent docker compose file: ${error}`);
+  }
+
+  return response.json();
+};
+
+
 export const updateAgentContainerId = async (agentId: string, containerId: string) => {
   const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/agents/${agentId}`, {
     method: "PUT",
@@ -330,11 +379,70 @@ export const updateAgentContainerId = async (agentId: string, containerId: strin
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Failed to create agent: ${error}`);
+    throw new Error(`Failed to update agent container id: ${error}`);
   }
 
   return response.json();
 };
+
+
+export const updateAgentContainerMetadata = async (agentId: string, metadata: Record<string, string>) => {
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/agents/${agentId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      metadata
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to update agent metadata: ${error}`);
+  }
+
+  return response.json();
+};
+
+export const deleteAgentDeployment = async (agentId: string, composePath: string): Promise<boolean> => {
+
+  const responseDown = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/down-compose`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({composePath}),
+  });
+
+  if (!responseDown.ok) {
+    const error = await responseDown.text();
+    throw new Error(`Failed to deploy agent docker compose file: ${error}`);
+    return false;
+
+  } else {
+
+    const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/remove-compose`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({composePath}),
+    });
+  
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to deploy agent docker compose file: ${error}`);
+
+      return false
+    }
+  
+    return true
+  }
+}
 
 export const updateAgentDeployment = async (agentData: AgentData) => {
   if (!agentData.id) {
@@ -394,9 +502,17 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       await updateAgentContainerId(agentId, `${containerId}:${newAgentServerPort ?? '3300'}`);
       
       // update the agent data with the container id
-      agentData.containerId = `${containerId}:${newAgentServerPort ?? '3300'}`;
+      //agentData.containerId = `${containerId}:${newAgentServerPort ?? '3300'}`;
 
-      return {agentId};
+      // update the agent data with the container metadata
+      const containerMetadata = await getAgentContainerMetadata(composeResult.composePath);
+      agentData.metadata.composePath = containerMetadata.composePath;
+      agentData.metadata.agentAlias = containerMetadata.agentAlias;
+      await updateAgentContainerMetadata(agentId, agentData.metadata);
+
+      console.log({AGENTDATA: agentData});
+
+      return { agentId };
       
     } else {
       throw new Error("Failed to create agent env variables");

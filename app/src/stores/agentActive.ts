@@ -59,6 +59,7 @@ export interface Agent {
     deployment_count: number
     container_id: string
     configuration: AgentConfiguration
+    metadata?: any
     plan?: string
 }
 
@@ -67,6 +68,9 @@ interface AgentActiveState {
     refresh: number
     setAgent: (agent: Agent) => void
     getAgent: () => Agent | null
+    getAgentContainerId: () => string | null
+    getAgentContainerPort: () => number | null
+    getAgentOrganizationId: () => string | null
     setRefresh: (refresh: number) => void
     getRefresh: () => number
     clearAgent: () => void
@@ -79,6 +83,9 @@ export const useAgentActiveStore = create<AgentActiveState>()(
             refresh: 0,
             setAgent: (agent: Agent) => set({ agent }),
             getAgent: () => get().agent,
+            getAgentContainerId: () => `${get().agent?.container_id}`.split(':')[0] ?? null,
+            getAgentContainerPort: () => Number(`${get().agent?.container_id}`.split(':')[1]) ?? null,
+            getAgentOrganizationId: () => get().agent?.organization_id ?? null,
             clearAgent: () => set({ agent: null }),
             setRefresh: (refresh: number) => set({ refresh }),
             getRefresh: () => get().refresh

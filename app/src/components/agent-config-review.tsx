@@ -3,8 +3,8 @@ import { useRouter, useCanGoBack } from '@tanstack/react-router'
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
 import { ChevronLeft } from "lucide-react";
-import { useAgentDeployStore } from '@/stores/agentDeployStore';
-import { useAgentDeployment } from '@/hooks/useAgentDeployment';
+import { useAgentDeployStore, AgentConfig } from '@/stores/agentDeployStore';
+import { useAgentDeployment } from '@/hooks/use-agent-deployment';
 import { useAuthStore } from '@/stores/authStore';
 import { useAgentActiveStore } from '@/stores/agentActive';
 import { toast } from '@/hooks/use-toast'
@@ -20,8 +20,8 @@ export default function AgentConfigReview() {
     const { setRefresh, getAgent, setAgent } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
     const agentDeploy = useAgentDeployStore.getState();
-    const characterConfig = agentDeploy.getConfig();
-    const characterEnvVars = agentDeploy.getEnv();
+    let characterConfig = agentDeploy.getConfig();
+    let characterEnvVars = agentDeploy.getEnv();
     const agentId = '';
     const isNewAgent = !agentId;
 
@@ -30,6 +30,16 @@ export default function AgentConfigReview() {
       isUpdating,
       updateError
     } = useAgentDeployment(agentId || '');
+
+    const updateAgentConfig = async (newCharacterConfig: AgentConfig) => {
+      if (!newCharacterConfig) {
+        console.error('No agent configuration found');
+        return;
+      }
+      agentDeploy.setConfig(newCharacterConfig);
+      characterConfig = agentDeploy.getConfig();
+    }
+
 
     const handleDeploy = async () => {
       if (!characterConfig) {
@@ -76,6 +86,8 @@ export default function AgentConfigReview() {
           metadata: {
             lastDeployedAt: new Date().toISOString(),
             isNewAgent,
+            composePath: '',
+            agentAlias: ''
           },
           envVars: characterEnvVars
         };
@@ -86,8 +98,10 @@ export default function AgentConfigReview() {
         setOnboarding({ ...getOnboarding(), completed: true })
         setRefresh(new Date().getTime())
         setAgent(getAgent()!);
-        // Navigate to success page or dashboard
-        router.navigate({ to: '/' });
+        if (!deploying) {
+          // Navigate to success page or dashboard
+          router.navigate({ to: '/' });
+        }
       } catch (error) {
         console.error('Failed to deploy agent:', error);
         setDeploying(false);
@@ -127,7 +141,9 @@ export default function AgentConfigReview() {
               className="border rounded-md overflow-hidden text-medium"
               value={JSON.stringify(characterConfig, null, 2)}
               extensions={[json()]}
-              onChange={() => {}}
+              onChange={(value) => { 
+                updateAgentConfig(JSON.parse(value) as unknown as AgentConfig)
+              }}
               basicSetup={{
                 lineNumbers: true,
                 foldGutter: false,

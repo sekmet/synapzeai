@@ -925,7 +925,7 @@ interface AgentSettings {
   customModelEndpoint?: string
 }
 
-interface AgentConfig {
+export interface AgentConfig {
   name: string
   plugins: AgentPlugin[]
   clients: AgentClient[]

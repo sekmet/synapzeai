@@ -1,16 +1,18 @@
 import { toast } from '@/hooks/use-toast'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useAgents } from '../context/agents-context'
+import { useNavigate } from '@tanstack/react-router'
 //import { AgentsImportDialog } from './agents-import-dialog'
 //import { AgentsMutateDrawer } from './agents-mutate-drawer'
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserAgents } from '@/components/layout/data/sidebar-data'
 import { useAgentActiveStore } from '@/stores/agentActive'
-import { deleteAgent } from '@/lib/api/agent'
+import { deleteAgent, deleteAgentDeployment } from '@/lib/api/agent'
 
 export function AgentsDialogs() {
   const { open, setOpen, currentAgent, setCurrentAgent } = useAgents()
   const { setRefresh, refresh, setAgent } = useAgentActiveStore()
+  const navigate = useNavigate()
 
   const { data: userAgentsActive } = useQuery({
     queryKey: ['userAgentsActive', refresh],
@@ -58,11 +60,14 @@ export function AgentsDialogs() {
             handleConfirm={() => {
               setOpen(null)
               setTimeout(() => {
+                deleteAgentDeployment(currentAgent.id, currentAgent.metadata.composePath)
                 deleteAgent(currentAgent.id)
                 setRefresh(new Date().getTime())
                 setCurrentAgent(null)
                 setAgent(userAgentsActive[0])
-                setRefresh(new Date().getTime())
+              }, 500)
+              setTimeout(() => {
+                navigate({ to: '/' })
               }, 500)
               toast({
                 title: 'The following agent has been deleted:',
