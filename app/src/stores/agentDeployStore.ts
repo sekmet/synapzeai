@@ -951,15 +951,24 @@ export interface AgentConfig {
   adjectives?: string[]
 }
 
+interface AgentProvisioningStatus {
+  isProvisioning: boolean
+  currentStep: number
+  completed?: boolean
+}
+
 interface AgentDeploySettings {
     config: AgentConfig | null
-    env: AgentEnvironmentVars
+    env: AgentEnvironmentVars | null
+    provisioning: AgentProvisioningStatus
     setConfig: (config: AgentConfig | null) => void
     getConfig: () => AgentConfig | null
     updateSettings: (settings: Partial<AgentSettings>) => void
     setEnv: (env: AgentEnvironmentVars) => void
-    getEnv: () => AgentEnvironmentVars
+    getEnv: () => AgentEnvironmentVars | null
     updateEnv: (env: Partial<AgentEnvironmentVars>) => void
+    setProvisioning: (provisioning: AgentProvisioningStatus) => void
+    getProvisioning: () => AgentProvisioningStatus
     addPlugin: (plugin: AgentPlugin) => void
     removePlugin: (pluginName: string) => void
     addClient: (client: AgentClient) => void
@@ -974,6 +983,11 @@ export const useAgentDeployStore = create<AgentDeployState>()(
     (set, get) => ({
         config: null,
         env: {},
+        provisioning: {
+          isProvisioning: false,
+          currentStep: 0,
+          completed: false
+        },
         setConfig: (config) =>
           set((state) => ({ ...state, config })),
         getConfig: () => get().config,
@@ -987,6 +1001,9 @@ export const useAgentDeployStore = create<AgentDeployState>()(
                 }
               : null,
           })),
+        setProvisioning: (provisioning) =>
+          set((state) => ({ ...state, provisioning })),
+        getProvisioning: () => get().provisioning,
         addPlugin: (plugin) =>
           set((state) => ({
             ...state,

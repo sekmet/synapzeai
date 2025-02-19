@@ -72,8 +72,8 @@ export function AgentSwitcher({
                 onClick={() => setActiveAgent(agent)}
                 className='gap-2 p-2'
               >
-                <div className='flex size-6 items-center justify-center rounded-sm border'>
-                  {agent.logo && <agent.logo className='size-4 shrink-0' />}
+                <div className={clsx('flex size-6 items-center justify-center rounded-sm', agent.logo ? 'border' : null)}>
+                  {agent.logo ? <agent.logo className='size-4 shrink-0' /> : <Jazzicon diameter={21} seed={stringToUniqueNumber(`${agent.name}:${agent.id}`)} />}
                 </div>
                 {agent.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>

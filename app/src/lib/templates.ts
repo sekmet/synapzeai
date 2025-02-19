@@ -420,15 +420,19 @@ export async function saveTemplateState(template: Template) {
   });
 
   const envDefaultValuesJson = await envDefaultValues.json();
-  console.log({envDefaultValuesJson})
+  const envVariablesChecked = envDefaultValuesJson.envVariables;
 
   // check if the env var value is undefined and set it to an empty string
   const env: any = {};
-  Object.keys(envDefaultValuesJson).forEach(key => {
-    if (env[key] === undefined) {
+  Object.keys(envVars).forEach(key => {
+    if (envVariablesChecked[key] === undefined) {
       env[key] = '';
+    } else {
+      env[key] = envVariablesChecked[key];
     }
   });
+
+  console.log({env})
   // Set the environment variables in the store
   agentDeployStore.setEnv(env);
   // Update the agent config in the store

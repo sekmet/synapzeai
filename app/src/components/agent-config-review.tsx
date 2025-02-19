@@ -19,9 +19,10 @@ export default function AgentConfigReview() {
     const [deploying, setDeploying] = useState(false)
     const { setRefresh, getAgent, setAgent } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
-    const agentDeploy = useAgentDeployStore.getState();
-    let characterConfig = agentDeploy.getConfig();
-    let characterEnvVars = agentDeploy.getEnv();
+    const { getConfig, setConfig, getEnv, getProvisioning, setProvisioning } = useAgentDeployStore((state) => state)
+    const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), isProvisioning: status })
+    let characterConfig = getConfig();
+    let characterEnvVars = getEnv();
     const agentId = '';
     const isNewAgent = !agentId;
 
@@ -36,8 +37,8 @@ export default function AgentConfigReview() {
         console.error('No agent configuration found');
         return;
       }
-      agentDeploy.setConfig(newCharacterConfig);
-      characterConfig = agentDeploy.getConfig();
+      setConfig(newCharacterConfig);
+      characterConfig = getConfig();
     }
 
 
@@ -98,13 +99,12 @@ export default function AgentConfigReview() {
         setOnboarding({ ...getOnboarding(), completed: true })
         setRefresh(new Date().getTime())
         setAgent(getAgent()!);
-        if (!deploying) {
-          // Navigate to success page or dashboard
-          router.navigate({ to: '/' });
-        }
+        setIsProvisioning(true);
+        router.navigate({ to: '/' });
       } catch (error) {
         console.error('Failed to deploy agent:', error);
         setDeploying(false);
+        setIsProvisioning(false);
       }
     };
 

@@ -13,7 +13,8 @@ import { runDeployment } from './lib/deploy/deploy-compose';
 import { runComposeDown } from './lib/down/compose-down';
 import { runCopyFile } from './lib/copy/copy-file';
 import { runComposeRemove } from './lib/remove/compose-remove';
-import { parseAndExtractEnvVariables } from './lib/envs/parseExtract';
+import { parseAndExtractEnvVariables } from './lib/envs/parse-extract';
+import { createSubdomain } from './lib/domains/create-domain';
 import * as path from 'path';
 import * as fs from 'fs';
 import nodemailer from 'nodemailer';
@@ -1159,7 +1160,7 @@ app.get(`${apiPrefix}/docker/info`, async (c) => {
 // Generate docker-compose file endpoint
 app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
   try {
-    const { dockerImageName, envVars, agentServerPort } = await c.req.json();
+    const { dockerImageName, envVars, agentServerPort, agentJwtSecret, agentHostDomain } = await c.req.json();
     
     // Validate required parameters
     if (!dockerImageName || !envVars || !agentServerPort) {
@@ -1172,7 +1173,9 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
     const composePath = generateDockerComposeFile({
       dockerImageName,
       envVars,
-      agentServerPort
+      agentServerPort,
+      agentJwtSecret,
+      agentHostDomain
     });
 
     return c.json({ 
@@ -1189,7 +1192,7 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
 app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
   try {
     const agentId = c.req.param('agentId');
-    const { dockerImageName, envVars, agentServerPort } = await c.req.json();
+    const { dockerImageName, envVars, agentServerPort, agentJwtSecret, agentHostDomain } = await c.req.json();
     
     // Validate required parameters
     if (!dockerImageName || !envVars || !agentServerPort) {
@@ -1202,7 +1205,9 @@ app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
     const composePath = generateDockerComposeFile({
       dockerImageName,
       envVars,
-      agentServerPort
+      agentServerPort,
+      agentJwtSecret,
+      agentHostDomain
     });
 
     return c.json({ 
@@ -1413,6 +1418,35 @@ app.post(`${apiPrefix}/docker/:agentId/remove-compose`, async (c) => {
 });
 
 
+// Create a agent subdomain endpoint
+app.post(`${apiPrefix}/agent/create-subdomain`, async (c) => {
+  try {
+    const { composePath } = await c.req.json();
+
+    // Validate required parameter
+    if (!composePath) {
+      return c.json({ 
+        error: 'Missing required parameter: composePath' 
+      }, 400);
+    }
+
+    const result = await createSubdomain(composePath);
+
+    return c.json({ 
+      success: true, 
+      message: 'Agent subdomain created successfully',
+      result
+    });
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to create agent subdomain'
+    }, 500);
+  }
+});
+
+
 // Extract env variables default values endpoint
 app.post(`${apiPrefix}/envs/extract`, async (c) => {
   try {
@@ -1421,8 +1455,6 @@ app.post(`${apiPrefix}/envs/extract`, async (c) => {
     if (!keysToExtract) {
       return c.json({ error: 'Keys to extract is required' }, 400);
     }
-
-    console.log(keysToExtract)
 
     const envVariables = parseAndExtractEnvVariables(keysToExtract);
 

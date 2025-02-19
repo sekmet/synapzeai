@@ -73,7 +73,7 @@ export default function AgentConfigSecrets() {
             <div className="space-y-4">
               {getAgentEnvironmentFields().map((key) => {
                 const agentDeploy = useAgentDeployStore.getState();
-                const value = agentDeploy.env[key as keyof typeof agentDeploy.env] as string || '';
+                const value =  agentDeploy.env && agentDeploy.env[key as keyof typeof agentDeploy.env] as string || '';
                 return (
                   <div key={key} className="grid grid-cols-2 gap-4">
                     <div className="text-sm font-medium">{key}</div>

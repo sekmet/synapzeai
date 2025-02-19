@@ -19,18 +19,22 @@ import { Overview } from './components/overview'
 import { useAuthStore } from '@/stores/authStore'
 //import { RecentSales } from './components/recent-sales'
 import { Onboarding } from './components/onboarding'
+import { ProvisioningSteps } from './components/provisioning'
 import { IconRobot, IconChartPie, IconLogs, IconPencil } from '@tabler/icons-react';
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
+import { useAgentDeployStore } from '@/stores/agentDeployStore'
 
 export default function Dashboard() {
   const { getOnboarding } = useAuthStore((state) => state)
   const isOnboarding = !getOnboarding().completed
   const { getAgent } = useAgentActiveStore((state) => state)
-
+  const { getProvisioning } = useAgentDeployStore((state) => state)
   const activeAgent = getAgent() as Agent
+  const isProvisioning = getProvisioning().isProvisioning;
 
   useEffect(() => {
   }, [activeAgent])
+
 
   return activeAgent ? (
     <>
@@ -196,6 +200,29 @@ export default function Dashboard() {
       </Main>
     </>
   ) : (
+    isProvisioning ? (
+      (
+        <>
+          {/* ===== Top Heading ===== */}
+          <Header>
+            {/*<TopNav links={topNav} />*/}
+            <div className='ml-auto flex items-center space-x-4'>
+                <ThemeSwitch />
+                <ProfileDropdown />
+              </div>
+          </Header>
+    
+          {/* ===== Main ===== */}
+          <Main>
+        <div className='h-svh'>
+        <div className='m-auto flex h-[90vh] w-full flex-col items-center justify-center gap-2'>
+          <ProvisioningSteps />
+        </div>
+      </div>
+      </Main>
+        </>
+      )
+    ) : (
     <>
       {/* ===== Top Heading ===== */}
       <Header>
@@ -235,6 +262,7 @@ export default function Dashboard() {
   </Main>
     </>
   )
+)
 }
 
 /*const topNav = [
