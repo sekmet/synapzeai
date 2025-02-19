@@ -53,11 +53,11 @@ services:
         labels:
         - traefik.enable=true
         - traefik.http.middlewares.test-compress.compress=true
-        - traefik.http.routers.eliza-https.rule=Host({{AGENT-HOST-URL}})
-        - traefik.http.routers.eliza-https.entrypoints=http,https
+        - traefik.http.routers.{{AGENT-HOST}}-https.rule=Host({{AGENT-HOST-URL}})
+        - traefik.http.routers.{{AGENT-HOST}}-https.entrypoints=http,https
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-        - traefik.http.routers.eliza-https.middlewares=https-redirect
-        - traefik.http.routers.eliza-https.service=elizav1@docker
+        - traefik.http.routers.{{AGENT-HOST}}-https.middlewares=https-redirect
+        - traefik.http.routers.{{AGENT-HOST}}-https.service=elizav1@docker
         - traefik.http.services.elizav1.loadbalancer.server.port={{AGENT-SERVER-PORT}}
         - traefik.http.services.elizav1.loadbalancer.sticky=true
         restart: always
@@ -81,6 +81,7 @@ volumes:
     .replace(/{{DOCKER-IMAGE-NAME}}/g, params.dockerImageName)
     .replace(/{{ENV-VARS}}/g, envVarsLines)
     .replace(/{{AGENT-JWT-SECRET}}/g, params.agentJwtSecret)
+    .replace(/{{AGENT-HOST}}/g, agentSubdomain)
     .replace(/{{AGENT-HOST-URL}}/g, agentHostUrl)
     .replace(/{{AGENT-SERVER-PORT}}/g, params.agentServerPort);
 

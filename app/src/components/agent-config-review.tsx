@@ -17,10 +17,10 @@ export default function AgentConfigReview() {
     const router = useRouter()
     const canGoBack = useCanGoBack()
     const [deploying, setDeploying] = useState(false)
-    const { setRefresh, getAgent, setAgent } = useAgentActiveStore((state) => state)
+    const { setRefresh, getAgent, setAgent, clearAgent } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
     const { getConfig, setConfig, getEnv, getProvisioning, setProvisioning } = useAgentDeployStore((state) => state)
-    const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), isProvisioning: status })
+    const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), completed: false, isProvisioning: status })
     let characterConfig = getConfig();
     let characterEnvVars = getEnv();
     const agentId = '';
@@ -94,13 +94,15 @@ export default function AgentConfigReview() {
         };
 
         updateAgent(agentData);
-        
+        clearAgent()
         // Mark onboarding as completed
         setOnboarding({ ...getOnboarding(), completed: true })
         setRefresh(new Date().getTime())
         setAgent(getAgent()!);
         setIsProvisioning(true);
-        router.navigate({ to: '/' });
+        if (!deploying) {
+          router.navigate({ to: '/' });
+        }
       } catch (error) {
         console.error('Failed to deploy agent:', error);
         setDeploying(false);

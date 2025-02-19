@@ -346,7 +346,7 @@ export const executeCommandOnAgentContainer = async (containerId: string, Cmd: s
 
 export const getDeployedAgentClientId = async (containerId: string, agentName: string) => {
 
-  const Cmd = ["/root/.local/bin/sqlite-utils", "agent/data/db.sqlite", "select id from accounts where name = '" + agentName + "'"];
+  const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "select id from accounts where name = '" + agentName + "'"];
   const AttachStdout =  true; 
   const AttachStderr = true;
 
@@ -550,7 +550,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
 
     if (agentId && agentData.envVars) {
       
-      agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), currentStep: 1 });
+      agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), isProvisioning: true, currentStep: 1 });
 
       // create agent env variables and store it in the database
       await createAgentEnvVariables(agentId, agentData.envVars);
@@ -642,7 +642,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       console.log({AGENTDATA: agentData});
 
       sleep(1000);
-      agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), completed: true });
+      agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), isProvisioning: false, completed: true });
 
       return { agentId };
       

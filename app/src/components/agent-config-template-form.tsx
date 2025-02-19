@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { getAvailableTemplates, loadTemplate, saveTemplateState } from '@/lib/templates'
+import { useAgentDeployStore } from '@/stores/agentDeployStore';
 import { clsx } from 'clsx'
 
 interface ListItem {
@@ -96,6 +97,8 @@ const plugins: Plugin[] = [
 
 export default function AgentConfigTemplateForm({ title }: { title: string }) {
   const [name, setName] = useState("")
+  const { getProvisioning, setProvisioning } = useAgentDeployStore((state) => state);
+  const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), completed: false, currentStep: 0, isProvisioning: status })
   const [settings, setSettings] = useState<AgentSettings>()
   const [modelProvider, setModelProvider] = useState("")
   const [postExamples, setPostExamples] = useState<string[]>([])
@@ -159,6 +162,7 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
   // Effect to save state changes
   useEffect(() => {
     const saveState = async () => {
+      setIsProvisioning(false)
       const template = {
         name,
         clients: selectedClients,
