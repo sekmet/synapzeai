@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useLogout } from '@privy-io/react-auth';
 import { useAuthStore } from '@/stores/authStore'
 //import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -15,13 +15,16 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { stringToUniqueNumber } from '@/lib/utils'
 
 export function ProfileDropdown() {
+  const navigate = useNavigate()
   const { getUser } = useAuthStore((state) => state)
   const { logout } = useLogout({
     onSuccess: () => {
       console.log('User logged out');
       // Any logic you'd like to execute after a user successfully logs out
+      navigate({ to: '/sign-in-2' })
     },
   });
 
@@ -31,7 +34,7 @@ export function ProfileDropdown() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             {/*<AvatarImage src='/avatars/01.png' alt='@shadcn' />*/}
-            <Jazzicon diameter={32} seed={Number(getUser()?.id)} />
+            <Jazzicon diameter={32} seed={stringToUniqueNumber(getUser()?.id)} />
             {/*<AvatarFallback>SK</AvatarFallback>*/}
           </Avatar>
         </Button>

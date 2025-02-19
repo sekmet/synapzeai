@@ -5,13 +5,13 @@ import { useNavigate } from '@tanstack/react-router'
 //import { AgentsImportDialog } from './agents-import-dialog'
 //import { AgentsMutateDrawer } from './agents-mutate-drawer'
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserAgents } from '@/components/layout/data/sidebar-data'
+import { fetchUserAgents } from '@/lib/api/agent'
 import { useAgentActiveStore } from '@/stores/agentActive'
 import { deleteAgent, deleteAgentDeployment } from '@/lib/api/agent'
 
 export function AgentsDialogs() {
   const { open, setOpen, currentAgent, setCurrentAgent } = useAgents()
-  const { setRefresh, refresh, setAgent } = useAgentActiveStore()
+  const { setRefresh, refresh, setAgent } = useAgentActiveStore((state) => state)
   const navigate = useNavigate()
 
   const { data: userAgentsActive } = useQuery({

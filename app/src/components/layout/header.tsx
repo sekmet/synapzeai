@@ -122,7 +122,7 @@ export const Header = ({
           // In this case, the user was already `authenticated` when this component was mounted.
           // For already-`authenticated` users, we redirect them to their profile page.
           console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
-          console.log({currentUser: currentUser.id})
+          console.log({currentUser: currentUser?.id})
           console.log(setUser(user as AuthUser)) // authUser being the new format
           if (currentUser?.id === undefined) {
              // If the user is new, create it in your backend

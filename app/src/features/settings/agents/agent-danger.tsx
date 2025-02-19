@@ -5,7 +5,7 @@ import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 
 export function AgentDanger() {
     const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null)
-    const { getAgent } = useAgentActiveStore()
+    const { getAgent } = useAgentActiveStore((state) => state)
     const { setCurrentAgent } = useAgents()
 
     useEffect(() => {

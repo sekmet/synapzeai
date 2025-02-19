@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEnvironmentVars } from '@/stores/agentDeployStore';
+import { addSubdomain, /*removeSubdomain,*/ type CloudflareCredentials } from './domains';
 
 // Agent API functions
 interface AgentData {
@@ -32,6 +33,28 @@ interface ContainersListing {
   containers: Container[];
 }
 
+
+export const fetchUserAgents = async (userId: string) => {
+  if (!userId) return [];
+  console.log('fetchUserAgents ', userId)
+  const userOrg = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations/${userId}/organization`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  const org = await userOrg.json();
+
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/agents/${org[0]}`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  return response.json();
+};
+
+
 /**
  * Extracts the largest PublicPort number from a containers listing.
  *
@@ -58,6 +81,51 @@ export function extractBiggestPublicPort(containersListing: ContainersListing): 
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export const createAgentSubdomain = async (composePath: string) => {
+
+  // Extract the directory from the composePath.
+  const _composePath = composePath.split('/');
+  _composePath.pop();
+  const dirPath = _composePath.join('/');
+  const agentAlias = `${dirPath.split('/').pop()}`.toLocaleLowerCase();
+  const agentServerIp = `${import.meta.env.VITE_AGENT_SERVER_IP}`;
+  const agentServerDomain = `${import.meta.env.VITE_AGENT_SERVER_DOMAIN}`;
+
+  const credentials: CloudflareCredentials = {
+    apiToken: `${import.meta.env.VITE_CLOUDFLARE_API_TOKEN}`,
+    zoneId: `${import.meta.env.VITE_ZONE_ID}`,
+  };
+
+  console.log('Credentials:', credentials);
+  try {
+     //Adding a subdomain
+    const addResult = await addSubdomain({
+      ...credentials,
+      subdomain: `${agentAlias}.${agentServerDomain}`,
+      content: agentServerIp,
+      type: 'A',
+      proxied: false,
+    });
+    console.log('Subdomain added:', addResult);
+
+     //Removing a subdomain
+    //const removeResult = await removeSubdomain({
+    //  ...credentials,
+    //  subdomain: 'agent-klpvha.synapze.xyz',
+    //});
+    //console.log('Subdomain removed:', removeResult);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return {
+    agentAlias,
+    agentSubdomain: `https://${agentAlias}.${agentServerDomain}`,
+    agentServerIp
+  }
+}
+
 
 export const getAgentContainerMetadata = async (composePath: string) => {
 
@@ -234,7 +302,14 @@ export const getAgentEnvVariables = async (id: string) => {
 };
 
 
-export const generateAgentDockerComposeFile = async (agentId: string, envVars: Record<string, string>, dockerImageName?: string, agentServerPort?: string) => {
+export const generateAgentDockerComposeFile = async (
+  agentId: string, 
+  envVars: Record<string, string>, 
+  dockerImageName?: string, 
+  agentServerPort?: string,
+  agentJwtSecret?: string,
+  agentHostDomain?: string
+) => {
 
   const agentEnvVars = []
   for (const [key, value] of Object.entries(envVars)) {
@@ -243,9 +318,11 @@ export const generateAgentDockerComposeFile = async (agentId: string, envVars: R
 
   const composeVars = {
     agentId,
-    dockerImageName: dockerImageName ?? "synapze/elizav019a",
+    dockerImageName: dockerImageName ?? "synapze/elizav019d",
     envVars: agentEnvVars,
-    agentServerPort: agentServerPort ?? "3001"
+    agentServerPort: agentServerPort ?? "3001",
+    agentJwtSecret: agentJwtSecret ?? `${import.meta.env.VITE_JWT_AGENT_SECRET}`,
+    agentHostUrl: agentHostDomain ?? "synapze.xyz"
   }
 
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/write-compose-file`, {
@@ -285,6 +362,47 @@ export const deployAgentDefaultCharacterJsonFile = async (agentId: string, compo
 
   return response.json();
 };
+
+export const executeCommandOnAgentContainer = async (containerId: string, Cmd: string[], AttachStdout: boolean, AttachStderr: boolean, Env?: string[]) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers/${containerId}/exec`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      Cmd,
+      AttachStdout,
+      AttachStderr,
+      Env
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to execute the command on the agent container: ${error}`);
+  }
+
+  return response.json();
+};
+
+export const getDeployedAgentClientId = async (containerId: string, agentName: string) => {
+
+  const Cmd = ['sqlite-utils', 'agent/data/db.sqlite', "select id from accounts where name = '" + agentName + "'"];
+  const AttachStdout =  true; 
+  const AttachStderr = true;
+
+  const response = await executeCommandOnAgentContainer(containerId, Cmd, AttachStdout, AttachStderr);
+
+  if (!response || !response.output) {
+    throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
+  }
+  
+  const parsedOutput = JSON.parse(response.output[0]);
+  const agentClientId = parsedOutput.id;
+
+  return agentClientId;
+}
 
 export const updateAgentContainerWithDefaultCharacterJson = async (containerId: string, srcPath: string, destPath: string) => {
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers/${containerId}/copy-file`, {
@@ -470,8 +588,14 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       console.log({Lastport: agentServerPort, Newport: Number(agentServerPort)+1});
       const newAgentServerPort = String(Number(agentServerPort)+1);
 
+    
       // write the docker compose file for the agent
-      const composeResult = await generateAgentDockerComposeFile(agentId, agentEnvVariables,'synapze/elizav019c', newAgentServerPort ?? '3300');
+      const composeResult = await generateAgentDockerComposeFile(
+        agentId, 
+        agentEnvVariables,
+        'synapze/elizav019d', 
+        newAgentServerPort ?? '3300'
+      );
 
       // write the default character json file for the agent
       const defaultCharacterJsonResult = await deployAgentDefaultCharacterJsonFile(agentId, composeResult.composePath, agentData.configuration);
@@ -497,17 +621,27 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const containerId = container.Id;
       console.log({CONTAINERID: containerId});
 
+      // create agent subdomain
+      const { agentAlias, agentSubdomain, agentServerIp } = await createAgentSubdomain(composeResult.composePath);
+
       await updateAgentContainerWithDefaultCharacterJson(containerId, defaultCharacterJsonResult.characterFilePath, '/app/characters' );
 
       await updateAgentContainerId(agentId, `${containerId}:${newAgentServerPort ?? '3300'}`);
       
       // update the agent data with the container id
       //agentData.containerId = `${containerId}:${newAgentServerPort ?? '3300'}`;
+      
+      // get the agent client id
+      const agentClientId = await getDeployedAgentClientId(containerId, agentData.name as string);
 
       // update the agent data with the container metadata
       const containerMetadata = await getAgentContainerMetadata(composeResult.composePath);
       agentData.metadata.composePath = containerMetadata.composePath;
       agentData.metadata.agentAlias = containerMetadata.agentAlias;
+      agentData.metadata.agentClientId = agentClientId;
+      agentData.metadata.agentHost = agentAlias;
+      agentData.metadata.agentSubdomain = agentSubdomain;
+      agentData.metadata.agentServerIp = agentServerIp;
       await updateAgentContainerMetadata(agentId, agentData.metadata);
 
       console.log({AGENTDATA: agentData});

@@ -16,7 +16,7 @@ import { useAgentActiveStore, Agent } from '@/stores/agentActive';
 import { IconRobot } from '@tabler/icons-react';
 
 export default function Logs() {
-  const { refresh, getAgent, getAgentContainerId} = useAgentActiveStore()
+  const { refresh, getAgent, getAgentContainerId} = useAgentActiveStore((state) => state)
   const [logEntries, setLogEntries] = useState<any[]>([])
   const { data: agentLogs } = useQuery({
     queryKey: ['agentLogs', refresh],

@@ -18,34 +18,37 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import Jazzicon from 'react-jazzicon'
-import { ChatUser } from '../data/chat-types'
+//import { ChatUser } from '../data/chat-types'
+import { Agent } from '@/stores/agentActive'
+import { stringToUniqueNumber } from '@/lib/utils'
 
-type User = Omit<ChatUser, 'messages'>
+//type User = Omit<Agent, 'messages'>
 
 type Props = {
-  users: User[]
+  agents: Agent[]
   open: boolean
   onOpenChange: (open: boolean) => void
 }
-export function NewChat({ users, onOpenChange, open }: Props) {
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([])
+export function NewChat({ agents, onOpenChange, open }: Props) {
+  const [selectedAgents, setSelectedAgents] = useState<Agent[]>([])
 
-  const handleSelectUser = (user: User) => {
-    if (!selectedUsers.find((u) => u.id === user.id)) {
-      setSelectedUsers([...selectedUsers, user])
+  const handleSelectAgent = (agent: Agent) => {
+    if (!selectedAgents.find((u) => u.id === agent.id)) {
+      setSelectedAgents([...selectedAgents, agent])
     } else {
-      handleRemoveUser(user.id)
+      handleRemoveAgent(agent.id)
     }
   }
 
-  const handleRemoveUser = (userId: string) => {
-    setSelectedUsers(selectedUsers.filter((user) => user.id !== userId))
+  const handleRemoveAgent = (agentId: string) => {
+    setSelectedAgents(selectedAgents.filter((agent) => agent.id !== agentId))
   }
 
   useEffect(() => {
     if (!open) {
-      setSelectedUsers([])
+      setSelectedAgents([])
     }
+    console.log(agents)
   }, [open])
 
   const onSubmit = () => {
@@ -54,7 +57,7 @@ export function NewChat({ users, onOpenChange, open }: Props) {
       description: (
         <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
           <code className='text-white'>
-            {JSON.stringify(selectedUsers, null, 2)}
+            {JSON.stringify(selectedAgents, null, 2)}
           </code>
         </pre>
       ),
@@ -70,17 +73,17 @@ export function NewChat({ users, onOpenChange, open }: Props) {
         <div className='flex flex-col gap-4'>
           <div className='flex flex-wrap items-center gap-2'>
             <span className='text-sm text-zinc-400'>To:</span>
-            {selectedUsers.map((user) => (
-              <Badge key={user.id} variant='default'>
-                {user.fullName}
+            {selectedAgents.map((agent) => (
+              <Badge key={agent.id} variant='default'>
+                {agent.name}
                 <button
                   className='ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2'
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleRemoveUser(user.id)
+                      handleRemoveAgent(agent.id)
                     }
                   }}
-                  onClick={() => handleRemoveUser(user.id)}
+                  onClick={() => handleRemoveAgent(agent.id)}
                 >
                   <IconX className='h-3 w-3 text-muted-foreground hover:text-foreground' />
                 </button>
@@ -89,21 +92,21 @@ export function NewChat({ users, onOpenChange, open }: Props) {
           </div>
           <Command className='rounded-lg border'>
             <CommandInput
-              placeholder='Search people...'
+              placeholder='Search agent...'
               className='text-foreground'
             />
             <CommandList>
-              <CommandEmpty>No people found.</CommandEmpty>
+              <CommandEmpty>No agent found.</CommandEmpty>
               <CommandGroup>
-                {users.map((user) => (
+                {agents && agents.map((agent) => (
                   <CommandItem
-                    key={user.id}
-                    onSelect={() => handleSelectUser(user)}
+                    key={agent.id}
+                    onSelect={() => handleSelectAgent(agent)}
                     className='flex items-center justify-between gap-2'
                   >
                     <div className='flex items-center gap-2'>
                     <div className='h-8 w-8 rounded-full'>
-                      <Jazzicon diameter={32} seed={Number(user.username)} />
+                      <Jazzicon diameter={32} seed={stringToUniqueNumber(`${agent.name}:${agent.id}`)} />
                     </div>
                       {/*<img
                         src={user.profile || '/placeholder.svg'}
@@ -112,15 +115,15 @@ export function NewChat({ users, onOpenChange, open }: Props) {
                       />*/}
                       <div className='flex flex-col'>
                         <span className='text-sm font-medium'>
-                          {user.fullName}
+                          {agent.name}
                         </span>
                         <span className='text-xs text-zinc-400'>
-                          {user.username}
+                        {`${agent.name} Agent`}
                         </span>
                       </div>
                     </div>
 
-                    {selectedUsers.find((u) => u.id === user.id) && (
+                    {selectedAgents.find((u) => u.id === agent.id) && (
                       <IconCheck className='h-4 w-4' />
                     )}
                   </CommandItem>
@@ -131,7 +134,7 @@ export function NewChat({ users, onOpenChange, open }: Props) {
           <Button
             variant={'default'}
             onClick={onSubmit}
-            disabled={selectedUsers.length === 0}
+            disabled={selectedAgents.length === 0}
           >
             Chat
           </Button>

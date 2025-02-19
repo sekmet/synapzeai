@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { AuthUser } from '@/stores/authStore'
 import { useLogout } from '@privy-io/react-auth';
 import {
@@ -27,17 +27,20 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { stringToUniqueNumber } from '@/lib/utils'
 
 export function NavUser({
   user,
 }: {
   user: AuthUser | null
 }) {
+  const navigate = useNavigate()
   const { isMobile } = useSidebar()
   const { logout } = useLogout({
     onSuccess: () => {
       console.log('User logged out');
       // Any logic you'd like to execute after a user successfully logs out
+      navigate({ to: '/sign-in-2' })
     },
   });
 
@@ -53,7 +56,7 @@ export function NavUser({
               <Avatar className='h-8 w-8 rounded-lg'>
                 {/*<AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
                 <AvatarFallback className='rounded-lg'>SK</AvatarFallback>*/}
-                <Jazzicon diameter={32} seed={Number(user?.id)} />
+                <Jazzicon diameter={32} seed={stringToUniqueNumber(user?.id)} />
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-semibold'>{'username'}</span>
@@ -73,7 +76,7 @@ export function NavUser({
                 <Avatar className='h-8 w-8 rounded-lg'>
                   {/*<AvatarImage src={'/avatars/01.jpg'} alt={user?.id} />
                   <AvatarFallback className='rounded-lg'>SK</AvatarFallback>*/}
-                  <Jazzicon diameter={32} seed={Number(user?.id)} />
+                  <Jazzicon diameter={32} seed={stringToUniqueNumber(user?.id)} />
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-semibold'>{'username'}</span>

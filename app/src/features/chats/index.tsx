@@ -1,19 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Fragment } from 'react/jsx-runtime'
-import { format } from 'date-fns'
+//import { format } from 'date-fns'
 import {
   IconArrowLeft,
   IconDotsVertical,
   IconEdit,
   IconMessages,
-  IconPaperclip,
-  IconPhone,
-  IconPhotoPlus,
-  IconPlus,
+  //IconPaperclip,
+  //IconPhone,
+  //IconPhotoPlus,
+  //IconPlus,
   IconSearch,
-  IconSend,
-  IconVideo,
-  IconRobot
+  //IconSend,
+  //IconVideo,
+  IconRobot,
+  IconBrandDiscord,
+  IconBrandWhatsapp,
+  IconBrandGithub,
+  IconBrandTelegram,
+  IconBrandTwitter,
+  IconBrandSlack
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 //import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -22,34 +28,60 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
+import { useParams } from '@tanstack/react-router'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import Jazzicon from 'react-jazzicon'
 import { NewChat } from './components/new-chat'
-import { type ChatUser, type Convo } from './data/chat-types'
+import { AgentChat } from './components/chat'
+import { ConnectionStatus } from './components/connection-status'
+//import { type ChatUser, type Convo } from './data/chat-types'
+import { useQuery } from "@tanstack/react-query";
+import { fetchUserAgents } from '@/lib/api/agent'
+import { useAuthStore } from '@/stores/authStore'
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
+import { stringToUniqueNumber } from '@/lib/utils'
+import { UUID } from '@/types/elizaosv1'
+
 // Fake Data
-import { conversations } from './data/convo.json'
+//import { conversations } from './data/convo.json'
 
 export default function Chats() {
+  const { agentId: agentIdParam } = useParams({ strict: false })
+  const agentId = agentIdParam as UUID
   const [search, setSearch] = useState('')
-  const { getAgent } = useAgentActiveStore()
-  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null)
-  const [mobileSelectedUser, setMobileSelectedUser] = useState<ChatUser | null>(
+  const { getUser } = useAuthStore((state) => state)
+  const { setAgent, getAgent, setRefresh, refresh } = useAgentActiveStore((state) => state)
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+  const [mobileSelectedAgent, setMobileSelectedAgent] = useState<Agent | null>(
     null
   )
+  //const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null)
+  //const [mobileSelectedUser, setMobileSelectedUser] = useState<ChatUser | null>(
+  //  null
+  //)
   const [createConversationDialogOpened, setCreateConversationDialog] =
     useState(false)
+
+    const { data: userAgents } = useQuery({
+      queryKey: ['userAgents'],
+      queryFn: () => fetchUserAgents(getUser()?.id ?? ''),
+    })
+  
+    useEffect(() => {
+      //console.log({refresh})
+      console.log({userAgents}, agentId)
+    }, [refresh])
 
   const activeAgent = getAgent() as Agent ?? null;
 
   // Filtered data based on the search query
-  const filteredChatList = conversations.filter(({ fullName }) =>
-    fullName.toLowerCase().includes(search.trim().toLowerCase())
+  const filteredChatList = userAgents && userAgents.filter(({ name }: Agent) =>
+    name.toLowerCase().includes(search.trim().toLowerCase())
   )
 
-  const currentMessage = selectedUser?.messages.reduce(
+  /*const currentMessage = selectedAgent?.messages.reduce(
     (acc: Record<string, Convo[]>, obj) => {
       const key = format(obj.timestamp, 'd MMM, yyyy')
 
@@ -66,9 +98,9 @@ export default function Chats() {
     {}
   )
 
-  const users = conversations.map(({ messages, ...user }) => user)
+  const users = conversations.map(({ messages, ...user }) => user)*/
 
-  return activeAgent ?(
+  return activeAgent ? (
     <>
       {/* ===== Top Heading ===== */}
       <Header>
@@ -114,29 +146,32 @@ export default function Chats() {
             </div>
 
             <ScrollArea className='-mx-3 h-full p-3'>
-              {filteredChatList.map((chatUsr) => {
-                const { id, username, messages, fullName } = chatUsr
+              {filteredChatList && filteredChatList.map((chatUsr: Agent) => {
+                const { id, name } = chatUsr
+                /*const { id, username, messages, fullName } = chatUsr
                 const lastConvo = messages[0]
                 const lastMsg =
                   lastConvo.sender === 'You'
                     ? `You: ${lastConvo.message}`
-                    : lastConvo.message
+                    : lastConvo.message*/
                 return (
                   <Fragment key={id}>
                     <button
                       type='button'
                       className={cn(
                         `-mx-1 flex w-full rounded-md px-2 py-2 text-left text-sm hover:bg-secondary/75`,
-                        selectedUser?.id === id && 'sm:bg-muted'
+                        activeAgent?.id === id && 'sm:bg-muted'
                       )}
                       onClick={() => {
-                        setSelectedUser(chatUsr)
-                        setMobileSelectedUser(chatUsr)
+                        setAgent(chatUsr)
+                        setSelectedAgent(chatUsr)
+                        setMobileSelectedAgent(chatUsr)
+                        setRefresh(new Date().getTime())
                       }}
                     >
                       <div className='flex gap-2'>
                         <div className='relative h-8 w-8' >
-                      <Jazzicon diameter={32} seed={Number(username)} />
+                      <Jazzicon diameter={32} seed={stringToUniqueNumber(`${name}:${id}`)} />
                       </div>
                         {/*<Avatar>
                           <AvatarImage src={profile} alt={username} />
@@ -144,11 +179,14 @@ export default function Chats() {
                         </Avatar>*/}
                         <div>
                           <span className='col-start-2 row-span-2 font-medium'>
-                            {fullName}
+                            {name}
                           </span>
                           <span className='col-start-2 row-span-2 row-start-2 line-clamp-2 text-ellipsis text-muted-foreground'>
-                            {lastMsg}
+                          <ConnectionStatus />
                           </span>
+                          {/*<span className='col-start-2 row-span-2 row-start-2 line-clamp-2 text-ellipsis text-muted-foreground'>
+                            {lastMsg}
+                          </span>*/}
                         </div>
                       </div>
                     </button>
@@ -160,11 +198,11 @@ export default function Chats() {
           </div>
 
           {/* Right Side */}
-          {selectedUser ? (
+          {selectedAgent ? (
             <div
               className={cn(
                 'absolute inset-0 left-full z-50 hidden w-full flex-1 flex-col rounded-md border bg-primary-foreground shadow-sm transition-all duration-200 sm:static sm:z-auto sm:flex',
-                mobileSelectedUser && 'left-0 flex'
+                mobileSelectedAgent && 'left-0 flex'
               )}
             >
               {/* Top Part */}
@@ -175,12 +213,12 @@ export default function Chats() {
                     size='icon'
                     variant='ghost'
                     className='-ml-2 h-full sm:hidden'
-                    onClick={() => setMobileSelectedUser(null)}
+                    onClick={() => setMobileSelectedAgent(null)}
                   >
                     <IconArrowLeft />
                   </Button>
                   <div className='flex items-center gap-2 lg:gap-4'>
-                  <Jazzicon diameter={36} seed={Number(selectedUser.username)} />
+                  <Jazzicon diameter={36} seed={stringToUniqueNumber(`${selectedAgent.name}:${selectedAgent.id}`)} />
                     {/*<Avatar className='size-9 lg:size-11'> 
                       <AvatarImage
                         src={selectedUser.profile}
@@ -190,10 +228,10 @@ export default function Chats() {
                     </Avatar>*/}
                     <div>
                       <span className='col-start-2 row-span-2 text-sm font-medium lg:text-base'>
-                        {selectedUser.fullName}
+                        {selectedAgent.name}
                       </span>
                       <span className='col-start-2 row-span-2 row-start-2 line-clamp-1 block max-w-32 text-ellipsis text-nowrap text-xs text-muted-foreground lg:max-w-none lg:text-sm'>
-                        {selectedUser.title}
+                        {`${selectedAgent.name} Agent`}
                       </span>
                     </div>
                   </div>
@@ -206,14 +244,42 @@ export default function Chats() {
                     variant='ghost'
                     className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
                   >
-                    <IconVideo size={22} className='stroke-muted-foreground' />
+                    <IconBrandTwitter size={22} className='stroke-muted-foreground' />
                   </Button>
                   <Button
                     size='icon'
                     variant='ghost'
                     className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
                   >
-                    <IconPhone size={22} className='stroke-muted-foreground' />
+                    <IconBrandTelegram size={22} className='stroke-muted-foreground' />
+                  </Button>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
+                  >
+                    <IconBrandWhatsapp size={22} className='stroke-muted-foreground' />
+                  </Button>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
+                  >
+                    <IconBrandDiscord size={22} className='stroke-muted-foreground' />
+                  </Button>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
+                  >
+                    <IconBrandSlack size={22} className='stroke-muted-foreground' />
+                  </Button>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
+                  >
+                    <IconBrandGithub size={22} className='stroke-muted-foreground' />
                   </Button>
                   <Button
                     size='icon'
@@ -226,7 +292,9 @@ export default function Chats() {
               </div>
 
               {/* Conversation */}
-              <div className='flex flex-1 flex-col gap-2 rounded-md px-4 pb-4 pt-0'>
+              <AgentChat agentId={agentId} />
+
+              {/*<div className='flex flex-1 flex-col gap-2 rounded-md px-4 pb-4 pt-0'>
                 <div className='flex size-full flex-1'>
                   <div className='chat-text-container relative -mr-4 flex flex-1 flex-col overflow-y-hidden'>
                     <div className='chat-flex flex h-40 w-full flex-grow flex-col-reverse justify-start gap-4 overflow-y-auto py-2 pb-4 pr-4'>
@@ -317,7 +385,8 @@ export default function Chats() {
                     <IconSend size={18} /> Send
                   </Button>
                 </form>
-              </div>
+              </div>*/}
+
             </div>
           ) : (
             <div
@@ -346,7 +415,7 @@ export default function Chats() {
           )}
         </section>
         <NewChat
-          users={users}
+          agents={userAgents}
           onOpenChange={setCreateConversationDialog}
           open={createConversationDialogOpened}
         />

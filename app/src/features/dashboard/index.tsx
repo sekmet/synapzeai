@@ -19,13 +19,13 @@ import { Overview } from './components/overview'
 import { useAuthStore } from '@/stores/authStore'
 //import { RecentSales } from './components/recent-sales'
 import { Onboarding } from './components/onboarding'
-import { IconRobot } from '@tabler/icons-react';
+import { IconRobot, IconChartPie, IconLogs, IconPencil } from '@tabler/icons-react';
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 
 export default function Dashboard() {
   const { getOnboarding } = useAuthStore((state) => state)
   const isOnboarding = !getOnboarding().completed
-  const { getAgent } = useAgentActiveStore()
+  const { getAgent } = useAgentActiveStore((state) => state)
 
   const activeAgent = getAgent() as Agent
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
           <div className='flex items-center space-x-2'>
           <Link to='/agent/new'>
-            <Button>New Agent</Button>
+            <Button><IconRobot /> New Agent</Button>
           </Link> 
           </div>
         </div>
@@ -71,17 +71,19 @@ export default function Dashboard() {
           className='space-y-4'
         >
           <div className='w-full overflow-x-auto pb-2'>
-            <TabsList className='hidden'>
-              <TabsTrigger value='overview'>Overview</TabsTrigger>
-              {/*<TabsTrigger value='analytics' disabled>
-                Analytics
+            <TabsList>
+              <TabsTrigger value='overview'>
+                <IconChartPie size={21} className='mr-1' /> Overview
               </TabsTrigger>
-              <TabsTrigger value='reports' disabled>
-                Reports
+              <TabsTrigger value='agent-details' disabled>
+              <IconRobot size={21} className='mr-1' /> Details
               </TabsTrigger>
-              <TabsTrigger value='notifications' disabled>
-                Notifications
-              </TabsTrigger>*/}
+              <TabsTrigger value='logs' disabled>
+                <IconLogs size={21} className='mr-1' /> Logs
+              </TabsTrigger>
+              <TabsTrigger value='edit-agent' disabled>
+                <IconPencil size={21} className='mr-1' /> Update
+              </TabsTrigger>
             </TabsList>
           </div>
           <TabsContent value='overview' className='space-y-4'>

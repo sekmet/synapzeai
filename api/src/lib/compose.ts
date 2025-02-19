@@ -6,27 +6,65 @@ interface ComposeParams {
   dockerImageName: string;
   envVars: string[]; // Now an array of environment variable strings.
   agentServerPort: string;
+  agentJwtSecret: string;
+  agentHostDomain: string;
 }
 
 export function generateDockerComposeFile(params: ComposeParams): string {
+
+  // Define the 'agents' directory in the current working directory.
+  const agentsDir = path.join(process.cwd(), 'agents');
+  if (!fs.existsSync(agentsDir)) {
+    fs.mkdirSync(agentsDir, { recursive: true });
+  }
+
+  // Create a temporary directory inside the 'agents' directory.
+  // The directory name will be prefixed with "docker-compose-".
+  const tmpDir = fs.mkdtempSync(path.join(agentsDir, 'agent-'));
+
+  // Define the full file path for docker-compose.yaml.
+  const filePath = path.join(tmpDir, 'docker-compose.yaml');
+
+  // build agent host url
+  ////'`agent-klpvho.synapze.xyz`'
+  const agentSubdomain = `${tmpDir.split('/').pop()}`.toLocaleLowerCase();
+  const agentHostUrl = '`https://'+ agentSubdomain+'.'+params.agentHostDomain+'`';
+
   // YAML template updated so that the placeholder is not already prefixed with a dash.
   // The envVars will be inserted as multiple lines.
-  const yamlTemplate = `
+const yamlTemplate = `
 services:
     eliza:
         image: {{DOCKER-IMAGE-NAME}}
         stdin_open: true
         tty: true
+        networks:
+          - proxy
         volumes:
             - /var/run/tappd.sock:/var/run/tappd.sock
             - eliza:/app/packages/client-twitter/src/tweetcache
             - eliza:/app/db.sqlite
         environment:
 {{ENV-VARS}}
+            - JWT_SECRET={{AGENT-JWT-SECRET}}
             - SERVER_PORT={{AGENT-SERVER-PORT}}
         ports:
             - "{{AGENT-SERVER-PORT}}:3000"
+        labels:
+        - traefik.enable=true
+        - traefik.http.middlewares.test-compress.compress=true
+        - traefik.http.routers.eliza-https.rule=Host({{AGENT-HOST-URL}})
+        - traefik.http.routers.eliza-https.entrypoints=http,https
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.routers.eliza-https.middlewares=https-redirect
+        - traefik.http.routers.eliza-https.service=elizav1@docker
+        - traefik.http.services.elizav1.loadbalancer.server.port={{AGENT-SERVER-PORT}}
+        - traefik.http.services.elizav1.loadbalancer.sticky=true
         restart: always
+
+networks:
+  proxy:
+    external: {}
 
 volumes:
     eliza:
@@ -42,20 +80,10 @@ volumes:
   const updatedYaml = yamlTemplate
     .replace(/{{DOCKER-IMAGE-NAME}}/g, params.dockerImageName)
     .replace(/{{ENV-VARS}}/g, envVarsLines)
+    .replace(/{{AGENT-JWT-SECRET}}/g, params.agentJwtSecret)
+    .replace(/{{AGENT-HOST-URL}}/g, agentHostUrl)
     .replace(/{{AGENT-SERVER-PORT}}/g, params.agentServerPort);
 
-  // Define the 'agents' directory in the current working directory.
-  const agentsDir = path.join(process.cwd(), 'agents');
-  if (!fs.existsSync(agentsDir)) {
-    fs.mkdirSync(agentsDir, { recursive: true });
-  }
-
-  // Create a temporary directory inside the 'agents' directory.
-  // The directory name will be prefixed with "docker-compose-".
-  const tmpDir = fs.mkdtempSync(path.join(agentsDir, 'agent-'));
-
-  // Define the full file path for docker-compose.yaml.
-  const filePath = path.join(tmpDir, 'docker-compose.yaml');
 
   // Write the updated YAML content to the file.
   fs.writeFileSync(filePath, updatedYaml, 'utf8');

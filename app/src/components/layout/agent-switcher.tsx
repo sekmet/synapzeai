@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { ChevronsUpDown, Plus } from 'lucide-react'
+import Jazzicon from 'react-jazzicon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
+import { clsx } from 'clsx'
+import { stringToUniqueNumber } from '@/lib/utils'
 
 export function AgentSwitcher({
   agents,
@@ -23,13 +26,14 @@ export function AgentSwitcher({
   agents: Agent[]
 }) {
   const { isMobile } = useSidebar()
-  const { getAgent, setAgent, setRefresh } = useAgentActiveStore()
+  const { getAgent, setAgent, setRefresh } = useAgentActiveStore((state) => state)
   //const [activeAgent, setActiveAgent] = React.useState(getAgent() ?? agents[0])
   console.log({agents})
   const activeAgent = getAgent() ?? agents[0];
   const setActiveAgent = (agent: Agent) =>  {
     setAgent(agent)
     setRefresh(new Date().getTime())
+    console.log(Number(`${activeAgent.name}:${activeAgent.id}`))
   }
 
   return activeAgent ? (
@@ -41,8 +45,8 @@ export function AgentSwitcher({
               size='lg'
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
-              <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
-                {activeAgent.logo && <activeAgent.logo className='size-4' />}
+              <div className={clsx('flex aspect-square size-8 items-center justify-center rounded-lg', activeAgent.logo ? 'bg-sidebar-primary text-sidebar-primary-foreground' : null)}>
+                {activeAgent.logo ? <activeAgent.logo className='size-4' /> : <Jazzicon diameter={32} seed={stringToUniqueNumber(`${activeAgent.name}:${activeAgent.id}`)} />}
               </div>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-semibold'>

@@ -185,7 +185,7 @@ app.notFound((c) => {
   // DB connection
   
   // Root route
-  app.get('/', (c) => c.text('SYNAPZE DOCKER API Server v0.0.2'))
+  app.get('/', (c) => c.text('SYNAPZE API Server v0.0.3'))
 
 // Docker Info endpoint
 app.get(`${apiPrefix}/docker/info`, async (c) => {
@@ -246,7 +246,6 @@ app.get(`${apiPrefix}/containers/:id/stats`, async (c) => {
 app.get(`${apiPrefix}/containers/:id/top`, async (c) => {
   try {
     const container = docker.getContainer(c.req.param('id'));
-    console.log('ID TOP', c.req.param('id'))
     // First ensure container exists and get its state
     const inspectData = await new Promise((resolve, reject) => {
       container.inspect((err, data) => {
@@ -271,8 +270,6 @@ app.get(`${apiPrefix}/containers/:id/top`, async (c) => {
     // Get processes
     const processes = await new Promise((resolve, reject) => {
       container.top({ps_args: 'aux'}, (err, data) => {
-        console.log('DATA', data)
-        console.log('ERR', err)
         if (err) return reject(err);
         resolve(data);
       });
@@ -883,10 +880,6 @@ app.get(`${apiPrefix}/containers/:id/top`, async (c) => {
 
     const response = { processes: topData.Processes, titles: topData.Titles };
 
-    await new Promise((resolve) => {
-      container.remove({ force: true }, () => resolve(void 0));
-    });
-
     return c.json(response);
   } catch (err) {
     return c.json({ error: err.message }, 500);
@@ -1044,6 +1037,92 @@ app.post(`${apiPrefix}/build/run`, async (c) => {
     return c.json({ error: err.message }, 500);
   }
 });
+
+/* ============================================================
+   13. Container Top Endpoint
+   URL: POST /containers/:id/exec
+   Request JSON may include:
+   - execOptions: options for container.exec (default provided below)
+   ============================================================ */
+   app.get(`${apiPrefix}/containers/:id/exec`, async (c) => {
+    try {
+      const id = c.req.param('id');
+      const { execOptions } = await c.req.json();
+
+      if (!id) {
+        return c.json({ error: 'Container ID is required' }, 400);
+      }
+
+      const container: any = docker.getContainer(id);
+  
+      const _execOptions = execOptions || {
+        Cmd: ['bash', '-c', 'echo test $VAR'],
+        Env: ['VAR=Agent-Running'],
+        AttachStdout: true,
+        AttachStderr: true
+      };
+
+    // First ensure container exists and get its state
+    const inspectData = await new Promise((resolve, reject) => {
+      container.inspect((err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    // If not running, start it
+    if (!inspectData.State.Running) {
+      await new Promise((resolve, reject) => {
+        container.start((err) => {
+          if (err) return reject(err);
+          resolve(void 0);
+        });
+      });
+
+      // Wait for container to be fully started
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    // Execute the command
+    const execInstance = await new Promise((resolve, reject) => {
+      container.exec(_execOptions, (err, execInstance) => {
+        if (err) return reject(err);
+        resolve(execInstance);
+      });
+    });
+
+    const { stream, output } = await new Promise((resolve, reject) => {
+      
+      let outputData = '';
+
+      execInstance.start((err, stream) => {
+        if (err) return reject(err);
+        container.modem.demuxStream(
+          stream,
+          { write(chunk) { outputData += chunk.toString('utf8'); } },
+          { write(chunk) { outputData += chunk.toString('utf8'); } }
+        );
+        stream.on('end', () => {
+          resolve({ stream, output: outputData });
+        });
+        stream.on('error', reject);
+      });
+      
+    });
+
+    const data = await new Promise((resolve, reject) => {
+      execInstance.inspect((err, data) => {
+        if (err) return reject(err);
+        resolve(data);
+      });
+    });
+
+    return c.json({ execData: data, stream, output });
+    } catch (err) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
 
 // Container inspection
 app.get(`${apiPrefix}/containers/:id/inspect`, async (c) => {

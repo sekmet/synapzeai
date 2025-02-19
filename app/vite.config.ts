@@ -61,8 +61,23 @@ export default defineConfig(({ mode }) => {
             "import.meta.env.VITE_JWT_INTEGRATIONS_API": JSON.stringify(
               env.JWT_INTEGRATIONS_API || ""
             ),
+            "import.meta.env.VITE_JWT_AGENT_SECRET": JSON.stringify(
+              env.JWT_AGENT_SECRET || ""
+            ),
             "import.meta.env.VITE_ENV_VAR_ENCRYPTION_KEY": JSON.stringify(
               env.ENV_VAR_ENCRYPTION_KEY || ""
+            ),
+            "import.meta.env.VITE_AGENT_SERVER_DOMAIN": JSON.stringify(
+              env.AGENT_SERVER_DOMAIN || ""
+            ),
+            "import.meta.env.VITE_AGENT_SERVER_IP": JSON.stringify(
+              env.AGENT_SERVER_IP || ""
+            ),
+            "import.meta.env.VITE_CLOUDFLARE_API_TOKEN": JSON.stringify(
+              env.CLOUDFLARE_API_TOKEN || ""
+            ),
+            "import.meta.env.VITE_ZONE_ID": JSON.stringify(
+              env.ZONE_ID || ""
             ),
         },
         build: {

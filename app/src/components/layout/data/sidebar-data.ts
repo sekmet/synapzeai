@@ -23,27 +23,6 @@ import {
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
 
-export const fetchUserAgents = async (userId: string) => {
-  if (!userId) return [];
-  console.log('fetchUserAgents ', userId)
-  const userOrg = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations/${userId}/organization`,{
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
-      'Content-Type': 'application/json',
-    }
-  });
-  const org = await userOrg.json();
-
-  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/agents/${org[0]}`,{
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
-      'Content-Type': 'application/json',
-    }
-  });
-  return response.json();
-};
-
-
 export const sidebarData: SidebarData = {
   user: {
     name: 'sekmet',

@@ -55,9 +55,19 @@ RUN npm install -g pnpm@9.4.0 && \
     apt-get install -y \
         git \
         python3 \
+        pipx \
         ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Set Python 3 as the default python
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+# PipX setup
+RUN pipx ensurepath
+
+# SQLITE-utils installation
+RUN pipx install sqlite-utils
 
 # Set the working directory
 WORKDIR /app
@@ -76,7 +86,7 @@ COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/characters ./characters
 
 # Expose necessary ports
-EXPOSE 3000 5173
+EXPOSE 3000
 
 # Command to start the application
-CMD ["sh", "-c", "pnpm start --character=\"characters/default.character.json\" & pnpm start:client"]
+CMD ["sh", "-c", "pnpm start --character=\"characters/default.character.json\""]
