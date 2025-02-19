@@ -1055,7 +1055,7 @@ app.post(`${apiPrefix}/build/run`, async (c) => {
 
       const container: any = docker.getContainer(id);
   
-      const _execOptions = execOptions || {
+      const _execOptions = execOptions ?? {
         Cmd: ['bash', '-c', 'echo test $VAR'],
         Env: ['VAR=Agent-Running'],
         AttachStdout: true,
@@ -1117,7 +1117,7 @@ app.post(`${apiPrefix}/build/run`, async (c) => {
       });
     });
 
-    return c.json({ execData: data, stream, output });
+    return c.json({ output });
     } catch (err) {
       return c.json({ error: err.message }, 500);
     }

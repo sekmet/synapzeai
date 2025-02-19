@@ -388,7 +388,7 @@ export const executeCommandOnAgentContainer = async (containerId: string, Cmd: s
 
 export const getDeployedAgentClientId = async (containerId: string, agentName: string) => {
 
-  const Cmd = ['sqlite-utils', 'agent/data/db.sqlite', "select id from accounts where name = '" + agentName + "'"];
+  const Cmd = ["/root/.local/bin/sqlite-utils", "agent/data/db.sqlite", "select id from accounts where name = '" + agentName + "'"];
   const AttachStdout =  true; 
   const AttachStderr = true;
 
@@ -398,8 +398,8 @@ export const getDeployedAgentClientId = async (containerId: string, agentName: s
     throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
   }
   
-  const parsedOutput = JSON.parse(response.output[0]);
-  const agentClientId = parsedOutput.id;
+  const parsedOutput = JSON.parse(response.output);
+  const agentClientId = parsedOutput[0].id;
 
   return agentClientId;
 }
