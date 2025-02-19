@@ -278,7 +278,7 @@ export const generateAgentDockerComposeFile = async (
     envVars: agentEnvVars,
     agentServerPort: agentServerPort ?? "3001",
     agentJwtSecret: agentJwtSecret ?? `${import.meta.env.VITE_JWT_AGENT_SECRET}`,
-    agentHostUrl: agentHostDomain ?? "synapze.xyz"
+    agentHostDomain: agentHostDomain ?? "synapze.xyz"
   }
 
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/write-compose-file`, {
@@ -356,7 +356,9 @@ export const getDeployedAgentClientId = async (containerId: string, agentName: s
     throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
   }
   
-  const parsedOutput = JSON.parse(response.output);
+  console.log('CLIENT RESPONSE', response);
+
+  const parsedOutput = response.output;
   const agentClientId = parsedOutput[0].id;
 
   return agentClientId;
@@ -638,6 +640,9 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), currentStep: 7 });
 
       console.log({AGENTDATA: agentData});
+
+      sleep(1000);
+      agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), completed: true });
 
       return { agentId };
       

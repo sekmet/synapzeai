@@ -1163,7 +1163,7 @@ app.post(`${apiPrefix}/docker/write-compose-file`, async (c) => {
     const { dockerImageName, envVars, agentServerPort, agentJwtSecret, agentHostDomain } = await c.req.json();
     
     // Validate required parameters
-    if (!dockerImageName || !envVars || !agentServerPort) {
+    if (!dockerImageName || !envVars || !agentServerPort || !agentJwtSecret || !agentHostDomain) {
       return c.json({ 
         error: 'Missing required parameters. Please provide dockerImageName, envVars, and agentServerPort' 
       }, 400);
