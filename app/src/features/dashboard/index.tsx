@@ -27,13 +27,13 @@ import { useAgentDeployStore } from '@/stores/agentDeployStore'
 export default function Dashboard() {
   const { getOnboarding } = useAuthStore((state) => state)
   const isOnboarding = !getOnboarding().completed
-  const { getAgent } = useAgentActiveStore((state) => state)
+  const { getAgent, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
   const activeAgent = getAgent() as Agent
   const isProvisioning = getProvisioning().isProvisioning;
 
   useEffect(() => {
-  }, [activeAgent])
+  }, [activeAgent, refresh])
 
 
   return activeAgent ? (

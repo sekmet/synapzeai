@@ -33,7 +33,6 @@ export function AgentSwitcher({
   const setActiveAgent = (agent: Agent) =>  {
     setAgent(agent)
     setRefresh(new Date().getTime())
-    console.log(Number(`${activeAgent.name}:${activeAgent.id}`))
   }
 
   return activeAgent ? (

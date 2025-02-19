@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEnvironmentVars } from '@/stores/agentDeployStore';
-import { useAgentDeployStore } from '@/stores/agentDeployStore'
+import { useAgentDeployStore } from '@/stores/agentDeployStore';
+import { useAgentActiveStore } from '@/stores/agentActive';
 
 // Agent API functions
 interface AgentData {
@@ -31,6 +32,36 @@ interface Container {
 
 interface ContainersListing {
   containers: Container[];
+}
+
+interface OutputClientSQlite {
+  id?: string;
+}
+
+/**
+ * Cleans up and parses a JSON string representing an array of objects.
+ *
+ * @param outputString - The JSON string to clean and parse.
+ * @returns An array of OutputClientSQlite objects, or an empty array if parsing fails.
+ */
+function parseOutputSQlite(output:string): OutputClientSQlite[] {
+  // Trim any extraneous whitespace and newline characters.
+  const cleanedOutput = output.trim();
+
+  try {
+    // Parse the cleaned JSON string.
+    const parsed = JSON.parse(cleanedOutput);
+
+    // Ensure the result is an array.
+    if (!Array.isArray(parsed)) {
+      throw new Error('Parsed output is not an array.');
+    }
+
+    return parsed as OutputClientSQlite[];
+  } catch (error) {
+    console.error('Error parsing output string:', error);
+    return [];
+  }
 }
 
 
@@ -356,9 +387,10 @@ export const getDeployedAgentClientId = async (containerId: string, agentName: s
     throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
   }
   
-  console.log('CLIENT RESPONSE', response);
+  console.log('CLIENT RESPONSE', response.output);
 
-  const parsedOutput = response.output;
+  const parsedOutput = parseOutputSQlite(response.output);
+  console.log('CLIENT RESPONSE Parsed', parsedOutput[0]);
   const agentClientId = parsedOutput[0].id;
 
   return agentClientId;
@@ -504,6 +536,10 @@ export const updateAgentContainerMetadata = async (agentId: string, metadata: Re
 
 export const deleteAgentDeployment = async (agentId: string, composePath: string): Promise<boolean> => {
 
+  if (!agentId || !composePath) {
+    throw new Error("Missing required parameters");
+  }
+
   const responseDown = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/down-compose`, {
     method: "POST",
     headers: {
@@ -513,11 +549,11 @@ export const deleteAgentDeployment = async (agentId: string, composePath: string
     body: JSON.stringify({composePath}),
   });
 
+  await responseDown.json();
+
   if (!responseDown.ok) {
     const error = await responseDown.text();
     throw new Error(`Failed to deploy agent docker compose file: ${error}`);
-    return false;
-
   } else {
 
     const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/remove-compose`, {
@@ -529,11 +565,11 @@ export const deleteAgentDeployment = async (agentId: string, composePath: string
       body: JSON.stringify({composePath}),
     });
   
+    await response.json();
+
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`Failed to deploy agent docker compose file: ${error}`);
-
-      return false
     }
   
     return true
@@ -611,13 +647,20 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
 
       await updateAgentContainerWithDefaultCharacterJson(containerId, defaultCharacterJsonResult.characterFilePath, '/app/characters' );
 
+      await sleep(30000);
+
       await updateAgentContainerId(agentId, `${containerId}:${newAgentServerPort ?? '3300'}`);
+
+      await sleep(10000);
 
       agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), currentStep: 5 });
       
       // update the agent data with the container id
       //agentData.containerId = `${containerId}:${newAgentServerPort ?? '3300'}`;
       
+      // wait the container to be ready
+      await sleep(21000);
+
       // get the agent client id
       const agentClientId = await getDeployedAgentClientId(containerId, agentData.name as string);
 
@@ -641,9 +684,16 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
 
       console.log({AGENTDATA: agentData});
 
-      sleep(1000);
+      await sleep(3000);
       agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), isProvisioning: false, completed: true });
-
+      const agentActive = useAgentActiveStore.getState()
+      const activeAgent = agentActive.getAgent();
+      if (activeAgent) {
+          agentActive.setAgent(activeAgent)
+          agentActive.setRefresh(new Date().getTime());
+          console.log('ACTIVE AGENT', activeAgent)
+      }
+      
       return { agentId };
       
     } else {

@@ -1,16 +1,13 @@
-import { useNavigate } from '@tanstack/react-router'
-import { useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, Loader2 } from "lucide-react"
 import { useAgentDeployStore } from '@/stores/agentDeployStore'
 
-export function ProvisioningSteps() {
-  const navigate = useNavigate()
+export function ProvisioningSteps() {  
   const { setProvisioning, getProvisioning } = useAgentDeployStore((state) => state)
   const currentStep = getProvisioning().currentStep
   const setCurrentStep = (step: number) => setProvisioning({ ...getProvisioning(), currentStep: step })
-  const completed = getProvisioning().completed
+  //const completed = getProvisioning().completed ?? false
 
   const steps = [
     {
@@ -66,12 +63,6 @@ export function ProvisioningSteps() {
   const handleReset = () => {
     setCurrentStep(0)
   }
-
-  useEffect(() => {
-    if (completed) {
-        navigate({ to: '/' })
-    }
-  }, [])
 
   return (
     <Card className="w-full max-w-2xl mx-auto p-6 shadow-lg">

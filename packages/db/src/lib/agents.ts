@@ -308,7 +308,7 @@ export async function deleteAgent(id: string) {
       RETURNING id
     `.values();
 
-    return result[0]?.id ? true : false;
+    return result[0]?.id ? false : true;
   } catch (error) {
     console.error('Failed to delete agent:', error);
     throw error;

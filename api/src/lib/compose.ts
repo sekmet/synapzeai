@@ -28,7 +28,7 @@ export function generateDockerComposeFile(params: ComposeParams): string {
   // build agent host url
   ////'`agent-klpvho.synapze.xyz`'
   const agentSubdomain = `${tmpDir.split('/').pop()}`.toLocaleLowerCase();
-  const agentHostUrl = '`https://'+ agentSubdomain+'.'+params.agentHostDomain+'`';
+  const agentHostUrl = '`'+ agentSubdomain+'.'+params.agentHostDomain+'`';
 
   // YAML template updated so that the placeholder is not already prefixed with a dash.
   // The envVars will be inserted as multiple lines.
