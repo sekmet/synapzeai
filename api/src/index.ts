@@ -14,7 +14,7 @@ import { runComposeDown } from './lib/down/compose-down';
 import { runCopyFile } from './lib/copy/copy-file';
 import { runComposeRemove } from './lib/remove/compose-remove';
 import { parseAndExtractEnvVariables } from './lib/envs/parse-extract';
-import { createSubdomain } from './lib/domains/create-domain';
+import { createAgentSubdomain } from './lib/domains/create-domain';
 import * as path from 'path';
 import * as fs from 'fs';
 import nodemailer from 'nodemailer';
@@ -1430,7 +1430,7 @@ app.post(`${apiPrefix}/agent/create-subdomain`, async (c) => {
       }, 400);
     }
 
-    const result = await createSubdomain(composePath);
+    const result = await createAgentSubdomain(composePath);
 
     return c.json({ 
       success: true, 
