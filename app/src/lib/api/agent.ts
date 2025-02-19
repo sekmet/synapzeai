@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AgentEnvironmentVars } from '@/stores/agentDeployStore';
 import { useAgentDeployStore } from '@/stores/agentDeployStore';
 import { useAgentActiveStore } from '@/stores/agentActive';
+import { useAuthStore } from '@/stores/authStore';
 
 // Agent API functions
 interface AgentData {
@@ -579,6 +580,7 @@ export const deleteAgentDeployment = async (agentId: string, composePath: string
 export const updateAgentDeployment = async (agentData: AgentData) => {
   if (!agentData.id) {
     const agentProvisioning = useAgentDeployStore.getState();
+    const userAuth = useAuthStore.getState();
     // If no ID is provided, create a new agent
     const newAgent = await createAgent(agentData);
     console.log({NEWAGENT: newAgent[0]});
@@ -683,15 +685,15 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), currentStep: 7 });
 
       console.log({AGENTDATA: agentData});
+      const agents = await fetchUserAgents(userAuth.getUser()?.id ?? '')
 
-      await sleep(3000);
+      await sleep(1000);
       agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), isProvisioning: false, completed: true });
       const agentActive = useAgentActiveStore.getState()
-      const activeAgent = agentActive.getAgent();
-      if (activeAgent) {
-          agentActive.setAgent(activeAgent)
+      if (agents[0]) {
+          agentActive.setAgent(agents[0])
           agentActive.setRefresh(new Date().getTime());
-          console.log('ACTIVE AGENT', activeAgent)
+          console.log('ACTIVE AGENT', agents[0])
       }
       
       return { agentId };

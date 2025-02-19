@@ -14,14 +14,17 @@ import { fetchUserAgents } from '@/lib/api/agent'
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from '@/stores/authStore'
 import { useAgentActiveStore } from '@/stores/agentActive'
+import { useAgentDeployStore } from '@/stores/agentDeployStore'
 import { useSidebar } from '@/components/ui/sidebar'
 import { clsx } from 'clsx'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state: sidebarState } = useSidebar()
   const { getUser, getOnboarding } = useAuthStore((state) => state)
+  const { getProvisioning } = useAgentDeployStore((state) => state)
   const { refresh } = useAgentActiveStore((state) => state)
   const onboarding = !getOnboarding().completed
+  const isProvisioning = getProvisioning().isProvisioning;
 
   const { data: userAgents } = useQuery({
     queryKey: ['userAgents', refresh],
@@ -32,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     //console.log({refresh})
   }, [refresh])
 
-  return onboarding ? null : (
+  return onboarding || isProvisioning ? null : (
     <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
         {userAgents ? (

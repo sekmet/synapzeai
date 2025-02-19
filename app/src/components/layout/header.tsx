@@ -6,6 +6,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 import { usePrivy, useLogin } from '@privy-io/react-auth'
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore, AuthUser } from '@/stores/authStore'
+import { useAgentDeployStore } from '@/stores/agentDeployStore'
 
 interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
   fixed?: boolean
@@ -103,8 +104,10 @@ export const Header = ({
   ...props
 }: HeaderProps) => {
   const [offset, setOffset] = React.useState(0)
+  const { getProvisioning } = useAgentDeployStore((state) => state)
   const { getOnboarding, setUser, getUser } = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
+  const isProvisioning = getProvisioning().isProvisioning;
 
   const {ready, authenticated } = usePrivy();
   // Disable login when Privy is not ready or the user is already authenticated
@@ -196,7 +199,7 @@ export const Header = ({
       )}
       {...props}
     >
-      {!onboarding ? (<SidebarTrigger variant='outline' className='scale-125 sm:scale-100' />) : null}
+      {!onboarding && !isProvisioning ? (<SidebarTrigger variant='outline' className='scale-125 sm:scale-100' />) : null}
       {/*<Separator orientation='vertical' className='h-6' />*/}
       {children}
     </header>

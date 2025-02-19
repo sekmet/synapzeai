@@ -57,9 +57,9 @@ services:
         - traefik.http.routers.{{AGENT-HOST}}-https.entrypoints=http,https
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.routers.{{AGENT-HOST}}-https.middlewares=https-redirect
-        - traefik.http.routers.{{AGENT-HOST}}-https.service=elizav1@docker
-        - traefik.http.services.elizav1.loadbalancer.server.port={{AGENT-SERVER-PORT}}
-        - traefik.http.services.elizav1.loadbalancer.sticky=true
+        - traefik.http.routers.{{AGENT-HOST}}-https.service={{AGENT-HOST}}-v1@docker
+        - traefik.http.services.{{AGENT-HOST}}-v1.loadbalancer.server.port={{AGENT-SERVER-PORT}}
+        - traefik.http.services.{{AGENT-HOST}}-v1.loadbalancer.sticky=true
         restart: always
 
 networks:
