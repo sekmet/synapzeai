@@ -13,6 +13,7 @@ import { runDeployment } from './lib/deploy/deploy-compose';
 import { runComposeDown } from './lib/down/compose-down';
 import { runCopyFile } from './lib/copy/copy-file';
 import { runComposeRemove } from './lib/remove/compose-remove';
+import { parseAndExtractEnvVariables } from './lib/envs/parseExtract';
 import * as path from 'path';
 import * as fs from 'fs';
 import nodemailer from 'nodemailer';
@@ -1411,6 +1412,33 @@ app.post(`${apiPrefix}/docker/:agentId/remove-compose`, async (c) => {
 
 });
 
+
+// Extract env variables default values endpoint
+app.post(`${apiPrefix}/envs/extract`, async (c) => {
+  try {
+    const { keysToExtract } = await c.req.json();
+
+    if (!keysToExtract) {
+      return c.json({ error: 'Keys to extract is required' }, 400);
+    }
+
+    console.log(keysToExtract)
+
+    const envVariables = parseAndExtractEnvVariables(keysToExtract);
+
+    return c.json({ 
+      success: true, 
+      message: 'Env variables extracted successfully',
+      envVariables
+    });
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to extract env variables'
+    }, 500);
+  }
+});
 
 // Get template file endpoint
 app.get(`${apiPrefix}/templates/:tplname`, async (c) => {

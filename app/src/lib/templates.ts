@@ -402,10 +402,29 @@ export async function saveTemplateState(template: Template) {
   };
 
   const envVars = getMatchedEnvironmentVars(template.modelProvider, template.clients);
-  console.log(envVars)
+  console.log({envVars})
+
+  // get env vars with default values
+  const keysToExtract: string[] = [];
+  Object.keys(envVars).forEach(envKey => {
+    keysToExtract.push(envKey)
+  })
+  // fetch the api to get the default values for the env vars
+  const envDefaultValues = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/envs/extract`,{
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ keysToExtract }),
+  });
+
+  const envDefaultValuesJson = await envDefaultValues.json();
+  console.log({envDefaultValuesJson})
+
   // check if the env var value is undefined and set it to an empty string
   const env: any = {};
-  Object.keys(envVars).forEach(key => {
+  Object.keys(envDefaultValuesJson).forEach(key => {
     if (env[key] === undefined) {
       env[key] = '';
     }
