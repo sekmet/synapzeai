@@ -1044,7 +1044,7 @@ app.post(`${apiPrefix}/build/run`, async (c) => {
    Request JSON may include:
    - execOptions: options for container.exec (default provided below)
    ============================================================ */
-   app.get(`${apiPrefix}/containers/:id/exec`, async (c) => {
+   app.post(`${apiPrefix}/containers/:id/exec`, async (c) => {
     try {
       const id = c.req.param('id');
       const { execOptions } = await c.req.json();
