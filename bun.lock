@@ -26,6 +26,7 @@
       "devDependencies": {
         "@types/bun": "latest",
         "@types/dockerode": "^3.3.34",
+        "@types/jsonwebtoken": "^9.0.8",
         "@types/nodemailer": "^6.4.17",
         "@types/tar-fs": "^2.0.4",
       },
@@ -843,6 +844,8 @@
     "@types/js-cookie": ["@types/js-cookie@3.0.6", "", {}, "sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ=="],
 
     "@types/json-schema": ["@types/json-schema@7.0.15", "", {}, "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="],
+
+    "@types/jsonwebtoken": ["@types/jsonwebtoken@9.0.8", "", { "dependencies": { "@types/ms": "*", "@types/node": "*" } }, "sha512-7fx54m60nLFUVYlxAB1xpe9CBWX2vSrk50Y6ogRJ1v5xxtba7qXTg5BgYDN5dq+yuQQ9HaVlHJyAAt1/mxryFg=="],
 
     "@types/ms": ["@types/ms@2.1.0", "", {}, "sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA=="],
 
