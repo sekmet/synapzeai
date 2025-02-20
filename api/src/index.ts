@@ -15,6 +15,7 @@ import { runCopyFile } from './lib/copy/copy-file';
 import { runComposeRemove } from './lib/remove/compose-remove';
 import { parseAndExtractEnvVariables } from './lib/envs/parse-extract';
 import { createAgentSubdomain } from './lib/domains/create-domain';
+import { signJwt } from './lib/jwt/sign';
 import * as path from 'path';
 import * as fs from 'fs';
 import nodemailer from 'nodemailer';
@@ -1442,6 +1443,34 @@ app.post(`${apiPrefix}/agent/create-subdomain`, async (c) => {
     return c.json({ 
       success: false, 
       error: err.message || 'Failed to create agent subdomain'
+    }, 500);
+  }
+});
+
+// Generate JWT token endpoint
+app.post(`${apiPrefix}/jwt/:organizationId/sign`, async (c) => {
+  try {
+    const { userid, apikey, iat } = await c.req.json();
+
+    // Validate required parameter
+    if (!userid || !apikey || !iat) {
+      return c.json({ 
+        error: 'Missing required jwt parameter' 
+      }, 400);
+    }
+
+    const result = await signJwt({userid, apikey, iat});
+
+    return c.json({ 
+      success: true, 
+      message: 'JWT token generated successfully',
+      result
+    });
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to generate JWT token'
     }, 500);
   }
 });

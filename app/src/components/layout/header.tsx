@@ -105,7 +105,7 @@ export const Header = ({
 }: HeaderProps) => {
   const [offset, setOffset] = React.useState(0)
   const { getProvisioning } = useAgentDeployStore((state) => state)
-  const { getOnboarding, setUser, getUser } = useAuthStore((state) => state)
+  const { getOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
   const isProvisioning = getProvisioning().isProvisioning;
 
@@ -124,14 +124,17 @@ export const Header = ({
       if (wasAlreadyAuthenticated) {
           // In this case, the user was already `authenticated` when this component was mounted.
           // For already-`authenticated` users, we redirect them to their profile page.
-          console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
-          console.log({currentUser: currentUser?.id})
-          console.log(setUser(user as AuthUser)) // authUser being the new format
           if (currentUser?.id === undefined) {
              // If the user is new, create it in your backend
              createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
           }
-          navigate({ to: '/' })
+          console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
+          console.log({currentUser: currentUser?.id})
+          console.log(setUser(user as AuthUser)) // authUser being the new format
+          //TODO remove hardcoded and get api-key from keystack server
+          setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
+
+          //navigate({ to: '/' })
       } else {
           // In this case, the user was not already `authenticated` when the component was mounted
           // but successfully complete `login` during this component's lifecycle.
@@ -141,9 +144,13 @@ export const Header = ({
           if (isNewUser) {
               // If the user is new, create it in your backend
               console.log("NEW USER", isNewUser)
-              console.log(setUser(user as AuthUser)) // authUser being the new format
+
               createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)
-              navigate({ to: '/sign-in-2' })
+              console.log(setUser(user as AuthUser)) // authUser being the new format
+              //TODO remove hardcoded and get api-key from keystack server
+              setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')              
+              
+              navigate({ to: '/' })
               /*await fetch('/signin', {
                   method: 'POST',
                   body: JSON.stringify(user)
@@ -156,7 +163,9 @@ export const Header = ({
                 createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
              }
               console.log(setUser(user as AuthUser)) // authUser being the new format
-              navigate({ to: '/' })
+              //TODO remove hardcoded and get api-key from keystack server
+              setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
+              //navigate({ to: '/' })
               /*await fetch(`your-find-user-endpoint/${user.id}`, {
                   method: 'GET',
               });*/

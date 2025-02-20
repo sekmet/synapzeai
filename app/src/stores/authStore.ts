@@ -30,12 +30,17 @@ export interface AuthUser {
   mfaMethods: any[]
   hasAcceptedTerms: boolean
   isGuest: boolean
+  apiKey: string
 }
 
 interface AuthState {
     user: AuthUser | null
     setUser: (user: AuthUser | null) => void
     getUser: () => AuthUser | null
+    apiKey: string | null
+    getApiKey: () => string | null
+    setApiKey: (apiKey: string) => void
+    resetApiKey: () => void
     accessToken: string
     setAccessToken: (accessToken: string) => void
     resetAccessToken: () => void
@@ -59,6 +64,12 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) =>
         set((state) => ({ ...state, user })),
       getUser: () => get().user,
+      apiKey: null,
+      getApiKey: () => get().apiKey,
+      setApiKey: (apiKey: string) =>
+        set((state) => ({ ...state, apiKey })),
+      resetApiKey: () =>
+        set((state) => ({ ...state, apiKey: null })),
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {

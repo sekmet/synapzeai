@@ -7,7 +7,7 @@ import { Button, type ButtonProps } from "../button";
 
 // ChatBubble
 const chatBubbleVariant = cva(
-    "flex gap-2 max-w-[60%] items-end relative group",
+    "flex gap-2 max-w-[90%] sm:max-w-[70%] items-end relative group",
     {
         variants: {
             variant: {

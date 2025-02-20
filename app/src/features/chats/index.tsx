@@ -43,11 +43,13 @@ import { useAuthStore } from '@/stores/authStore'
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 import { stringToUniqueNumber } from '@/lib/utils'
 import { UUID } from '@/types/elizaosv1'
+import { useRouter } from '@tanstack/react-router'
 
 // Fake Data
 //import { conversations } from './data/convo.json'
 
 export default function Chats() {
+  const router = useRouter();
   const { agentId: agentIdParam } = useParams({ strict: false })
   const agentId = agentIdParam as UUID
   const [search, setSearch] = useState('')
@@ -167,6 +169,7 @@ export default function Chats() {
                         setSelectedAgent(chatUsr)
                         setMobileSelectedAgent(chatUsr)
                         setRefresh(new Date().getTime())
+                        router.navigate({ to: `/chats/${chatUsr.metadata.agentClientId}` })
                       }}
                     >
                       <div className='flex gap-2'>

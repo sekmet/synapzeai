@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEnvironmentVars } from '@/stores/agentDeployStore';
 import { useAgentDeployStore } from '@/stores/agentDeployStore';
-import { useAgentActiveStore } from '@/stores/agentActive';
+import { useAgentActiveStore, Agent } from '@/stores/agentActive';
 import { useAuthStore } from '@/stores/authStore';
+import { useAgentStore } from '@/stores/agentStore';
 
 // Agent API functions
 interface AgentData {
@@ -68,6 +69,7 @@ function parseOutputSQlite(output:string): OutputClientSQlite[] {
 
 export const fetchUserAgents = async (userId: string) => {
   if (!userId) return [];
+  const agentStore = useAgentStore.getState();
   console.log('fetchUserAgents ', userId)
   const userOrg = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations/${userId}/organization`,{
     headers: {
@@ -83,9 +85,34 @@ export const fetchUserAgents = async (userId: string) => {
       'Content-Type': 'application/json',
     }
   });
-  return response.json();
+  const result = await response.json();
+  // Set agents in the agent store.
+  agentStore.setAgents( result as Agent[]);
+  return result;
 };
 
+
+export const fetchUserAgent = async (userId: string, agentId: string) => {
+  if (!userId || !agentId) return null;
+  console.log('fetchUserAgent ', userId, agentId)
+  const userOrg = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations/${userId}/organization`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  const org = await userOrg.json();
+
+  if (!org[0]) return null;
+
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/agent/${agentId}`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  return response.json();
+};
 
 /**
  * Extracts the largest PublicPort number from a containers listing.

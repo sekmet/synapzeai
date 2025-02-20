@@ -1,7 +1,24 @@
 import type { UUID, Character } from "@/types/elizaosv1";
+//import { fetchUserAgent } from "./agent";
+import { useAgentActiveStore, Agent } from '@/stores/agentActive';
+//import { useAuthStore } from '@/stores/authStore';
+
+//const authUser = useAuthStore.getState();
+const agentActiveStore = useAgentActiveStore.getState();
+const activeAgent = agentActiveStore.getAgent() as Agent;
+/*const userId = authUser.getUser().id;
+const agentId = agentActiveStore.getAgent().id;
+
+if (!userId || !agentId) {
+    throw new Error("User or agent ID not found");
+}
+const activeAgent = await fetchUserAgent(userId, agentId);
+if (!activeAgent) {
+    throw new Error("Agent not found");
+}*/
 
 //TODO get the api url from agent config store
-const BASE_URL = `https://agent-klpvho.synapze.xyz`;
+const BASE_URL = activeAgent?.metadata.agentSubdomain; //`https://agent-klpvho.synapze.xyz`;
 
 const fetcher = async ({
     url,
@@ -19,6 +36,7 @@ const fetcher = async ({
         headers: headers
             ? headers
             : {
+                  Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiJ0ZXN0X0VnMWZWalZDcTJEYWdrZ0ZrUEtlV2t3UjMzcU5lVGhUckJqaG1EWUs2RXdSdmZ1cCIsInVzZXJpZCI6ImRpZDpwcml2eTpjbTZ4ZnV5NDcwMGY1MTE2aGlveXVkYTJkIiwiaWF0IjoxNTE2MjM5MDIyfQ.QjkYYQYoJo7Uq8WSLO68t3I_XQ3ulvVEDmR6jrAurM8`,
                   Accept: "application/json",
                   "Content-Type": "application/json",
               },

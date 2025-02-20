@@ -7,12 +7,13 @@ import {
 } from "@/components/ui/chat/chat-bubble";
 import { ChatInput } from "@/components/ui/chat/chat-input";
 import { ChatMessageList } from "@/components/ui/chat/chat-message-list";
-//import { useTransition, animated, type AnimatedProps } from "@react-spring/web";
 import { Paperclip, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Content, UUID } from "@/types/elizaosv1";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api/client-api";
+//import { apiClient } from "@/lib/api/client-api";
+import ApiClient from "@/lib/api/secure-client-api";
+import { useAuthStore } from '@/stores/authStore';
 import { cn, moment } from "@/lib/utils";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import CopyButton from "./copy-button";
@@ -33,17 +34,22 @@ type ExtraContentFields = {
 
 type ContentWithUser = Content & ExtraContentFields;
 
-//type AnimatedDivProps = AnimatedProps<{ style: React.CSSProperties }> & {
-//    children?: React.ReactNode;
-//};
-
 export function AgentChat({ agentId }: { agentId: UUID }) {
     const { toast } = useToast();
+    const authUser = useAuthStore.getState();
+    const [apiClient, setApiClient] = useState<ApiClient | null>(null);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [input, setInput] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
+
+    const userId = authUser.getUser()?.id as UUID;
+    const apiKey = authUser.getApiKey() as string;
+
+    if (!userId || !apiKey) {
+        throw new Error("User or API key not found");
+    }
 
     const queryClient = useQueryClient();
 
@@ -56,14 +62,17 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
 
     const messages = queryClient.getQueryData<ContentWithUser[]>(["messages", agentId]) || [];
 
-    /*const transitions = useTransition(messages, {
-        keys: (message: ContentWithUser) =>
-            `${message.createdAt}-${message.user}-${message.text}`,
-        from: { opacity: 0, transform: "translateY(50px)" },
-        enter: { opacity: 1, transform: "translateY(0px)" },
-        leave: { opacity: 0, transform: "translateY(10px)" },
-        config: { tension: 300, friction: 20 }
-    });*/
+    useEffect(() => {
+        const createApiClient = async () => {
+            try {
+                const client = await ApiClient.create(agentId, userId, apiKey);
+                setApiClient(client);
+            } catch (error) {
+                console.error("Failed to create ApiClient:", error);
+            }
+        };
+        createApiClient();
+    }, [agentId, userId, apiKey]); // Dependencies: re-run if these change
 
     useEffect(() => {
         scrollToBottom();
@@ -137,7 +146,7 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
         }: {
             message: string;
             selectedFiles?: File[] | null;
-        }) => apiClient.sendMessage(agentId, message, selectedFiles),
+        }) => apiClient?.sendMessage(message, selectedFiles) as Promise<ContentWithUser[]>,
         onSuccess: (newMessages: ContentWithUser[]) => {
             queryClient.setQueryData(
                 ["messages", agentId],
@@ -165,9 +174,8 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
         }
     };
 
-    //const CustomAnimatedDiv = animated.div as React.FC<AnimatedDivProps>;
     return (
-        <div className="flex flex-col w-full h-[calc(100dvh)] p-4">
+        <div className="flex flex-col w-full h-[calc(100dvh)] p-2">
             <div className="flex-1 overflow-y-auto">
                 <ChatMessageList
                     scrollRef={scrollRef}
@@ -175,10 +183,9 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
                     scrollToBottom={scrollToBottom}
                     disableAutoScroll={disableAutoScroll}
                 >
-                    {/*transitions((style, message: ContentWithUser) => {*/}
-                    {messages.map((message, index) => (
+                    {messages.map((message) => (
                         <div
-                                key={index}
+                                key={`${message.createdAt}-${message.user}-${message.text}`}
                                 style={{
                                     //...style,
                                     display: "flex",
@@ -278,7 +285,7 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
                     }
                 </ChatMessageList>
             </div>
-            <div className="px-4 pb-4">
+            <div className="px-1 pb-2">
                 <form
                     ref={formRef}
                     onSubmit={handleSendMessage}
