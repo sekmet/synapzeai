@@ -33,8 +33,9 @@ function loadSentimentLexicon(filePath: string): { [word: string]: number } {
  * @returns The overall sentiment: 'positive', 'neutral', or 'negative'.
  */
 export function analyzeSentiment(text: string): 'positive' | 'neutral' | 'negative' {
-  const lexiconDir = '/home/sekmet/DEVELOPMENT/HACKATHONS/GOLDENAI-HACK/MANTLE-AGENTS/eliza/packages/plugin-log/src/services';
-  //path.join(process.cwd(), 'packages', 'plugin-log', 'src', 'services');
+  const agentDir = process.cwd();
+  const rootDir = path.join(agentDir, '..');
+  const lexiconDir = path.join(rootDir, 'packages', 'plugin-log', 'src', 'services');
   const lexiconFilePath = `${lexiconDir}/lexicon.txt`;
   // Load the sentiment lexicon from the provided file.
   const sentimentLexicon = loadSentimentLexicon(lexiconFilePath);

@@ -1,6 +1,6 @@
 {
   "name": "TrollDetective.Exe",
-  "plugins": [],
+  "plugins": ["@elizaos/plugin-log"],
   "clients": ["twitter"],
   "modelProvider": "eternalai",
   "settings": {

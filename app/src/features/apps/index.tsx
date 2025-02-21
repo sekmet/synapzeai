@@ -143,7 +143,7 @@ export default function Apps() {
         {isLoading ? (
           <div className="flex flex-col justify-center items-center h-64">
             <svg
-              className="animate-spin h-24 w-24 text-orange-500"
+              className="animate-spin h-24 w-24 text-gray-400 dark:text-blue-400"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

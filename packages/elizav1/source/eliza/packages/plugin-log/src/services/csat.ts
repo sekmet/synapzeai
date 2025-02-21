@@ -46,8 +46,9 @@ function loadSentimentLexicon(filePath: string): { [word: string]: number } {
  * @returns A CSAT score on a scale from 0 to 5.
  */
 export function getCustomerSatisfactionScore(text: string): number {
-    const lexiconDir = '/home/sekmet/DEVELOPMENT/HACKATHONS/GOLDENAI-HACK/MANTLE-AGENTS/eliza/packages/plugin-log/src/services';
-    //path.join(process.cwd(), 'packages', 'plugin-log', 'src', 'services');
+    const agentDir = process.cwd();
+    const rootDir = path.join(agentDir, '..');
+    const lexiconDir = path.join(rootDir, 'packages', 'plugin-log', 'src', 'services');
     const lexiconFilePath = `${lexiconDir}/lexicon.txt`;
     // Load the sentiment lexicon.
     const sentimentLexicon = loadSentimentLexicon(lexiconFilePath);

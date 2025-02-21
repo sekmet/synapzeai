@@ -23,14 +23,54 @@ import { ProvisioningSteps } from './components/provisioning'
 import { IconRobot, IconChartPie, IconLogs, IconPencil } from '@tabler/icons-react';
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 import { useAgentDeployStore } from '@/stores/agentDeployStore'
+import { useQuery } from "@tanstack/react-query";
+import { 
+  getEngagedSessions, 
+  getSessionsRejectedTime, 
+  getTransferRate, 
+  getAvgSessionHandleTime, 
+  getAvgCsat, 
+  getAvgSessionSentiment 
+} from '@/lib/api/reports'
 
 export default function Dashboard() {
   const { getOnboarding } = useAuthStore((state) => state)
   const isOnboarding = !getOnboarding().completed
-  const { getAgent, refresh } = useAgentActiveStore((state) => state)
+  const { getAgent, getAgentContainerId, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
   const activeAgent = getAgent() as Agent
   const isProvisioning = getProvisioning().isProvisioning;
+
+  const { data: engagedSessions } = useQuery({
+    queryKey: ['engagedSessions', refresh],
+    queryFn: () => getEngagedSessions(getAgentContainerId() ?? ''),
+  });
+
+  const { data: rejectedSessions } = useQuery({
+    queryKey: ['rejectedSessions', refresh],
+    queryFn: () => getSessionsRejectedTime(getAgentContainerId() ?? ''),
+  });
+
+  const { data: transferRate } = useQuery({
+    queryKey: ['transferRate', refresh],
+    queryFn: () => getTransferRate(getAgentContainerId() ?? ''),
+  });
+
+  const { data: avgHandleTime } = useQuery({
+    queryKey: ['avgHandleTime', refresh],
+    queryFn: () => getAvgSessionHandleTime(getAgentContainerId() ?? ''),
+  });
+
+  const { data: avgCsat } = useQuery({
+    queryKey: ['avgCsat', refresh],
+    queryFn: () => getAvgCsat(getAgentContainerId() ?? ''),
+  });
+
+  const { data: avgSentiment } = useQuery({
+    queryKey: ['avgSentiment', refresh],
+    queryFn: () => getAvgSessionSentiment(getAgentContainerId() ?? ''),
+  });
+
 
   useEffect(() => {
   }, [activeAgent, refresh])
@@ -92,72 +132,72 @@ export default function Dashboard() {
           </div>
           <TabsContent value='overview' className='space-y-4'>
             <div className='grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6'>
-              <Card>
+            {engagedSessions && (<Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2'>
                   <CardTitle className='text-sm font-medium'>
                     Engaged sessions
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='px-4 pb-4'>
-                  <div className='text-2xl font-bold leading-none'>83</div>
+                  <div className='text-2xl font-bold leading-none'>{engagedSessions[0]?.engaged_sessions ?? 0}</div>
                   <p className='text-xs text-muted-foreground mt-1'>0.0%</p>
                 </CardContent>
-              </Card>
-              <Card>
+              </Card>)}
+              {rejectedSessions && (<Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2'>
                   <CardTitle className='text-sm font-medium'>
                     Sessions rejected/time
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='px-4 pb-4'>
-                  <div className='text-2xl font-bold leading-none'>57.0%</div>
+                  <div className='text-2xl font-bold leading-none'>{rejectedSessions[0]?.sessions_rejected_percentage ?? 0}%</div>
                   <p className='text-xs text-muted-foreground mt-1'>0.0%</p>
                 </CardContent>
-              </Card>
-              <Card>
+              </Card>)}
+              {transferRate && (<Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2'>
                   <CardTitle className='text-sm font-medium'>
                     Transfer rate
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='px-4 pb-4'>
-                  <div className='text-2xl font-bold leading-none'>4.7%</div>
+                  <div className='text-2xl font-bold leading-none'>{transferRate[0]?.transfer_rate ?? 0}%</div>
                   <p className='text-xs text-muted-foreground mt-1'>0.0%</p>
                 </CardContent>
-              </Card>
-              <Card>
+              </Card>)}
+              {avgHandleTime && (<Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2'>
                   <CardTitle className='text-sm font-medium'>
                     Avg. session handle time
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='px-4 pb-4'>
-                  <div className='text-2xl font-bold leading-none'>6.4</div>
+                  <div className='text-2xl font-bold leading-none'>{avgHandleTime[0]?.avg_handle_time_percentage ?? 0}%</div>
                   <p className='text-xs text-muted-foreground mt-1'>0.0%</p>
                 </CardContent>
-              </Card>
-              <Card>
+              </Card>)}
+              {avgCsat && (<Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2'>
                   <CardTitle className='text-sm font-medium'>
                     Avg. CSAT
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='px-4 pb-4'>
-                  <div className='text-2xl font-bold leading-none'>3.1</div>
+                  <div className='text-2xl font-bold leading-none'>{avgCsat[0]?.avg_csat ?? 0}%</div>
                   <p className='text-xs text-muted-foreground mt-1'>0.0%</p>
                 </CardContent>
-              </Card>
-              <Card>
+              </Card>)}
+              {avgSentiment && (<Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 p-4 pb-2'>
                   <CardTitle className='text-sm font-medium'>
                     Avg. session sentiment
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='px-4 pb-4'>
-                  <div className='text-2xl font-bold leading-none'>50.7%</div>
+                  <div className='text-2xl font-bold leading-none'>{avgSentiment[0]?.avg_session_sentiment_percentage ?? 0}%</div>
                   <p className='text-xs text-muted-foreground mt-1'>0.0%</p>
                 </CardContent>
-              </Card>
+              </Card>)}
             </div>
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-2'>
               <Card className='h-[300px]'>
