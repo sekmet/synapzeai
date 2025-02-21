@@ -387,8 +387,8 @@ export async function saveTemplateState(template: Template) {
   // Convert template format to AgentConfig format
   const config = {
     name: template.name,
-    plugins: template.plugins.map(name => (name)),
-    clients: template.clients.map(name => (name)),
+    plugins: template.plugins.map(name => ({ name, enabled: true })),
+    clients: template.clients.map(name => ({ name, enabled: true })),
     modelProvider: template.modelProvider,
     settings: template.settings,
     bio: template.bio,
