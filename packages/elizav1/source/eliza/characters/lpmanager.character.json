@@ -1,7 +1,7 @@
 {
     "name": "LP Manager",
     "modelProvider": "openai",
-    "plugins": [],
+    "plugins": ["@elizaos/plugin-log"],
     "clients": [],
     "settings": {
         "secrets": {},

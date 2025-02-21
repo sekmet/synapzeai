@@ -48,6 +48,7 @@ services:
 {{ENV-VARS}}
             - JWT_SECRET={{AGENT-JWT-SECRET}}
             - SERVER_PORT={{AGENT-SERVER-PORT}}
+            - ENABLE_LOGGING=true
         ports:
             - "{{AGENT-SERVER-PORT}}:3000"
         labels:

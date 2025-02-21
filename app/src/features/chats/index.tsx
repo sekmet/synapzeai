@@ -35,7 +35,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import Jazzicon from 'react-jazzicon'
 import { NewChat } from './components/new-chat'
 import { AgentChat } from './components/chat'
-import { ConnectionStatus } from './components/connection-status'
+//import { ConnectionStatus } from './components/connection-status'
 //import { type ChatUser, type Convo } from './data/chat-types'
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserAgents } from '@/lib/api/agent'
@@ -185,7 +185,8 @@ export default function Chats() {
                             {name}
                           </span>
                           <span className='col-start-2 row-span-2 row-start-2 line-clamp-2 text-ellipsis text-muted-foreground'>
-                          <ConnectionStatus />
+                          <div className="flex items-center gap-1"><div className='h-2.5 w-2.5 rounded-full bg-green-500'/><span className='text-xs text-green-500'>Active</span></div>
+                          {/*<ConnectionStatus />*/}
                           </span>
                           {/*<span className='col-start-2 row-span-2 row-start-2 line-clamp-2 text-ellipsis text-muted-foreground'>
                             {lastMsg}
@@ -296,99 +297,6 @@ export default function Chats() {
 
               {/* Conversation */}
               <AgentChat agentId={agentId} />
-
-              {/*<div className='flex flex-1 flex-col gap-2 rounded-md px-4 pb-4 pt-0'>
-                <div className='flex size-full flex-1'>
-                  <div className='chat-text-container relative -mr-4 flex flex-1 flex-col overflow-y-hidden'>
-                    <div className='chat-flex flex h-40 w-full flex-grow flex-col-reverse justify-start gap-4 overflow-y-auto py-2 pb-4 pr-4'>
-                      {currentMessage &&
-                        Object.keys(currentMessage).map((key) => (
-                          <Fragment key={key}>
-                            {currentMessage[key].map((msg, index) => (
-                              <div
-                                key={`${msg.sender}-${msg.timestamp}-${index}`}
-                                className={cn(
-                                  'chat-box max-w-72 break-words px-3 py-2 shadow-lg',
-                                  msg.sender === 'You'
-                                    ? 'self-end rounded-[16px_16px_0_16px] bg-primary/85 text-primary-foreground/75'
-                                    : 'self-start rounded-[16px_16px_16px_0] bg-secondary'
-                                )}
-                              >
-                                {msg.message}{' '}
-                                <span
-                                  className={cn(
-                                    'mt-1 block text-xs font-light italic text-muted-foreground',
-                                    msg.sender === 'You' && 'text-right'
-                                  )}
-                                >
-                                  {format(msg.timestamp, 'h:mm a')}
-                                </span>
-                              </div>
-                            ))}
-                            <div className='text-center text-xs'>{key}</div>
-                          </Fragment>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-                <form className='flex w-full flex-none gap-2'>
-                  <div className='flex flex-1 items-center gap-2 rounded-md border border-input px-2 py-1 focus-within:outline-none focus-within:ring-1 focus-within:ring-ring lg:gap-4'>
-                    <div className='space-x-1'>
-                      <Button
-                        size='icon'
-                        type='button'
-                        variant='ghost'
-                        className='h-8 rounded-md'
-                      >
-                        <IconPlus
-                          size={20}
-                          className='stroke-muted-foreground'
-                        />
-                      </Button>
-                      <Button
-                        size='icon'
-                        type='button'
-                        variant='ghost'
-                        className='hidden h-8 rounded-md lg:inline-flex'
-                      >
-                        <IconPhotoPlus
-                          size={20}
-                          className='stroke-muted-foreground'
-                        />
-                      </Button>
-                      <Button
-                        size='icon'
-                        type='button'
-                        variant='ghost'
-                        className='hidden h-8 rounded-md lg:inline-flex'
-                      >
-                        <IconPaperclip
-                          size={20}
-                          className='stroke-muted-foreground'
-                        />
-                      </Button>
-                    </div>
-                    <label className='flex-1'>
-                      <span className='sr-only'>Chat Text Box</span>
-                      <input
-                        type='text'
-                        placeholder='Type your messages...'
-                        className='h-8 w-full bg-inherit focus-visible:outline-none'
-                      />
-                    </label>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='hidden sm:inline-flex'
-                    >
-                      <IconSend size={20} />
-                    </Button>
-                  </div>
-                  <Button className='h-full sm:hidden'>
-                    <IconSend size={18} /> Send
-                  </Button>
-                </form>
-              </div>*/}
 
             </div>
           ) : (

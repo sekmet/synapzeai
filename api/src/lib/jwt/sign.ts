@@ -7,7 +7,7 @@ if (!JWT_SECRET) {
     throw new Error('JWT_AGENT_SECRET is not set');
 }
 
-export const signJwt = (payload: any) => {
+export const signJwt = async (payload: any) => {
     if (!JWT_SECRET) {
         throw new Error('JWT_AGENT_SECRET is not set');
     }

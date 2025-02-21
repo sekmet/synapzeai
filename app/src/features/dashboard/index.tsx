@@ -170,7 +170,7 @@ export default function Dashboard() {
               </Card>
               <Card className='h-[300px]'>
                 <CardHeader>
-                  <CardTitle>Avg. session handle time (min)</CardTitle>
+                  <CardTitle>Avg. time between interactions (min)</CardTitle>
                 </CardHeader>
                 <CardContent className='pl-2 h-[300px] sm:h-[350px]'>
                   <Overview chartType="handleTime" />

@@ -37,7 +37,7 @@ interface ContainersListing {
 }
 
 interface OutputClientSQlite {
-  id?: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 /**
@@ -46,7 +46,7 @@ interface OutputClientSQlite {
  * @param outputString - The JSON string to clean and parse.
  * @returns An array of OutputClientSQlite objects, or an empty array if parsing fails.
  */
-function parseOutputSQlite(output:string): OutputClientSQlite[] {
+export function parseOutputSQlite(output:string): OutputClientSQlite[] {
   // Trim any extraneous whitespace and newline characters.
   const cleanedOutput = output.trim();
 

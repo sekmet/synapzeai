@@ -60,6 +60,7 @@ class ApiClient {
         const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/jwt/${organizationId}/sign`, {
             method: 'POST',
             headers: {
+                Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload),
@@ -69,13 +70,13 @@ class ApiClient {
             throw new Error(`Failed to sign JWT: ${response.statusText}`);
         }
 
-        const { token } = await response.json(); // Assuming response is { token: "signed-jwt-token" }
-        if (!token) {
+        const { result } = await response.json(); // Assuming response is { token: "signed-jwt-token" }
+        if (!result) {
             throw new Error('No token received from the server');
         }
 
         // Return a new ApiClient instance with the retrieved agent and token
-        return new ApiClient(agent, token);
+        return new ApiClient(agent, result);
     }
 
     /**
@@ -95,6 +96,7 @@ class ApiClient {
         body?: object | FormData;
         headers?: Record<string, string>;
     }) {
+
         const defaultHeaders = {
             Authorization: `Bearer ${this.token}`,
             Accept: "application/json",

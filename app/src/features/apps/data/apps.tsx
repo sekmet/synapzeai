@@ -1,27 +1,58 @@
 import {
-  /*IconBrandDiscord,
-  IconBrandDocker,
-  IconBrandFigma,
-  IconBrandGithub,
-  IconBrandGitlab,
-  IconBrandGmail,
-  IconBrandMedium,
-  IconBrandNotion,
-  IconBrandSkype,
-  IconBrandSlack,
-  IconBrandStripe,
-  //IconBrandTelegram,
-  IconBrandTrello,
-  IconBrandWhatsapp,
-  IconBrandZoom,*/
+  IconDatabaseCog,
+  IconRouter,
   IconPlug,
 } from '@tabler/icons-react'
 
+/**
+ * Returns an icon component based on the provided string.
+ * 
+ * @param str - The input string to search for a keyword.
+ * @returns The corresponding icon component or null if no keyword is found.
+ */
+export function getIconForString(str: string): any {
+  if (str.includes('adapter-')) {
+    return <IconDatabaseCog />;
+  }
+  if (str.includes('plugin-')) {
+    return <IconPlug />;
+  }
+  if (str.includes('client-')) {
+    return <IconRouter />;
+  }
+  return null;
+}
+
+const extractDescriptionFromReadme = (readmeContent: string): string | null => {
+  const lines = readmeContent.split('\n');
+  let titleFound = false;
+  let paragraphLines: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!titleFound && trimmed.startsWith('# ')) {
+      titleFound = true;
+      continue;
+    }
+    if (titleFound) {
+      if (trimmed === '') {
+        if (paragraphLines.length > 0) {
+          break; // End of paragraph
+        }
+      } else if (trimmed.startsWith('#')) {
+        break; // Another header, end of paragraph
+      } else {
+        paragraphLines.push(trimmed);
+      }
+    }
+  }
+
+  return paragraphLines.length > 0 ? paragraphLines.join(' ') : null;
+};
+
 export const fetchPlugins = async (forceRefresh = false) => {
   try {
-    //setError(null);
     if (forceRefresh) {
-      //setLoading(true);
       console.log('Fetching plugins...');
     }
 
@@ -29,178 +60,112 @@ export const fetchPlugins = async (forceRefresh = false) => {
     const registryResponse = await fetch(
       'https://raw.githubusercontent.com/elizaos-plugins/registry/main/index.json'
     );
-    
+
     if (!registryResponse.ok) {
       throw new Error('Failed to fetch plugin registry');
     }
 
     const registry = await registryResponse.json();
-    
-    // Convert registry object to array of entries
     const pluginEntries = Object.entries(registry);
 
-    // Fetch package.json for each plugin
+    // Fetch package.json, check for logo, and fetch README.md for each plugin
     const pluginData = await Promise.all(
       pluginEntries.map(async ([name, githubUrl]) => {
-        // Parse GitHub URL to get owner and repo
-        // Format is "github:owner/repo"
+        const shortName = name.replace('@elizaos/', '');
         const [owner, repo] = (githubUrl as string).replace('github:', '').split('/');
-        
+        let branch = 'main';
+        let packageJsonContent;
+
+        // Try fetching package.json from main branch
         try {
-          const packageJsonResponse = await fetch(
+          const response = await fetch(
             `https://raw.githubusercontent.com/${owner}/${repo}/main/package.json`
           );
-          
-          if (!packageJsonResponse.ok) {
-            console.warn(`Failed to fetch package.json for ${name}, trying 'master' branch`);
-            // Try master branch as fallback
-            const fallbackResponse = await fetch(
+          if (!response.ok) {
+            throw new Error('Main branch not found');
+          }
+          packageJsonContent = await response.json();
+        } catch {
+          // Fallback to master branch
+          try {
+            const response = await fetch(
               `https://raw.githubusercontent.com/${owner}/${repo}/master/package.json`
             );
-            
-            if (!fallbackResponse.ok) {
-              throw new Error(`Failed to fetch package.json for ${name}`);
+            if (!response.ok) {
+              throw new Error('Master branch not found');
             }
-            
-            const content = await fallbackResponse.json();
+            packageJsonContent = await response.json();
+            branch = 'master';
+          } catch {
+            console.warn(`Failed to fetch package.json for ${name}`);
             return {
-              logo: <IconPlug />,
-              name: name.replace('@elizaos/', ''),
-              version: content.version,
-              description: content.description,
-              author: content.author,
+              logo: '',
+              icon: getIconForString(shortName),
+              name: shortName,
+              version: 'unknown',
+              description: 'Plugin information unavailable',
+              author: 'unknown',
               githubUrl: `https://github.com/${owner}/${repo}`,
-              installed: false
+              installed: false,
+              agentConfig: null, // Set agentConfig to null when package.json fetch fails
             };
           }
-
-          const content = await packageJsonResponse.json();
-          return {
-            logo: <IconPlug />,
-            name: name.replace('@elizaos/', ''),
-            version: content.version,
-            description: content.description,
-            author: content.author,
-            githubUrl: `https://github.com/${owner}/${repo}`,
-            installed: false
-          };
-        } catch (err) {
-          console.warn(`Failed to fetch package.json for ${name}:`, err);
-          // Return partial data if package.json fetch fails
-          return {
-            logo: <IconPlug />,
-            name: name.replace('@elizaos/', ''),
-            version: 'unknown',
-            description: 'Plugin information unavailable',
-            author: 'unknown',
-            githubUrl: `https://github.com/${owner}/${repo}`,
-            installed: false
-          };
         }
+
+        // Check for images/logo.jpg in the determined branch
+        let logo: any = '';
+        if (packageJsonContent) {
+          const logoUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/images/logo.jpg`;
+          try {
+            const logoResponse = await fetch(logoUrl, { method: 'HEAD' });
+            if (logoResponse.ok) {
+              logo = <img src={logoUrl} alt={shortName} className='rounded-lg' />;
+            }
+          } catch {
+            console.warn(`Failed to check for logo in ${name}`);
+            // logo remains ''
+          }
+        }
+
+        // Fetch README.md from the determined branch
+        let readmeDescription: string | null = null;
+        try {
+          const readmeResponse = await fetch(
+            `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/README.md`
+          );
+          if (readmeResponse.ok) {
+            const readmeContent = await readmeResponse.text();
+            readmeDescription = extractDescriptionFromReadme(readmeContent);
+          } else {
+            console.warn(`README.md not found for ${name} on branch ${branch}`);
+          }
+        } catch {
+          console.warn(`Failed to fetch README.md for ${name}`);
+        }
+
+        // Use README description if available, else package.json description
+        const description =
+          readmeDescription || packageJsonContent.description || 'No description available';
+
+        return {
+          logo,
+          icon: getIconForString(shortName),
+          name: shortName,
+          version: packageJsonContent.version || 'unknown',
+          description,
+          author: packageJsonContent.author || 'unknown',
+          githubUrl: `https://github.com/${owner}/${repo}`,
+          installed: false,
+          agentConfig: packageJsonContent.agentConfig || null, // Pull agentConfig if it exists
+        };
       })
     );
 
     return pluginData;
-
   } catch (err: any) {
     console.log(err.message || 'Failed to load plugins. Please try again later.');
     console.error('Failed to load plugins:', err);
   } finally {
     console.log('Plugins loaded');
-    //setLoading(false);
   }
 };
-
-/*export const apps = [
-  {
-    name: 'Telegram',
-    logo: <IconPlug />,
-    installed: false,
-    desc: 'Connect with Telegram for real-time communication.',
-  },
-  {
-    name: 'Notion',
-    logo: <IconBrandNotion />,
-    installed: true,
-    desc: 'Effortlessly sync Notion pages for seamless collaboration.',
-  },
-  {
-    name: 'Figma',
-    logo: <IconBrandFigma />,
-    installed: true,
-    desc: 'View and collaborate on Figma designs in one place.',
-  },
-  {
-    name: 'Trello',
-    logo: <IconBrandTrello />,
-    installed: false,
-    desc: 'Sync Trello cards for streamlined project management.',
-  },
-  {
-    name: 'Slack',
-    logo: <IconBrandSlack />,
-    installed: false,
-    desc: 'Integrate Slack for efficient team communication',
-  },
-  {
-    name: 'Zoom',
-    logo: <IconBrandZoom />,
-    installed: true,
-    desc: 'Host Zoom meetings directly from the dashboard.',
-  },
-  {
-    name: 'Stripe',
-    logo: <IconBrandStripe />,
-    installed: false,
-    desc: 'Easily manage Stripe transactions and payments.',
-  },
-  {
-    name: 'Gmail',
-    logo: <IconBrandGmail />,
-    installed: true,
-    desc: 'Access and manage Gmail messages effortlessly.',
-  },
-  {
-    name: 'Medium',
-    logo: <IconBrandMedium />,
-    installed: false,
-    desc: 'Explore and share Medium stories on your dashboard.',
-  },
-  {
-    name: 'Skype',
-    logo: <IconBrandSkype />,
-    installed: false,
-    desc: 'Connect with Skype contacts seamlessly.',
-  },
-  {
-    name: 'Docker',
-    logo: <IconBrandDocker />,
-    installed: false,
-    desc: 'Effortlessly manage Docker containers on your dashboard.',
-  },
-  {
-    name: 'GitHub',
-    logo: <IconBrandGithub />,
-    installed: false,
-    desc: 'Streamline code management with GitHub integration.',
-  },
-  {
-    name: 'GitLab',
-    logo: <IconBrandGitlab />,
-    installed: false,
-    desc: 'Efficiently manage code projects with GitLab integration.',
-  },
-  {
-    name: 'Discord',
-    logo: <IconBrandDiscord />,
-    installed: false,
-    desc: 'Connect with Discord for seamless team communication.',
-  },
-  {
-    name: 'WhatsApp',
-    logo: <IconBrandWhatsapp />,
-    installed: false,
-    desc: 'Easily integrate WhatsApp for direct messaging.',
-  },
-]
-*/

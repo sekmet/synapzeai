@@ -191,7 +191,7 @@ export class DirectClient {
 
         this.app.post(
             "/:agentId/message",
-            upload.single("file"),
+            upload.array("files"), // Handle multiple files
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
@@ -232,24 +232,38 @@ export class DirectClient {
 
                 const messageId = stringToUuid(Date.now().toString());
 
-                const attachments: Media[] = [];
-                if (req.file) {
-                    const filePath = path.join(
-                        process.cwd(),
-                        "data",
-                        "uploads",
-                        req.file.filename
-                    );
-                    attachments.push({
-                        id: Date.now().toString(),
-                        url: filePath,
-                        title: req.file.originalname,
-                        source: "direct",
-                        description: `Uploaded file: ${req.file.originalname}`,
-                        text: "",
-                        contentType: req.file.mimetype,
-                    });
-                }
+                const attachments: Media[] = []
+
+                await Promise.all(
+                    ((req.files as Express.Multer.File[]) || []).concat(req.file ? [req.file] : []).map(async (file) => {
+                        const filePath = path.join(
+                            process.cwd(),
+                            "data",
+                            "uploads",
+                            file.filename
+                        );
+                        elizaLogger.debug(`File: ${filePath}`);
+                        elizaLogger.debug(`Attachment: ${JSON.stringify({
+                            id: Date.now().toString(),
+                            url: filePath,
+                            title: file.originalname,
+                            source: "direct",
+                            description: `Uploaded file: ${file.originalname}`,
+                            text: "",
+                            contentType: file.mimetype,
+                        }, null, 2)}`);
+
+                        attachments.push({
+                            id: Date.now().toString(),
+                            url: filePath,
+                            title: file.originalname,
+                            source: "direct",
+                            description: `Uploaded file: ${file.originalname}`,
+                            text: "",
+                            contentType: file.mimetype,
+                        });
+                    })
+                );
 
                 const content: Content = {
                     text,
