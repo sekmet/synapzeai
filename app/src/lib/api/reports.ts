@@ -29,7 +29,7 @@ try {
 // ################################ 1. Engaged Sessions
 
 export const getAgentEngagedSessions = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -56,7 +56,7 @@ export const getAgentEngagedSessions = async (containerId: string) => {
 // ################################ 2. Handle Time
 
 export const getAgentHandleTime = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -84,7 +84,7 @@ export const getAgentHandleTime = async (containerId: string) => {
 // ################################ 3. CSAT (Customer Satisfaction)
 
 export const getAgentCustomerSatisfactionScore = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -111,7 +111,7 @@ export const getAgentCustomerSatisfactionScore = async (containerId: string) => 
 // ################################ 4. Sentiment
 
 export const getAgentSentimentScore = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -139,7 +139,7 @@ export const getAgentSentimentScore = async (containerId: string) => {
 // ################################ 1. Engaged Sessions - widget
 
 export const getEngagedSessions = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -166,7 +166,7 @@ export const getEngagedSessions = async (containerId: string) => {
 // ################################ 2. Sessions Rejected/Time - widget
 
 export const getSessionsRejectedTime = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -193,7 +193,7 @@ export const getSessionsRejectedTime = async (containerId: string) => {
 // ################################ 3. Transfer Rate - widget
 
 export const getTransferRate = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -220,7 +220,7 @@ export const getTransferRate = async (containerId: string) => {
 // ################################ 4. Avg. Session Handle Time - widget
 
 export const getAvgSessionHandleTime = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -247,7 +247,7 @@ export const getAvgSessionHandleTime = async (containerId: string) => {
 // ################################ 5. Avg. CSAT - widget
 
 export const getAvgCsat = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -275,7 +275,7 @@ export const getAvgCsat = async (containerId: string) => {
 // ################################ 6. Avg. Session Sentiment - widget
 
 export const getAvgSessionSentiment = async (containerId: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }
@@ -304,7 +304,7 @@ export const getAvgSessionSentiment = async (containerId: string) => {
 // ################################ 10. Agent Performance
 
 export const getAgentPerformanceStats = async (containerId: string, agentName: string) => {
-    if (!containerId) {
+    if (!containerId || containerId === 'undefined') {
         console.error('Container ID is required');
         return []
     }

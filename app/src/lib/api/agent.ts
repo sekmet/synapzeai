@@ -379,6 +379,12 @@ export const deployAgentDefaultCharacterJsonFile = async (agentId: string, compo
 };
 
 export const executeCommandOnAgentContainer = async (containerId: string, Cmd: string[], AttachStdout: boolean, AttachStderr: boolean, Env?: string[]) => {
+
+  if (!containerId || containerId === 'undefined') {
+    console.error('Container ID is required');
+    return null
+  }
+
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers/${containerId}/exec`, {
     method: "POST",
     headers: {
@@ -404,6 +410,11 @@ export const executeCommandOnAgentContainer = async (containerId: string, Cmd: s
 };
 
 export const getDeployedAgentClientId = async (containerId: string, agentName: string) => {
+
+  if (!containerId || containerId === 'undefined') {
+    console.error('Container ID is required');
+    return null
+  }
 
   const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "select id from accounts where name = '" + agentName + "'"];
   const AttachStdout =  true; 
@@ -638,7 +649,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const composeResult = await generateAgentDockerComposeFile(
         agentId, 
         agentEnvVariables,
-        'synapze/elizav019d', 
+        'synapze/elizav019e', 
         newAgentServerPort ?? '3300',
         `${import.meta.env.VITE_JWT_AGENT_SECRET}`,
         'synapze.xyz'
