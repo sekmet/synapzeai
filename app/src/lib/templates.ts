@@ -402,7 +402,7 @@ export async function saveTemplateState(template: Template) {
   };
 
   const envVars = getMatchedEnvironmentVars(template.modelProvider, template.clients);
-  console.log({envVars})
+  //console.log({envVars})
 
   // get env vars with default values
   const keysToExtract: string[] = [];
@@ -432,7 +432,7 @@ export async function saveTemplateState(template: Template) {
     }
   });
 
-  console.log({env})
+  //console.log({env})
   // Set the environment variables in the store
   agentDeployStore.setEnv(env);
   // Update the agent config in the store
