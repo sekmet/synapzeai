@@ -1,0 +1,35 @@
+{
+  "name": "@elizaos-plugins/client-deva",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "DEVA_API_BASE_URL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "DEVA_API_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "POST_IMMEDIATELY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "POST_INTERVAL_MIN": {
+        "type": "integer",
+        "default": 90,
+        "description": "Minimum interval between posts (in minutes)"
+      },
+      "POST_INTERVAL_MAX": {
+        "type": "integer",
+        "default": 180,
+        "description": "Maximum interval between posts (in minutes)"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@elizaos-plugins/client-lens",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "LENS_DRY_RUN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "LENS_POLL_INTERVAL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "STORJ_API_PASSWORD": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "STORJ_API_USERNAME": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

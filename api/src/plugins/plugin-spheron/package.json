@@ -1,0 +1,25 @@
+{
+  "name": "@elizaos-plugins/plugin-spheron",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "PRIVATE_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "PROVIDER_PROXY_URL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "WALLET_ADDRESS": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@elizaos-plugins/plugin-autonome",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "AUTONOME_JWT_TOKEN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "AUTONOME_RPC": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

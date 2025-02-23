@@ -1,0 +1,40 @@
+{
+  "name": "@elizaos-plugins/plugin-coinbase",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "COINBASE_API_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "COINBASE_COMMERCE_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "COINBASE_GENERATED_WALLET_HEX_SEED": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "COINBASE_GENERATED_WALLET_ID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "COINBASE_NOTIFICATION_URI": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "COINBASE_PRIVATE_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

@@ -5,44 +5,54 @@ import { persist } from 'zustand/middleware'
 interface Plugin {
     name: string
     enabled: boolean
+    config?: Record<string, any>
 }
 
 interface Client {
     name: string
     enabled: boolean
+    config?: Record<string, any>
 }
 
-interface VoiceSettings {
+interface AgentVoiceSettings {
     model: string
-}
-
+    provider?: string
+  }
+  
 interface AgentSettings {
-    voice: VoiceSettings
-}
-
-interface MessageExample {
-    user: string
-    content: {
-        text: string
-    }
+    secrets: Record<string, string>
+    voice?: AgentVoiceSettings
+    transcriptionProvider?: string
+    modelProvider?: string
+    customModelEndpoint?: string
 }
 
 interface AgentConfiguration {
     name: string
-    plugins: Plugin[]
-    clients: Client[]
+    pluginsConfig?: Plugin[]
+    plugins?: string[]
+    clientsConfig?: Client[]
+    clients?: string[]
     modelProvider: string
     settings: AgentSettings
+    system?: string
     bio: string[]
-    lore: string[]
-    knowledge: string[]
-    messageExamples: MessageExample[][]
-    postExamples: string[]
-    topics: string[]
-    style: {
-        all: string[]
-        chat: string[]
+    lore?: string[]
+    knowledge?: string[]
+    messageExamples?: Array<Array<{
+      user: string
+      content: {
+        text: string
+      }
+    }>>
+    style?: {
+      all: string[]
+      chat: string[]
+      post: string[]
     }
+    postExamples?: string[]
+    topics?: string[]
+    adjectives?: string[]
 }
 
 export interface Agent {
@@ -66,8 +76,11 @@ export interface Agent {
 interface AgentActiveState {
     agent: Agent | null
     refresh: number
+    configuration: AgentConfiguration | null
     setAgent: (agent: Agent) => void
     getAgent: () => Agent | null
+    getConfig: () => AgentConfiguration | null
+    setConfig: (config: AgentConfiguration) => void
     getAgentContainerId: () => string | null
     getAgentContainerPort: () => number | null
     getAgentOrganizationId: () => string | null
@@ -81,8 +94,11 @@ export const useAgentActiveStore = create<AgentActiveState>()(
         (set, get) => ({
             agent: null,
             refresh: 0,
+            configuration: null,
             setAgent: (agent: Agent) => set({ agent }),
             getAgent: () => get().agent,
+            setConfig: (config: AgentConfiguration) => set({ configuration: config }),
+            getConfig: () => get().agent?.configuration ?? null,
             getAgentContainerId: () => `${get().agent?.container_id}`.split(':')[0] ?? null,
             getAgentContainerPort: () => Number(`${get().agent?.container_id}`.split(':')[1]) ?? null,
             getAgentOrganizationId: () => get().agent?.organization_id ?? null,

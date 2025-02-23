@@ -1,0 +1,55 @@
+{
+  "name": "@elizaos-plugins/plugin-near",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "NEAR_ADDRESS": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_ENV": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_NETWORK": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_PUBLIC_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_RPC_URL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_SLIPPAGE": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_WALLET_PUBLIC_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "NEAR_WALLET_SECRET_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "SLIPPAGE_TOLERANCE": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+//import { Button } from "@/components/ui/button"
 import { Check, Loader2 } from "lucide-react"
 import { useAgentDeployStore } from '@/stores/agentDeployStore'
 
 export function ProvisioningSteps() {  
-  const { setProvisioning, getProvisioning } = useAgentDeployStore((state) => state)
+    //setProvisioning,
+  const { getProvisioning } = useAgentDeployStore((state) => state)
   const currentStep = getProvisioning().currentStep
-  const setCurrentStep = (step: number) => setProvisioning({ ...getProvisioning(), currentStep: step })
+  //const setCurrentStep = (step: number) => setProvisioning({ ...getProvisioning(), currentStep: step })
   //const completed = getProvisioning().completed ?? false
 
   const steps = [
@@ -54,7 +55,7 @@ export function ProvisioningSteps() {
     },
   ]
 
-  const handleNextStep = () => {
+  /*const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     }
@@ -62,7 +63,7 @@ export function ProvisioningSteps() {
 
   const handleReset = () => {
     setCurrentStep(0)
-  }
+  }*/
 
   return (
     <Card className="w-full max-w-2xl mx-auto p-6 shadow-lg">
@@ -118,14 +119,14 @@ export function ProvisioningSteps() {
           )
         })}
       </div>
-      <div className="flex justify-between">
+      {/*<div className="flex justify-between">
         <Button onClick={handleReset} variant="outline">
           Reset
         </Button>
         <Button onClick={handleNextStep} disabled={currentStep === steps.length - 1}>
           {currentStep === steps.length - 1 ? "Completed" : "Next Step"}
         </Button>
-      </div>
+      </div>*/}
     </Card>
   )
 }

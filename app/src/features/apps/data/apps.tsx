@@ -23,6 +23,24 @@ export function getIconForString(str: string): any {
   return null;
 }
 
+
+
+function formatCapitalizedString(input: string): string {
+  // Handle empty/null cases
+  if (!input) return '';
+  
+  // If no hyphens, just capitalize first letter
+  if (!input.includes('-')) {
+    return input.charAt(0).toUpperCase() + input.slice(1);
+  }
+ 
+  return input
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+ }
+ 
+
 const extractDescriptionFromReadme = (readmeContent: string): string | null => {
   const lines = readmeContent.split('\n');
   let titleFound = false;
@@ -58,7 +76,7 @@ export const fetchPlugins = async (forceRefresh = false) => {
 
     // Fetch the registry index
     const registryResponse = await fetch(
-      'https://raw.githubusercontent.com/elizaos-plugins/registry/main/index.json'
+      'https://raw.githubusercontent.com/aisynapze/registry/synapze/index.json'
     );
 
     if (!registryResponse.ok) {
@@ -71,7 +89,9 @@ export const fetchPlugins = async (forceRefresh = false) => {
     // Fetch package.json, check for logo, and fetch README.md for each plugin
     const pluginData = await Promise.all(
       pluginEntries.map(async ([name, githubUrl]) => {
-        const shortName = name.replace('@elizaos/', '');
+        const shortName = name.replace('@elizaos-plugins/', '');
+        const value = shortName.replace('plugin-', '');  // e.g., "0g"
+        const packageName = name.replace('@elizaos-plugins/', '@elizaos/');
         const [owner, repo] = (githubUrl as string).replace('github:', '').split('/');
         let branch = 'main';
         let packageJsonContent;
@@ -101,11 +121,13 @@ export const fetchPlugins = async (forceRefresh = false) => {
             return {
               logo: '',
               icon: getIconForString(shortName),
-              name: shortName,
+              name: formatCapitalizedString(value),
+              value,
               version: 'unknown',
               description: 'Plugin information unavailable',
               author: 'unknown',
               githubUrl: `https://github.com/${owner}/${repo}`,
+              package: packageName,
               installed: false,
               agentConfig: null, // Set agentConfig to null when package.json fetch fails
             };
@@ -150,11 +172,13 @@ export const fetchPlugins = async (forceRefresh = false) => {
         return {
           logo,
           icon: getIconForString(shortName),
-          name: shortName,
+          name: formatCapitalizedString(value),
+          value,
           version: packageJsonContent.version || 'unknown',
           description,
           author: packageJsonContent.author || 'unknown',
           githubUrl: `https://github.com/${owner}/${repo}`,
+          package: packageName,
           installed: false,
           agentConfig: packageJsonContent.agentConfig || null, // Pull agentConfig if it exists
         };

@@ -120,7 +120,7 @@ export const Header = ({
   const navigate = useNavigate()
   const { login } = useLogin({
 
-    onComplete: ({user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount}) => {
+    onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
       if (wasAlreadyAuthenticated) {
           // In this case, the user was already `authenticated` when this component was mounted.
           // For already-`authenticated` users, we redirect them to their profile page.
@@ -128,9 +128,10 @@ export const Header = ({
              // If the user is new, create it in your backend
              createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
           }
-          console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
-          console.log({currentUser: currentUser?.id})
-          console.log(setUser(user as AuthUser)) // authUser being the new format
+          //console.log(user, isNewUser, wasAlreadyAuthenticated, loginMethod, loginAccount);
+          //console.log({currentUser: currentUser?.id})
+          //console.log(setUser(user as AuthUser)) // authUser being the new format
+          setUser(user as AuthUser) // authUser being the new format
           //TODO remove hardcoded and get api-key from keystack server
           setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
 
@@ -146,7 +147,8 @@ export const Header = ({
               console.log("NEW USER", isNewUser)
 
               createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)
-              console.log(setUser(user as AuthUser)) // authUser being the new format
+              //console.log(setUser(user as AuthUser)) // authUser being the new format
+              setUser(user as AuthUser) 
               //TODO remove hardcoded and get api-key from keystack server
               setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')              
               
@@ -162,7 +164,8 @@ export const Header = ({
                 // If the user is new, create it in your backend
                 createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
              }
-              console.log(setUser(user as AuthUser)) // authUser being the new format
+              //console.log(setUser(user as AuthUser)) // authUser being the new format
+              setUser(user as AuthUser) 
               //TODO remove hardcoded and get api-key from keystack server
               setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
               //navigate({ to: '/' })

@@ -16,6 +16,8 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Overview } from './components/overview'
+import { UpdateAgent } from './components/update-agent'
+import { AgentLogs } from './components/agent-logs'
 import { useAuthStore } from '@/stores/authStore'
 //import { RecentSales } from './components/recent-sales'
 import { Onboarding } from './components/onboarding'
@@ -117,16 +119,16 @@ export default function Dashboard() {
           <div className='w-full overflow-x-auto pb-2'>
             <TabsList>
               <TabsTrigger value='overview'>
-                <IconChartPie size={21} className='mr-1' /> Overview
+                <IconChartPie size={21} className='mr-1' /> <span className='hidden sm:block'>Overview</span>
               </TabsTrigger>
-              <TabsTrigger value='agent-details' disabled>
-              <IconRobot size={21} className='mr-1' /> Details
+              <TabsTrigger value='agent-details'>
+              <IconRobot size={21} className='mr-1' /> <span className='hidden sm:block'>Details</span>
               </TabsTrigger>
-              <TabsTrigger value='logs' disabled>
-                <IconLogs size={21} className='mr-1' /> Logs
+              <TabsTrigger value='agent-logs'>
+                <IconLogs size={21} className='mr-1' /> <span className='hidden sm:block'>Logs</span>
               </TabsTrigger>
-              <TabsTrigger value='edit-agent' disabled>
-                <IconPencil size={21} className='mr-1' /> Update
+              <TabsTrigger value='update-agent'>
+                <IconPencil size={21} className='mr-1' /> <span className='hidden sm:block'>Update Agent</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -233,6 +235,12 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+          <TabsContent value='update-agent' className='space-y-4'>
+            <UpdateAgent />
+          </TabsContent>
+          <TabsContent value='agent-logs' className='space-y-4'>
+            <AgentLogs />
           </TabsContent>
         </Tabs>
         </>

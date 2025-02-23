@@ -1,5 +1,6 @@
 //import { Link } from '@tanstack/react-router'
 //import { Card } from '@/components/ui/card'
+import { useParams } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -9,6 +10,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import AgentConfigTemplateForm from '@/components/agent-config-template-form'
 
 export default function NewAgentTemplate() {
+  const { templateId } = useParams({ strict: false })
   return (
     <>
     <Header fixed>
@@ -18,8 +20,8 @@ export default function NewAgentTemplate() {
     <ProfileDropdown />
     </div>
     </Header>
-    <Main className="flex flex-col items-center px-6 py-16 flex-1 text-white pt-[5vh] dark:text-gray-100">
-    <AgentConfigTemplateForm title="Start with a template" />
+    <Main className="sm:px-6 sm:py-16 text-white pt-[5vh] dark:text-gray-100">
+    <AgentConfigTemplateForm title={`⚗️ ${templateId} template`} />
     </Main>
     </>
   )

@@ -45,8 +45,6 @@ import { stringToUniqueNumber } from '@/lib/utils'
 import { UUID } from '@/types/elizaosv1'
 import { useRouter } from '@tanstack/react-router'
 
-// Fake Data
-//import { conversations } from './data/convo.json'
 
 export default function Chats() {
   const router = useRouter();

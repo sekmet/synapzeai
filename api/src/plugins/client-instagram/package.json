@@ -1,0 +1,75 @@
+{
+  "name": "@elizaos-plugins/client-instagram",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "INSTAGRAM_ACTION_INTERVAL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_APP_ID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_APP_SECRET": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_BUSINESS_ACCOUNT_ID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_DRY_RUN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_ENABLE_ACTION_PROCESSING": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_PASSWORD": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "INSTAGRAM_POST_INTERVAL_MAX": {
+        "type": "integer",
+        "default": 180,
+        "description": "Maximum interval between posts (in minutes)"
+      },
+      "INSTAGRAM_POST_INTERVAL_MIN": {
+        "type": "integer",
+        "default": 90,
+        "description": "Minimum interval between posts (in minutes)"
+      },
+      "INSTAGRAM_USERNAME": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "MAX_ACTIONS_PROCESSING": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "POST_INTERVAL_MAX": {
+        "type": "integer",
+        "default": 180,
+        "description": "Maximum interval between posts (in minutes)"
+      },
+      "POST_INTERVAL_MIN": {
+        "type": "integer",
+        "default": 90,
+        "description": "Minimum interval between posts (in minutes)"
+      }
+    }
+  }
+}

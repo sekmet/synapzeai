@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "dockerode": "^4.0.4",
+    "handlebars": "^4.7.8",
     "hono": "^4.7.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",

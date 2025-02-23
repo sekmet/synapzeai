@@ -1,0 +1,40 @@
+{
+  "name": "@elizaos-plugins/client-simsai",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "POST_INTERVAL_MIN": {
+        "type": "integer",
+        "default": 90,
+        "description": "Minimum interval between posts (in minutes)"
+      },
+      "POST_INTERVAL_MAX": {
+        "type": "integer",
+        "default": 180,
+        "description": "Maximum interval between posts (in minutes)"
+      },
+      "SIMSAI_AGENT_ID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "SIMSAI_API_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "SIMSAI_DRY_RUN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "SIMSAI_USERNAME": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

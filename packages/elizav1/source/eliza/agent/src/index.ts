@@ -1,4 +1,11 @@
+import { PGLiteDatabaseAdapter } from "@elizaos/adapter-pglite";
+import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
+import { QdrantDatabaseAdapter } from "@elizaos/adapter-qdrant";
+import { RedisClient } from "@elizaos/adapter-redis";
 import { SqliteDatabaseAdapter } from "@elizaos/adapter-sqlite";
+import { SupabaseDatabaseAdapter } from "@elizaos/adapter-supabase";
+import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
+import { MongoClient } from "mongodb";
 import { AutoClientInterface } from "@elizaos/client-auto";
 import { DirectClient } from "@elizaos/client-direct";
 
@@ -24,6 +31,7 @@ import {
     validateCharacterConfig,
 } from "@elizaos/core";
 
+import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { normalizeCharacter } from "@elizaos/plugin-di";
 import { elizaCodeinPlugin, onchainJson } from "@elizaos/plugin-iq6900";
 import { createNodePlugin } from "@elizaos/plugin-node";
@@ -558,6 +566,94 @@ export function getTokenForProvider(
 }
 
 function initializeDatabase(dataDir: string) {
+    if (process.env.MONGODB_CONNECTION_STRING) {
+        elizaLogger.log("Initializing database on MongoDB Atlas");
+        const client = new MongoClient(process.env.MONGODB_CONNECTION_STRING, {
+            maxPoolSize: 100,
+            minPoolSize: 5,
+            maxIdleTimeMS: 60000,
+            connectTimeoutMS: 10000,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            compressors: ["zlib"],
+            retryWrites: true,
+            retryReads: true,
+        });
+
+        const dbName = process.env.MONGODB_DATABASE || "elizaAgent";
+        const db = new MongoDBDatabaseAdapter(client, dbName);
+
+        // Test the connection
+        db.init()
+            .then(() => {
+                elizaLogger.success("Successfully connected to MongoDB Atlas");
+            })
+            .catch((error) => {
+                elizaLogger.error("Failed to connect to MongoDB Atlas:", error);
+                throw error; // Re-throw to handle it in the calling code
+            });
+
+        return db;
+    } else if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+        elizaLogger.info("Initializing Supabase connection...");
+        const db = new SupabaseDatabaseAdapter(
+            process.env.SUPABASE_URL,
+            process.env.SUPABASE_ANON_KEY
+        );
+
+        // Test the connection
+        db.init()
+            .then(() => {
+                elizaLogger.success(
+                    "Successfully connected to Supabase database"
+                );
+            })
+            .catch((error) => {
+                elizaLogger.error("Failed to connect to Supabase:", error);
+            });
+
+        return db;
+    } else if (process.env.POSTGRES_URL) {
+        elizaLogger.info("Initializing PostgreSQL connection...");
+        const db = new PostgresDatabaseAdapter({
+            connectionString: process.env.POSTGRES_URL,
+            parseInputs: true,
+        });
+
+        // Test the connection
+        db.init()
+            .then(() => {
+                elizaLogger.success(
+                    "Successfully connected to PostgreSQL database"
+                );
+            })
+            .catch((error) => {
+                elizaLogger.error("Failed to connect to PostgreSQL:", error);
+            });
+
+        return db;
+    } else if (process.env.PGLITE_DATA_DIR) {
+        elizaLogger.info("Initializing PgLite adapter...");
+        // `dataDir: memory://` for in memory pg
+        const db = new PGLiteDatabaseAdapter({
+            dataDir: process.env.PGLITE_DATA_DIR,
+        });
+        return db;
+    } else if (
+        process.env.QDRANT_URL &&
+        process.env.QDRANT_KEY &&
+        process.env.QDRANT_PORT &&
+        process.env.QDRANT_VECTOR_SIZE
+    ) {
+        elizaLogger.info("Initializing Qdrant adapter...");
+        const db = new QdrantDatabaseAdapter(
+            process.env.QDRANT_URL,
+            process.env.QDRANT_KEY,
+            Number(process.env.QDRANT_PORT),
+            Number(process.env.QDRANT_VECTOR_SIZE)
+        );
+        return db;
+    } else {
         const filePath =
             process.env.SQLITE_FILE ?? path.resolve(dataDir, "db.sqlite");
         elizaLogger.info(`Initializing SQLite database at ${filePath}...`);
@@ -575,6 +671,7 @@ function initializeDatabase(dataDir: string) {
             });
 
         return db;
+    }
 }
 
 // also adds plugins from character file into the runtime
@@ -664,13 +761,15 @@ export async function createAgent(
         character,
         // character.plugins are handled when clients are added
         plugins: [
+            bootstrapPlugin,
+            nodePlugin,
         ]
             .flat()
             .filter(Boolean),
         providers: [],
         managers: [],
         cacheManager: cache,
-        fetch: logFetch
+        fetch: logFetch,
     });
 }
 
@@ -705,7 +804,7 @@ function initializeCache(
     switch (cacheStore) {
         case CacheStore.REDIS:
             if (process.env.REDIS_URL) {
-                /*elizaLogger.info("Connecting to Redis...");
+                elizaLogger.info("Connecting to Redis...");
                 const redisClient = new RedisClient(process.env.REDIS_URL);
                 if (!character?.id) {
                     throw new Error(
@@ -714,8 +813,7 @@ function initializeCache(
                 }
                 return new CacheManager(
                     new DbCacheAdapter(redisClient, character.id) // Using DbCacheAdapter since RedisClient also implements IDatabaseCacheAdapter
-                );*/
-                elizaLogger.info("Redis caching not supported yet...");
+                );
             } else {
                 throw new Error("REDIS_URL environment variable is not set.");
             }

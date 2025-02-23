@@ -1,0 +1,35 @@
+{
+  "name": "@elizaos-plugins/plugin-twitter",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "MAX_TWEET_LENGTH": {
+        "type": "integer",
+        "default": 280,
+        "description": "Maximum length of tweets"
+      },
+      "TWITTER_2FA_SECRET": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TWITTER_EMAIL": {
+        "type": "string",
+        "format": "email",
+        "description": "Valid X/Twitter email is required"
+      },
+      "TWITTER_PASSWORD": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TWITTER_USERNAME": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

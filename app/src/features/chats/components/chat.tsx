@@ -25,6 +25,7 @@ import type { IAttachment } from "../data/chat-types";
 import { AudioRecorder } from "./audio-recorder";
 import { Badge } from "@/components/ui/badge";
 import { useAutoScroll } from "@/components/ui/chat/hooks/useAutoScroll";
+import { useAgentActiveStore } from "@/stores/agentActive";
 
 type ExtraContentFields = {
     user: string;
@@ -39,6 +40,7 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
     const authUser = useAuthStore.getState();
     const [apiClient, setApiClient] = useState<ApiClient | null>(null);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const { getAgent, setAgent } = useAgentActiveStore((state: any) => state)
     const [input, setInput] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,8 +73,14 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
                 console.error("Failed to create ApiClient:", error);
             }
         };
-        createApiClient();
+        if (agentId === undefined) {
+            setAgent(getAgent())
+        } else {
+            createApiClient();
+        }
+
     }, [agentId, userId, apiKey]); // Dependencies: re-run if these change
+
 
     useEffect(() => {
         scrollToBottom();
@@ -321,6 +329,7 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
                         onChange={({ target }) => setInput(target.value)}
                         placeholder="Type your message here..."
                         className="min-h-12 resize-none rounded-md bg-card border-0 p-3 shadow-none focus-visible:ring-0"
+                        disabled={sendMessageMutation?.isPending}
                     />
                     <div className="flex items-center p-3 pt-0">
                         <Tooltip>
@@ -329,6 +338,7 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
                                     <Button
                                         variant="ghost"
                                         size="icon"
+                                        disabled={sendMessageMutation?.isPending}
                                         onClick={() => {
                                             if (fileInputRef.current) {
                                                 fileInputRef.current.click();
@@ -355,6 +365,7 @@ export function AgentChat({ agentId }: { agentId: UUID }) {
                             </TooltipContent>
                         </Tooltip>
                         <AudioRecorder
+                            disabled={sendMessageMutation?.isPending}
                             agentId={agentId}
                             onChange={(newInput: string) => setInput(newInput)}
                         />

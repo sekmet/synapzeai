@@ -18,7 +18,7 @@ export default function NewAgentReview() {
     <ProfileDropdown />
     </div>
     </Header>
-    <Main className="flex flex-col items-center px-6 py-16 flex-1 text-white pt-[5vh] dark:text-gray-100">
+    <Main className="px-6 py-16 text-white pt-[5vh] dark:text-gray-100">
       <AgentConfigReview />
     </Main>
     </>

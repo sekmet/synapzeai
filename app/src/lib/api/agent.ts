@@ -70,7 +70,7 @@ export function parseOutputSQlite(output:string): OutputClientSQlite[] {
 export const fetchUserAgents = async (userId: string) => {
   if (!userId) return [];
   const agentStore = useAgentStore.getState();
-  console.log('fetchUserAgents ', userId)
+  //console.log('fetchUserAgents ', userId)
   const userOrg = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/organizations/${userId}/organization`,{
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
@@ -615,6 +615,26 @@ export const deleteAgentDeployment = async (agentId: string, composePath: string
   }
 }
 
+async function retryGetAgentClientId(containerId: string, agentName: string, maxRetries: number = 3): Promise<any> {
+  let retryCount = 0;
+  
+  while (retryCount < maxRetries) {
+    try {
+      const agentClientId = await getDeployedAgentClientId(containerId, agentName);
+      return agentClientId;
+    } catch (error) {
+      if (retryCount === maxRetries - 1) {
+        throw new Error(`Failed to get agent client ID after ${maxRetries} attempts: ${error}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 10000)); // 10 sec delay
+      retryCount++;
+    }
+  }
+  
+  throw new Error('Unexpected retry loop exit');
+}
+
+
 export const updateAgentDeployment = async (agentData: AgentData) => {
   if (!agentData.id) {
     const agentProvisioning = useAgentDeployStore.getState();
@@ -702,7 +722,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       await sleep(21000);
 
       // get the agent client id
-      const agentClientId = await getDeployedAgentClientId(containerId, agentData.name as string);
+      const agentClientId = await retryGetAgentClientId(containerId, agentData.name as string, 5);
 
       agentProvisioning.setProvisioning({ ...agentProvisioning.getProvisioning(), currentStep: 6 });
 

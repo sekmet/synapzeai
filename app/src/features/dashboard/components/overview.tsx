@@ -3,6 +3,7 @@ import { Bar, BarChart, Line, LineChart, PieChart, Pie, ResponsiveContainer, XAx
 import { getAgentEngagedSessions, getAgentHandleTime, getAgentCustomerSatisfactionScore, getAgentSentimentScore } from "@/lib/api/reports";
 import { useQuery } from "@tanstack/react-query";
 import { useAgentActiveStore } from '@/stores/agentActive'
+import { LoadingWidget } from '@/components/loading'
 
 /*const engagedData = [
   { date: 'Jan 31', sessions: 15 },
@@ -24,33 +25,6 @@ import { useAgentActiveStore } from '@/stores/agentActive'
   { name: 'Neutral', percentage: 83.33 },
   { name: 'Positive', percentage: 5.0 },
 ]*/
-
-function LoadingWidget() {
-  return (
-    <div className="flex flex-col justify-center items-center h-32">
-    <svg
-      className="animate-spin h-24 w-24 text-gray-400 dark:text-blue-400"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      ></circle>
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      ></path>
-    </svg>
-  </div>
-  )
-}
 
 
 const COLORS = ['#ff4d4f', '#faad14', '#52c41a']

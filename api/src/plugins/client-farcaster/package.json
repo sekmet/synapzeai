@@ -1,0 +1,85 @@
+{
+  "name": "@elizaos-plugins/client-farcaster",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "ACTION_INTERVAL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "ACTION_TIMELINE_TYPE": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "ENABLE_ACTION_PROCESSING": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "ENABLE_POST": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "FARCASTER_DRY_RUN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "FARCASTER_FID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "FARCASTER_HUB_URL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "FARCASTER_NEYNAR_API_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "FARCASTER_NEYNAR_SIGNER_UUID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "FARCASTER_POLL_INTERVAL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "MAX_ACTIONS_PROCESSING": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "MAX_CAST_LENGTH": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "POST_IMMEDIATELY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "POST_INTERVAL_MIN": {
+        "type": "integer",
+        "default": 90,
+        "description": "Minimum interval between posts (in minutes)"
+      },
+      "POST_INTERVAL_MAX": {
+        "type": "integer",
+        "default": 180,
+        "description": "Maximum interval between posts (in minutes)"
+      }
+    }
+  }
+}

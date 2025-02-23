@@ -1,8 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 import { EditorState } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
+import { EditorView/*, keymap, lineNumbers*/ } from "@codemirror/view";
+//import { javascript } from "@codemirror/lang-javascript";
 import { basicSetup } from '@codemirror/basic-setup';
 import { json } from '@codemirror/lang-json';
+/*import { defaultKeymap } from "@codemirror/commands"
+import { 
+    syntaxHighlighting,
+    defaultHighlightStyle,
+    bracketMatching
+} from "@codemirror/language"*/
 
 interface EditorProps {
   initialDoc?: string;

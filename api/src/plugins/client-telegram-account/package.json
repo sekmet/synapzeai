@@ -1,0 +1,35 @@
+{
+  "name": "@elizaos-plugins/client-telegram-account",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "TELEGRAM_ACCOUNT_APP_HASH": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TELEGRAM_ACCOUNT_APP_ID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TELEGRAM_ACCOUNT_DEVICE_MODEL": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TELEGRAM_ACCOUNT_PHONE": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TELEGRAM_ACCOUNT_SYSTEM_VERSION": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

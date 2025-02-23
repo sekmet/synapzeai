@@ -16,6 +16,7 @@ type Props = {
     agentId: UUID;
     onChange: (newInput: string) => void;
     className?: string;
+    disabled?: boolean;
     timerClassName?: string;
 };
 
@@ -39,6 +40,7 @@ export const AudioRecorder = ({
     timerClassName,
     agentId,
     onChange,
+    disabled,
 }: Props) => {
     const { toast } = useToast();
     // States
@@ -264,6 +266,7 @@ export const AudioRecorder = ({
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                disabled={disabled}
                                 onClick={() => startRecording()}
                             >
                                 <Mic className="size-4" />
@@ -274,6 +277,7 @@ export const AudioRecorder = ({
                                 onClick={handleSubmit}
                                 variant="ghost"
                                 size="icon"
+                                disabled={disabled}
                             >
                                 <Send className="size-4" />
                             </Button>

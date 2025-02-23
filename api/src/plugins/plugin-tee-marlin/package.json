@@ -1,0 +1,15 @@
+{
+  "name": "@elizaos-plugins/plugin-tee-marlin",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "TEE_MARLIN_ATTESTATION_ENDPOINT": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}

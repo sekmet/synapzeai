@@ -82,9 +82,6 @@ const AuthenticatedAgentNewIndexLazyImport = createFileRoute(
 const AuthenticatedAgentNewUploadLazyImport = createFileRoute(
   '/_authenticated/agent/new/upload',
 )()
-const AuthenticatedAgentNewTemplateLazyImport = createFileRoute(
-  '/_authenticated/agent/new/template',
-)()
 const AuthenticatedAgentNewSecretsLazyImport = createFileRoute(
   '/_authenticated/agent/new/secrets',
 )()
@@ -93,6 +90,12 @@ const AuthenticatedAgentNewReviewLazyImport = createFileRoute(
 )()
 const AuthenticatedAgentNewFromScracthLazyImport = createFileRoute(
   '/_authenticated/agent/new/from-scracth',
+)()
+const AuthenticatedAgentNewTemplateIndexLazyImport = createFileRoute(
+  '/_authenticated/agent/new/template/',
+)()
+const AuthenticatedAgentNewTemplateTemplateIdLazyImport = createFileRoute(
+  '/_authenticated/agent/new/template/$templateId',
 )()
 
 // Create/Update Routes
@@ -345,9 +348,7 @@ const AuthenticatedAgentNewIndexLazyRoute =
     path: '/agent/new/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
-    import('./routes/_authenticated/agent/new/index.lazy').then(
-      (d) => d.Route,
-    ),
+    import('./routes/_authenticated/agent/new/index.lazy').then((d) => d.Route),
   )
 
 const AuthenticatedAgentNewUploadLazyRoute =
@@ -357,17 +358,6 @@ const AuthenticatedAgentNewUploadLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/agent/new/upload.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
-const AuthenticatedAgentNewTemplateLazyRoute =
-  AuthenticatedAgentNewTemplateLazyImport.update({
-    id: '/agent/new/template',
-    path: '/agent/new/template',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/agent/new/template.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -401,6 +391,28 @@ const AuthenticatedAgentNewFromScracthLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/agent/new/from-scracth.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedAgentNewTemplateIndexLazyRoute =
+  AuthenticatedAgentNewTemplateIndexLazyImport.update({
+    id: '/agent/new/template/',
+    path: '/agent/new/template/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/agent/new/template/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedAgentNewTemplateTemplateIdLazyRoute =
+  AuthenticatedAgentNewTemplateTemplateIdLazyImport.update({
+    id: '/agent/new/template/$templateId',
+    path: '/agent/new/template/$templateId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/agent/new/template/$templateId.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -626,13 +638,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentNewSecretsLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/agent/new/template': {
-      id: '/_authenticated/agent/new/template'
-      path: '/agent/new/template'
-      fullPath: '/agent/new/template'
-      preLoaderRoute: typeof AuthenticatedAgentNewTemplateLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
     '/_authenticated/agent/new/upload': {
       id: '/_authenticated/agent/new/upload'
       path: '/agent/new/upload'
@@ -645,6 +650,20 @@ declare module '@tanstack/react-router' {
       path: '/agent/new'
       fullPath: '/agent/new'
       preLoaderRoute: typeof AuthenticatedAgentNewIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/agent/new/template/$templateId': {
+      id: '/_authenticated/agent/new/template/$templateId'
+      path: '/agent/new/template/$templateId'
+      fullPath: '/agent/new/template/$templateId'
+      preLoaderRoute: typeof AuthenticatedAgentNewTemplateTemplateIdLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/agent/new/template/': {
+      id: '/_authenticated/agent/new/template/'
+      path: '/agent/new/template'
+      fullPath: '/agent/new/template'
+      preLoaderRoute: typeof AuthenticatedAgentNewTemplateIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
   }
@@ -694,9 +713,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgentNewFromScracthLazyRoute: typeof AuthenticatedAgentNewFromScracthLazyRoute
   AuthenticatedAgentNewReviewLazyRoute: typeof AuthenticatedAgentNewReviewLazyRoute
   AuthenticatedAgentNewSecretsLazyRoute: typeof AuthenticatedAgentNewSecretsLazyRoute
-  AuthenticatedAgentNewTemplateLazyRoute: typeof AuthenticatedAgentNewTemplateLazyRoute
   AuthenticatedAgentNewUploadLazyRoute: typeof AuthenticatedAgentNewUploadLazyRoute
   AuthenticatedAgentNewIndexLazyRoute: typeof AuthenticatedAgentNewIndexLazyRoute
+  AuthenticatedAgentNewTemplateTemplateIdLazyRoute: typeof AuthenticatedAgentNewTemplateTemplateIdLazyRoute
+  AuthenticatedAgentNewTemplateIndexLazyRoute: typeof AuthenticatedAgentNewTemplateIndexLazyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -715,10 +735,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAgentNewFromScracthLazyRoute,
   AuthenticatedAgentNewReviewLazyRoute: AuthenticatedAgentNewReviewLazyRoute,
   AuthenticatedAgentNewSecretsLazyRoute: AuthenticatedAgentNewSecretsLazyRoute,
-  AuthenticatedAgentNewTemplateLazyRoute:
-    AuthenticatedAgentNewTemplateLazyRoute,
   AuthenticatedAgentNewUploadLazyRoute: AuthenticatedAgentNewUploadLazyRoute,
   AuthenticatedAgentNewIndexLazyRoute: AuthenticatedAgentNewIndexLazyRoute,
+  AuthenticatedAgentNewTemplateTemplateIdLazyRoute:
+    AuthenticatedAgentNewTemplateTemplateIdLazyRoute,
+  AuthenticatedAgentNewTemplateIndexLazyRoute:
+    AuthenticatedAgentNewTemplateIndexLazyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -755,9 +777,10 @@ export interface FileRoutesByFullPath {
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
-  '/agent/new/template': typeof AuthenticatedAgentNewTemplateLazyRoute
   '/agent/new/upload': typeof AuthenticatedAgentNewUploadLazyRoute
   '/agent/new': typeof AuthenticatedAgentNewIndexLazyRoute
+  '/agent/new/template/$templateId': typeof AuthenticatedAgentNewTemplateTemplateIdLazyRoute
+  '/agent/new/template': typeof AuthenticatedAgentNewTemplateIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -789,9 +812,10 @@ export interface FileRoutesByTo {
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
-  '/agent/new/template': typeof AuthenticatedAgentNewTemplateLazyRoute
   '/agent/new/upload': typeof AuthenticatedAgentNewUploadLazyRoute
   '/agent/new': typeof AuthenticatedAgentNewIndexLazyRoute
+  '/agent/new/template/$templateId': typeof AuthenticatedAgentNewTemplateTemplateIdLazyRoute
+  '/agent/new/template': typeof AuthenticatedAgentNewTemplateIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -827,9 +851,10 @@ export interface FileRoutesById {
   '/_authenticated/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/_authenticated/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/_authenticated/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
-  '/_authenticated/agent/new/template': typeof AuthenticatedAgentNewTemplateLazyRoute
   '/_authenticated/agent/new/upload': typeof AuthenticatedAgentNewUploadLazyRoute
   '/_authenticated/agent/new/': typeof AuthenticatedAgentNewIndexLazyRoute
+  '/_authenticated/agent/new/template/$templateId': typeof AuthenticatedAgentNewTemplateTemplateIdLazyRoute
+  '/_authenticated/agent/new/template/': typeof AuthenticatedAgentNewTemplateIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -865,9 +890,10 @@ export interface FileRouteTypes {
     | '/agent/new/from-scracth'
     | '/agent/new/review'
     | '/agent/new/secrets'
-    | '/agent/new/template'
     | '/agent/new/upload'
     | '/agent/new'
+    | '/agent/new/template/$templateId'
+    | '/agent/new/template'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -898,9 +924,10 @@ export interface FileRouteTypes {
     | '/agent/new/from-scracth'
     | '/agent/new/review'
     | '/agent/new/secrets'
-    | '/agent/new/template'
     | '/agent/new/upload'
     | '/agent/new'
+    | '/agent/new/template/$templateId'
+    | '/agent/new/template'
   id:
     | '__root__'
     | '/_authenticated'
@@ -934,9 +961,10 @@ export interface FileRouteTypes {
     | '/_authenticated/agent/new/from-scracth'
     | '/_authenticated/agent/new/review'
     | '/_authenticated/agent/new/secrets'
-    | '/_authenticated/agent/new/template'
     | '/_authenticated/agent/new/upload'
     | '/_authenticated/agent/new/'
+    | '/_authenticated/agent/new/template/$templateId'
+    | '/_authenticated/agent/new/template/'
   fileRoutesById: FileRoutesById
 }
 
@@ -1010,9 +1038,10 @@ export const routeTree = rootRoute
         "/_authenticated/agent/new/from-scracth",
         "/_authenticated/agent/new/review",
         "/_authenticated/agent/new/secrets",
-        "/_authenticated/agent/new/template",
         "/_authenticated/agent/new/upload",
-        "/_authenticated/agent/new/"
+        "/_authenticated/agent/new/",
+        "/_authenticated/agent/new/template/$templateId",
+        "/_authenticated/agent/new/template/"
       ]
     },
     "/(auth)/500": {
@@ -1132,16 +1161,20 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/agent/new/secrets.lazy.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/agent/new/template": {
-      "filePath": "_authenticated/agent/new/template.lazy.tsx",
-      "parent": "/_authenticated"
-    },
     "/_authenticated/agent/new/upload": {
       "filePath": "_authenticated/agent/new/upload.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/agent/new/": {
       "filePath": "_authenticated/agent/new/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/agent/new/template/$templateId": {
+      "filePath": "_authenticated/agent/new/template/$templateId.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/agent/new/template/": {
+      "filePath": "_authenticated/agent/new/template/index.lazy.tsx",
       "parent": "/_authenticated"
     }
   }

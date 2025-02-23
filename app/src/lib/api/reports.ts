@@ -34,7 +34,7 @@ export const getAgentEngagedSessions = async (containerId: string) => {
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT DATE(createdAt / 1000, 'unixepoch') AS date, COUNT(*) AS sessions FROM memories GROUP BY DATE(createdAt) ORDER BY date;"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT DATE(createdAt / 1000, 'unixepoch') AS date, COUNT(DISTINCT roomId) AS sessions FROM memories GROUP BY DATE(createdAt) ORDER BY date;"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   
@@ -89,7 +89,7 @@ export const getAgentCustomerSatisfactionScore = async (containerId: string) => 
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT DATE(createdAt / 1000, 'unixepoch') AS date, AVG(CAST(json_extract(body, '$.csat') AS REAL)) AS avg_csat FROM logs WHERE type = 'csat' GROUP BY DATE(createdAt) ORDER BY date;"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT DATE(createdAt) AS date, ROUND(AVG(CAST(json_extract(body, '$.csat') AS REAL)), 2) AS avg_csat FROM logs WHERE type = 'csat' GROUP BY DATE(createdAt) ORDER BY date;"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   
@@ -116,7 +116,7 @@ export const getAgentSentimentScore = async (containerId: string) => {
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT CAST(json_extract(body, '$.sentiment') AS TEXT) AS sentiment, (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM logs WHERE type = 'sentiment')) AS percentage FROM logs WHERE type = 'sentiment' GROUP BY body;"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT CAST(json_extract(body, '$.sentiment') AS TEXT) AS name, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM logs WHERE type = 'sentiment'), 2) AS percentage FROM logs WHERE type = 'sentiment' GROUP BY body;"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   
@@ -225,7 +225,7 @@ export const getAvgSessionHandleTime = async (containerId: string) => {
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT AVG(met_target) AS avg_handle_time_percentage FROM (SELECT roomId, CASE WHEN (MAX(createdAt) - MIN(createdAt)) / 60000.0 <= 3 THEN 100.0 ELSE 0.0 END AS met_target FROM memories GROUP BY roomId ) AS session_targets;"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT ROUND(AVG(met_target), 2) AS avg_handle_time_percentage FROM (SELECT roomId, CASE WHEN (MAX(createdAt) - MIN(createdAt)) / 60000.0 <= 3 THEN 100.0 ELSE 0.0 END AS met_target FROM memories GROUP BY roomId ) AS session_targets;"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   
@@ -252,7 +252,7 @@ export const getAvgCsat = async (containerId: string) => {
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT AVG(CAST(json_extract(body, '$.csat') AS REAL)) AS avg_csat FROM logs WHERE type = 'csat';"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT ROUND(AVG(CAST(json_extract(body, '$.csat') AS REAL)), 2) AS avg_csat FROM logs WHERE type = 'csat';"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   
@@ -280,7 +280,7 @@ export const getAvgSessionSentiment = async (containerId: string) => {
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT AVG(room_avg_sentiment) * 100 AS avg_session_sentiment_percentage FROM (SELECT roomId, AVG(CASE WHEN json_extract(body, '$.sentiment') = 'negative' THEN 0 WHEN json_extract(body, '$.sentiment') = 'neutral' THEN 0.5 WHEN json_extract(body, '$.sentiment') = 'positive' THEN 1 ELSE NULL END ) AS room_avg_sentiment FROM logs WHERE type = 'sentiment' GROUP BY roomId ) AS room_sentiments;"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT ROUND(AVG(room_avg_sentiment),2) * 100 AS avg_session_sentiment_percentage FROM (SELECT roomId, AVG(CASE WHEN json_extract(body, '$.sentiment') = 'negative' THEN 0 WHEN json_extract(body, '$.sentiment') = 'neutral' THEN 0.5 WHEN json_extract(body, '$.sentiment') = 'positive' THEN 1 ELSE NULL END ) AS room_avg_sentiment FROM logs WHERE type = 'sentiment' GROUP BY roomId ) AS room_sentiments;"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   

@@ -16,19 +16,15 @@ interface AdditionalSecret {
 export default function AgentConfigSecrets() {
     const router = useRouter()
     const canGoBack = useCanGoBack()
-  const [additionalSecrets, setAdditionalSecrets] = useState<AdditionalSecret[]>([{
-    id: 1,
-    key: "",
-    value: ""
-  }, {
-    id: 2,
-    key: "",
-    value: ""
-  }, {
-    id: 3,
-    key: "",
-    value: ""
-  }]);
+    const { getConfig } = useAgentDeployStore((state) => state)
+
+  const [additionalSecrets, setAdditionalSecrets] = useState<AdditionalSecret[]>([
+    {
+      id: 1,
+      key: "",
+      value: ""
+    }
+  ]);
   const addSecret = () => {
     const newId = Math.max(0, ...additionalSecrets.map(s => s.id)) + 1;
     setAdditionalSecrets([...additionalSecrets, {
@@ -47,9 +43,15 @@ export default function AgentConfigSecrets() {
     } : secret));
   };
 
+  // TODO: handle plugin config and secrets setups
+  let characterConfig = getConfig();
+  delete characterConfig?.pluginsConfig;
+  delete characterConfig?.clientsConfig;
+
+
   return (
   <div className="min-h-screen bg-background text-foreground w-full p-8">
-      <div className="max-w-full sm:max-w-5xl mx-auto">
+      <div className="max-w-full mx-auto">
         <div className="mb-8">
         {canGoBack ? (
             <button onClick={() => router.history.back()} className="flex items-center text-yellow-500 dark:text-yellow-400 mb-6 hover:opacity-80">
@@ -99,7 +101,7 @@ export default function AgentConfigSecrets() {
             </p>
             <div className="space-y-4">
               {additionalSecrets.map(secret => <div key={secret.id} className="grid grid-cols-2 gap-4">
-                  <Input type="text" className="w-full px-3 py-1 rounded border bg-background text-foreground" placeholder="Enter key..." defaultValue={secret.key} onChange={e => updateSecret(secret.id, "key", e.target.value)} />
+                  <Input type="text" disabled={secret.key !== ""} className="w-full px-3 py-1 rounded border bg-background text-foreground" placeholder="Enter key..." defaultValue={secret.key} onChange={e => updateSecret(secret.id, "key", e.target.value)} />
                   <div className="flex gap-2">
                     <Input type="text" className="w-full px-3 py-1 rounded border bg-background text-foreground" placeholder="Enter value..." defaultValue={secret.value} onChange={e => updateSecret(secret.id, "value", e.target.value)} />
                     <button onClick={() => removeSecret(secret.id)} className="p-2 text-sm text-muted-foreground hover:text-foreground">

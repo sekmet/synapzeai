@@ -1532,6 +1532,38 @@ app.get(`${apiPrefix}/templates/:tplname`, async (c) => {
   }
 });
 
+
+// Get plugin config file endpoint
+app.get(`${apiPrefix}/plugins/:pluginname`, async (c) => {
+  try {
+    const pluginName = c.req.param('pluginname');
+    if (!pluginName) {
+      return c.json({ error: 'Plugin name is required' }, 400);
+    }
+
+    // Ensure the plugin name has .json extension
+    const fileName = `package.json`;
+    const pluginDir = path.join(process.cwd(), 'src', 'plugins', `${pluginName}`);
+    const filePath = path.join(pluginDir, fileName);
+
+    // Check if file exists and is within plugins directory (prevent directory traversal)
+    if (!filePath.startsWith(pluginDir) || !fs.existsSync(filePath)) {
+      return c.json({ error: 'Plugin not found' }, 404);
+    }
+
+    // Read and parse the JSON file
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const jsonContent = JSON.parse(fileContent);
+
+    return c.json(jsonContent);
+  } catch (err) {
+    console.error('Error reading plugin config file:', err);
+    return c.json({ 
+      error: err instanceof SyntaxError ? 'Invalid JSON format' : 'Failed to read plugin config file' 
+    }, 500);
+  }
+});
+
 // Start the Bun server
 Bun.serve({
   fetch: app.fetch,

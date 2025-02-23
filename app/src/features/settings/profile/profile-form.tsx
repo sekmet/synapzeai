@@ -140,7 +140,7 @@ let defaultValues: Partial<ProfileFormValues> = {
 }
 
 export default function ProfileForm({ initialData }: { initialData?: ProfileFormValues }) {
-  const { user } = useAuthStore()
+  //const { user } = useAuthStore()
   const { getOnboarding, setOnboarding, getUser } = useAuthStore((state) => state)
   const queryClient = useQueryClient()
   const [verifyEmailisLoading, setVerifyEmailisLoading] = useState(false)
@@ -188,8 +188,8 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
         completed: false
       })
     }
-    console.log('USER STORE', user)
-    console.log(userData)
+    //console.log('USER STORE', user)
+    //console.log(userData)
   }, [userData, form])
 
   const { fields, append } = useFieldArray<ProfileFormValues>({

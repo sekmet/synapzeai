@@ -4,29 +4,294 @@ import { QdrantDatabaseAdapter } from "@elizaos/adapter-qdrant";
 import { RedisClient } from "@elizaos/adapter-redis";
 import { SqliteDatabaseAdapter } from "@elizaos/adapter-sqlite";
 import { SupabaseDatabaseAdapter } from "@elizaos/adapter-supabase";
-import { AutoClientInterface } from "@elizaos/client-auto";
-import { DiscordClientInterface } from "@elizaos/client-discord";
-import { InstagramClientInterface } from "@elizaos/client-instagram";
-import { LensAgentClient } from "@elizaos/client-lens";
-import { SlackClientInterface } from "@elizaos/client-slack";
-import { TelegramClientInterface } from "@elizaos/client-telegram";
-import { TelegramAccountClientInterface } from "@elizaos/client-telegram-account";
-import { TwitterClientInterface } from "@elizaos/client-twitter";
-import { AlexaClientInterface } from "@elizaos/client-alexa";
 import { MongoDBDatabaseAdapter } from "@elizaos/adapter-mongodb";
-import { DevaClientInterface } from "@elizaos/client-deva";
-
-import { FarcasterClientInterface } from "@elizaos/client-farcaster";
-import { OmniflixPlugin } from "@elizaos/plugin-omniflix";
-import { JeeterClientInterface } from "@elizaos/client-simsai";
-import { XmtpClientInterface } from "@elizaos/client-xmtp";
+import { MongoClient } from "mongodb";
+import { AutoClientInterface } from "@elizaos/client-auto";
 import { DirectClient } from "@elizaos/client-direct";
+{{#if client-discord}}
+import { DiscordClientInterface } from "@elizaos/client-discord";
+{{/if}}
+{{#if client-farcaster}}
+import { FarcasterClientInterface } from "@elizaos/client-farcaster";
+{{/if}}
+{{#if client-github}}
+import { GitHubClientInterface } from "@elizaos/client-github";
+{{/if}}
+{{#if client-lens}}
+import { LensAgentClient } from "@elizaos/client-lens";
+{{/if}}
+{{#if client-slack}}
+import { SlackClientInterface } from "@elizaos/client-slack";
+{{/if}}
+{{#if client-telegram}}
+import { TelegramClientInterface } from "@elizaos/client-telegram";
+{{/if}}
+{{#if client-telegram-account}}
+import { TelegramAccountClientInterface } from "@elizaos/client-telegram-account";
+{{/if}}
+{{#if client-twitter}}
+import { TwitterClientInterface } from "@elizaos/client-twitter";
+{{/if}}
+{{#if client-instagram}}
+import { InstagramClientInterface } from "@elizaos/client-instagram";
+{{/if}}
+{{#if client-alexa}}
+import { AlexaClientInterface } from "@elizaos/client-alexa";
+{{/if}}
+{{#if client-deva}}
+import { DevaClientInterface } from "@elizaos/client-deva";
+{{/if}}
+{{#if client-simsai}}
+import { JeeterClientInterface } from "@elizaos/client-simsai";
+{{/if}}
+{{#if client-xmtp}}
+import { XmtpClientInterface } from "@elizaos/client-xmtp";
+{{/if}}
+{{#if plugin-0g}}
+import { zgPlugin } from "@elizaos/plugin-0g";
+{{/if}}
+{{#if plugin-football}}
+import { footballPlugin } from "@elizaos/plugin-football";
+{{/if}}
+{{#if plugin-agentkit}}
 import { agentKitPlugin } from "@elizaos/plugin-agentkit";
+{{/if}}
+{{#if plugin-gelato}}
 import { gelatoPlugin } from "@elizaos/plugin-gelato";
+{{/if}}
+{{#if plugin-primus}}
 import { PrimusAdapter } from "@elizaos/plugin-primus";
+{{/if}}
+{{#if plugin-lightning}}
 import { lightningPlugin } from "@elizaos/plugin-lightning";
-import { elizaCodeinPlugin, onchainJson } from "@elizaos/plugin-iq6900";
+{{/if}}
+{{#if plugin-dcap}}
 import { dcapPlugin } from "@elizaos/plugin-dcap";
+{{/if}}
+{{#if plugin-3d-generation}}
+import { ThreeDGenerationPlugin } from "@elizaos/plugin-3d-generation";
+{{/if}}
+{{#if plugin-abstract}}
+import { abstractPlugin } from "@elizaos/plugin-abstract";
+{{/if}}
+{{#if plugin-akash}}
+import { akashPlugin } from "@elizaos/plugin-akash";
+{{/if}}
+{{#if plugin-allora}}
+import { alloraPlugin } from "@elizaos/plugin-allora";
+{{/if}}
+{{#if plugin-aptos}}
+import { aptosPlugin } from "@elizaos/plugin-aptos";
+{{/if}}
+{{#if plugin-arthera}}
+import { artheraPlugin } from "@elizaos/plugin-arthera";
+{{/if}}
+{{#if plugin-autonome}}
+import { autonomePlugin } from "@elizaos/plugin-autonome";
+{{/if}}
+{{#if plugin-avail}}
+import { availPlugin } from "@elizaos/plugin-avail";
+{{/if}}
+{{#if plugin-avalanche}}
+import { avalanchePlugin } from "@elizaos/plugin-avalanche";
+{{/if}}
+{{#if plugin-b2}}
+import { b2Plugin } from "@elizaos/plugin-b2";
+{{/if}}
+{{#if plugin-binance}}
+import { binancePlugin } from "@elizaos/plugin-binance";
+{{/if}}
+{{#if plugin-birdeye}}
+import { birdeyePlugin } from "@elizaos/plugin-birdeye";
+{{/if}}
+{{#if plugin-bittensor}}
+import { bittensorPlugin } from "@elizaos/plugin-bittensor";
+{{/if}}
+{{#if plugin-bnb}}
+import { bnbPlugin } from "@elizaos/plugin-bnb";
+{{/if}}
+{{#if plugin-coinbase}}
+import {
+    advancedTradePlugin,
+    coinbaseCommercePlugin,
+    coinbaseMassPaymentsPlugin,
+    tokenContractPlugin,
+    tradePlugin,
+    webhookPlugin,
+} from "@elizaos/plugin-coinbase";
+{{/if}}
+{{#if plugin-coingecko}}
+import { coingeckoPlugin } from "@elizaos/plugin-coingecko";
+{{/if}}
+{{#if plugin-coinmarketcap}}
+import { coinmarketcapPlugin } from "@elizaos/plugin-coinmarketcap";
+{{/if}}
+{{#if plugin-conflux}}
+import { confluxPlugin } from "@elizaos/plugin-conflux";
+{{/if}}
+{{#if plugin-cosmos}}
+import { createCosmosPlugin } from "@elizaos/plugin-cosmos";
+{{/if}}
+{{#if plugin-cronoszkevm}}
+import { cronosZkEVMPlugin } from "@elizaos/plugin-cronoszkevm";
+{{/if}}
+{{#if plugin-evm}}
+import { evmPlugin } from "@elizaos/plugin-evm";
+{{/if}}
+{{#if plugin-flow}}
+import { flowPlugin } from "@elizaos/plugin-flow";
+{{/if}}
+{{#if plugin-fuel}}
+import { fuelPlugin } from "@elizaos/plugin-fuel";
+{{/if}}
+{{#if plugin-genlayer}}
+import { genLayerPlugin } from "@elizaos/plugin-genlayer";
+{{/if}}
+{{#if plugin-gitcoin-passport}}
+import { gitcoinPassportPlugin } from "@elizaos/plugin-gitcoin-passport";
+{{/if}}
+{{#if plugin-initia}}
+import { initiaPlugin } from "@elizaos/plugin-initia";
+{{/if}}
+{{#if plugin-giphy}}
+import { giphyPlugin } from "@elizaos/plugin-giphy";
+{{/if}}
+{{#if plugin-goat}}
+import createGoatPlugin from "@elizaos/plugin-goat";
+{{/if}}
+{{#if plugin-zilliqa}}
+import createZilliqaPlugin from "@elizaos/plugin-zilliqa";
+{{/if}}
+{{#if plugin-hyperliquid}}
+import { hyperliquidPlugin } from "@elizaos/plugin-hyperliquid";
+{{/if}}
+{{#if plugin-image-generation}}
+import { imageGenerationPlugin } from "@elizaos/plugin-image-generation";
+{{/if}}
+{{#if plugin-lens-network}}
+import { lensPlugin } from "@elizaos/plugin-lens-network";
+{{/if}}
+{{#if plugin-lit}}
+import { litPlugin } from "@elizaos/plugin-lit";
+{{/if}}
+{{#if plugin-mind-network}}
+import { mindNetworkPlugin } from "@elizaos/plugin-mind-network";
+{{/if}}
+{{#if plugin-multiversx}}
+import { multiversxPlugin } from "@elizaos/plugin-multiversx";
+{{/if}}
+{{#if plugin-near}}
+import { nearPlugin } from "@elizaos/plugin-near";
+{{/if}}
+{{#if plugin-nft-collections}}
+import createNFTCollectionsPlugin from "@elizaos/plugin-nft-collections";
+{{/if}}
+{{#if plugin-nft-generation}}
+import { nftGenerationPlugin } from "@elizaos/plugin-nft-generation";
+{{/if}}
+{{#if plugin-obsidian}}
+import { obsidianPlugin } from "@elizaos/plugin-obsidian";
+{{/if}}
+{{#if plugin-opacity}}
+import { OpacityAdapter } from "@elizaos/plugin-opacity";
+{{/if}}
+{{#if plugin-open-weather}}
+import { openWeatherPlugin } from "@elizaos/plugin-open-weather";
+{{/if}}
+{{#if plugin-quai}}
+import { quaiPlugin } from "@elizaos/plugin-quai";
+{{/if}}
+{{#if plugin-sgx}}
+import { sgxPlugin } from "@elizaos/plugin-sgx";
+{{/if}}
+{{#if plugin-solana}}
+import { solanaPlugin } from "@elizaos/plugin-solana";
+{{/if}}
+{{#if plugin-solana}}
+import { solanaPluginV2 } from "@elizaos/plugin-solana-v2";
+{{/if}}
+{{#if plugin-solana-agent-kit}}
+import { solanaAgentkitPlugin } from "@elizaos/plugin-solana-agent-kit";
+{{/if}}
+{{#if plugin-squid-router}}
+import { squidRouterPlugin } from "@elizaos/plugin-squid-router";
+{{/if}}
+{{#if plugin-stargaze}}
+import { stargazePlugin } from "@elizaos/plugin-stargaze";
+{{/if}}
+{{#if plugin-story}}
+import { storyPlugin } from "@elizaos/plugin-story";
+{{/if}}
+{{#if plugin-sui}}
+import { suiPlugin } from "@elizaos/plugin-sui";
+{{/if}}
+{{#if plugin-tee-marlin}}
+import { teeMarlinPlugin } from "@elizaos/plugin-tee-marlin";
+{{/if}}
+{{#if plugin-tee-verifiable-log}}
+import { verifiableLogPlugin } from "@elizaos/plugin-tee-verifiable-log";
+{{/if}}
+{{#if plugin-ton}}
+import { tonPlugin } from "@elizaos/plugin-ton";
+{{/if}}
+{{#if plugin-web-search}}
+import { webSearchPlugin } from "@elizaos/plugin-web-search";
+{{/if}}
+{{#if plugin-dkg}}
+import { dkgPlugin } from "@elizaos/plugin-dkg";
+{{/if}}
+{{#if plugin-injective}}
+import { injectivePlugin } from "@elizaos/plugin-injective";
+{{/if}}
+{{#if plugin-letzai}}
+import { letzAIPlugin } from "@elizaos/plugin-letzai";
+{{/if}}
+{{#if plugin-thirdweb}}
+import { thirdwebPlugin } from "@elizaos/plugin-thirdweb";
+{{/if}}
+{{#if plugin-moralis}}
+import { moralisPlugin } from "@elizaos/plugin-moralis";
+{{/if}}
+{{#if plugin-echochambers}}
+import { echoChambersPlugin } from "@elizaos/plugin-echochambers";
+{{/if}}
+{{#if plugin-dexscreener}}
+import { dexScreenerPlugin } from "@elizaos/plugin-dexscreener";
+{{/if}}
+{{#if plugin-pyth-data}}
+import { pythDataPlugin } from "@elizaos/plugin-pyth-data";
+{{/if}}
+{{#if plugin-openai}}
+import { openaiPlugin } from "@elizaos/plugin-openai";
+{{/if}}
+{{#if plugin-router-nitro}}
+import { nitroPlugin } from "@elizaos/plugin-router-nitro";
+{{/if}}
+{{#if plugin-devin}}
+import { devinPlugin } from "@elizaos/plugin-devin";
+{{/if}}
+{{#if plugin-zksync-era}}
+import { zksyncEraPlugin } from "@elizaos/plugin-zksync-era";
+{{/if}}
+{{#if plugin-chainbase}}
+import { chainbasePlugin } from "@elizaos/plugin-chainbase";
+{{/if}}
+{{#if plugin-holdstation}}
+import { holdstationPlugin } from "@elizaos/plugin-holdstation";
+{{/if}}
+{{#if plugin-nvidia-nim}}
+import { nvidiaNimPlugin } from "@elizaos/plugin-nvidia-nim";
+{{/if}}
+{{#if plugin-0x}}
+import { zxPlugin } from "@elizaos/plugin-0x";
+{{/if}}
+{{#if plugin-hyperbolic}}
+import { hyperbolicPlugin } from "@elizaos/plugin-hyperbolic";
+{{/if}}
+{{#if plugin-omniflix}}
+import { OmniflixPlugin } from "@elizaos/plugin-omniflix";
+{{/if}}
+
 import {
     AgentRuntime,
     CacheManager,
@@ -48,116 +313,65 @@ import {
     stringToUuid,
     validateCharacterConfig,
 } from "@elizaos/core";
-import { zgPlugin } from "@elizaos/plugin-0g";
-import { footballPlugin } from "@elizaos/plugin-football";
 
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { normalizeCharacter } from "@elizaos/plugin-di";
-import createGoatPlugin from "@elizaos/plugin-goat";
-import createZilliqaPlugin from "@elizaos/plugin-zilliqa";
-
-// import { intifacePlugin } from "@elizaos/plugin-intiface";
-import { ThreeDGenerationPlugin } from "@elizaos/plugin-3d-generation";
-import { abstractPlugin } from "@elizaos/plugin-abstract";
-import { akashPlugin } from "@elizaos/plugin-akash";
-import { alloraPlugin } from "@elizaos/plugin-allora";
-import { aptosPlugin } from "@elizaos/plugin-aptos";
-import { artheraPlugin } from "@elizaos/plugin-arthera";
-import { autonomePlugin } from "@elizaos/plugin-autonome";
-import { availPlugin } from "@elizaos/plugin-avail";
-import { avalanchePlugin } from "@elizaos/plugin-avalanche";
-import { b2Plugin } from "@elizaos/plugin-b2";
-import { binancePlugin } from "@elizaos/plugin-binance";
-import { birdeyePlugin } from "@elizaos/plugin-birdeye";
-import { bittensorPlugin } from "@elizaos/plugin-bittensor";
-import { bnbPlugin } from "@elizaos/plugin-bnb";
-import {
-    advancedTradePlugin,
-    coinbaseCommercePlugin,
-    coinbaseMassPaymentsPlugin,
-    tokenContractPlugin,
-    tradePlugin,
-    webhookPlugin,
-} from "@elizaos/plugin-coinbase";
-import { coingeckoPlugin } from "@elizaos/plugin-coingecko";
-import { coinmarketcapPlugin } from "@elizaos/plugin-coinmarketcap";
-import { confluxPlugin } from "@elizaos/plugin-conflux";
-import { createCosmosPlugin } from "@elizaos/plugin-cosmos";
-import { cronosZkEVMPlugin } from "@elizaos/plugin-cronoszkevm";
-import { evmPlugin } from "@elizaos/plugin-evm";
-import { flowPlugin } from "@elizaos/plugin-flow";
-import { fuelPlugin } from "@elizaos/plugin-fuel";
-import { genLayerPlugin } from "@elizaos/plugin-genlayer";
-import { gitcoinPassportPlugin } from "@elizaos/plugin-gitcoin-passport";
-import { initiaPlugin } from "@elizaos/plugin-initia";
-import { imageGenerationPlugin } from "@elizaos/plugin-image-generation";
-import { lensPlugin } from "@elizaos/plugin-lens-network";
-import { litPlugin } from "@elizaos/plugin-lit";
-import { mindNetworkPlugin } from "@elizaos/plugin-mind-network";
-import { multiversxPlugin } from "@elizaos/plugin-multiversx";
-import { nearPlugin } from "@elizaos/plugin-near";
-import createNFTCollectionsPlugin from "@elizaos/plugin-nft-collections";
-import { nftGenerationPlugin } from "@elizaos/plugin-nft-generation";
+import { elizaCodeinPlugin, onchainJson } from "@elizaos/plugin-iq6900";
 import { createNodePlugin } from "@elizaos/plugin-node";
-import { obsidianPlugin } from "@elizaos/plugin-obsidian";
-import { OpacityAdapter } from "@elizaos/plugin-opacity";
-import { openWeatherPlugin } from "@elizaos/plugin-open-weather";
-import { quaiPlugin } from "@elizaos/plugin-quai";
-import { sgxPlugin } from "@elizaos/plugin-sgx";
-import { solanaPlugin } from "@elizaos/plugin-solana";
-import { solanaPluginV2 } from "@elizaos/plugin-solana-v2";
-import { solanaAgentkitPlugin } from "@elizaos/plugin-solana-agent-kit";
-import { squidRouterPlugin } from "@elizaos/plugin-squid-router";
-import { stargazePlugin } from "@elizaos/plugin-stargaze";
-import { storyPlugin } from "@elizaos/plugin-story";
-import { suiPlugin } from "@elizaos/plugin-sui";
 import { TEEMode, teePlugin } from "@elizaos/plugin-tee";
+{{#if plugin-tee-log}}
 import { teeLogPlugin } from "@elizaos/plugin-tee-log";
-import { teeMarlinPlugin } from "@elizaos/plugin-tee-marlin";
-import { verifiableLogPlugin } from "@elizaos/plugin-tee-verifiable-log";
-import { tonPlugin } from "@elizaos/plugin-ton";
-import { webSearchPlugin } from "@elizaos/plugin-web-search";
-import { dkgPlugin } from "@elizaos/plugin-dkg";
-import { injectivePlugin } from "@elizaos/plugin-injective";
-import { giphyPlugin } from "@elizaos/plugin-giphy";
-import { letzAIPlugin } from "@elizaos/plugin-letzai";
-import { thirdwebPlugin } from "@elizaos/plugin-thirdweb";
-import { hyperliquidPlugin } from "@elizaos/plugin-hyperliquid";
-import { moralisPlugin } from "@elizaos/plugin-moralis";
-import { echoChambersPlugin } from "@elizaos/plugin-echochambers";
-import { dexScreenerPlugin } from "@elizaos/plugin-dexscreener";
-import { pythDataPlugin } from "@elizaos/plugin-pyth-data";
-import { openaiPlugin } from "@elizaos/plugin-openai";
-import nitroPlugin from "@elizaos/plugin-router-nitro";
-import { devinPlugin } from "@elizaos/plugin-devin";
-import { zksyncEraPlugin } from "@elizaos/plugin-zksync-era";
-import { chainbasePlugin } from "@elizaos/plugin-chainbase";
-import { holdstationPlugin } from "@elizaos/plugin-holdstation";
-import { nvidiaNimPlugin } from "@elizaos/plugin-nvidia-nim";
-import { zxPlugin } from "@elizaos/plugin-0x";
-import { hyperbolicPlugin } from "@elizaos/plugin-hyperbolic";
+{{/if}}
+{{#if plugin-email}}
+import { emailPlugin } from "@elizaos/plugin-email";
+{{/if}}
+{{#if plugin-email-automation}}
+import { emailAutomationPlugin } from "@elizaos/plugin-email-automation";
+{{/if}}
+{{#if plugin-sei}}
+import { seiPlugin } from "@elizaos/plugin-sei";
+{{/if}}
+{{#if plugin-suno}}
+import { sunoPlugin } from "@elizaos/plugin-suno";
+{{/if}}
+{{#if plugin-udio}}
+import { udioPlugin } from "@elizaos/plugin-udio";
+{{/if}}
+{{#if plugin-imgflip}}
+import { imgflipPlugin } from "@elizaos/plugin-imgflip";
+{{/if}}
+{{#if plugin-ethstorage}}
+import { ethstoragePlugin } from "@elizaos/plugin-ethstorage";
+{{/if}}
+{{#if plugin-zerion}}
+import { zerionPlugin } from "@elizaos/plugin-zerion";
+{{/if}}
+{{#if plugin-mina}}
+import { minaPlugin } from "@elizaos/plugin-mina";
+{{/if}}
+{{#if plugin-ankr}}
+import { ankrPlugin } from "@elizaos/plugin-ankr";
+{{/if}}
+{{#if plugin-form}}
+import { formPlugin } from "@elizaos/plugin-form";
+{{/if}}
+{{#if plugin-quick-intel}}
+import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
+{{/if}}
+{{#if plugin-trikon}}
+import { trikonPlugin } from "@elizaos/plugin-trikon";
+{{/if}}
+{{#if plugin-arbitrage}}
+import arbitragePlugin from "@elizaos/plugin-arbitrage";
+{{/if}}
+
 import Database from "better-sqlite3";
 import fs from "fs";
 import net from "net";
 import path from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
-import { emailPlugin } from "@elizaos/plugin-email";
-import { emailAutomationPlugin } from "@elizaos/plugin-email-automation";
-import { seiPlugin } from "@elizaos/plugin-sei";
-import { sunoPlugin } from "@elizaos/plugin-suno";
-import { udioPlugin } from "@elizaos/plugin-udio";
-import { imgflipPlugin } from "@elizaos/plugin-imgflip";
-import { ethstoragePlugin } from "@elizaos/plugin-ethstorage";
-import { zerionPlugin } from "@elizaos/plugin-zerion";
-import { minaPlugin } from "@elizaos/plugin-mina";
-import { ankrPlugin } from "@elizaos/plugin-ankr";
-import { formPlugin } from "@elizaos/plugin-form";
-import { MongoClient } from "mongodb";
-import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
 
-import { trikonPlugin } from "@elizaos/plugin-trikon";
-import arbitragePlugin from "@elizaos/plugin-arbitrage";
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
@@ -804,81 +1018,87 @@ export async function initializeClients(
         const autoClient = await AutoClientInterface.start(runtime);
         if (autoClient) clients.auto = autoClient;
     }
-
+    {{#if client-xmtp}}
     if (clientTypes.includes(Clients.XMTP)) {
         const xmtpClient = await XmtpClientInterface.start(runtime);
         if (xmtpClient) clients.xmtp = xmtpClient;
     }
-
+    {{/if}}
+    {{#if client-discord}}
     if (clientTypes.includes(Clients.DISCORD)) {
         const discordClient = await DiscordClientInterface.start(runtime);
         if (discordClient) clients.discord = discordClient;
     }
-
+    {{/if}}
+    {{#if client-telegram}}
     if (clientTypes.includes(Clients.TELEGRAM)) {
         const telegramClient = await TelegramClientInterface.start(runtime);
         if (telegramClient) clients.telegram = telegramClient;
     }
-
+    {{/if}}
+    {{#if client-telegram-account}}
     if (clientTypes.includes(Clients.TELEGRAM_ACCOUNT)) {
-        const telegramAccountClient =
-            await TelegramAccountClientInterface.start(runtime);
-        if (telegramAccountClient)
-            clients.telegram_account = telegramAccountClient;
+        const telegramAccountClient = await TelegramAccountClientInterface.start(runtime);
+        if (telegramAccountClient) clients.telegram_account = telegramAccountClient;
     }
-
+    {{/if}}
+    {{#if client-twitter}}
     if (clientTypes.includes(Clients.TWITTER)) {
         const twitterClient = await TwitterClientInterface.start(runtime);
-        if (twitterClient) {
-            clients.twitter = twitterClient;
-        }
+        if (twitterClient) clients.twitter = twitterClient;
     }
-
+    {{/if}}
+    {{#if client-github}}
+    if (clientTypes.includes(Clients.GITHUB)) {
+        const githubClient = await GitHubClientInterface.start(runtime);
+        if (githubClient) clients.github = githubClient;
+    }
+    {{/if}}
+    {{#if client-alexa}}
     if (clientTypes.includes(Clients.ALEXA)) {
         const alexaClient = await AlexaClientInterface.start(runtime);
-        if (alexaClient) {
-            clients.alexa = alexaClient;
-        }
+        if (alexaClient) clients.alexa = alexaClient;
     }
-
+    {{/if}}
+    {{#if client-instagram}}
     if (clientTypes.includes(Clients.INSTAGRAM)) {
         const instagramClient = await InstagramClientInterface.start(runtime);
-        if (instagramClient) {
-            clients.instagram = instagramClient;
-        }
+        if (instagramClient) clients.instagram = instagramClient;
     }
-
+    {{/if}}
+    {{#if client-farcaster}}
     if (clientTypes.includes(Clients.FARCASTER)) {
         const farcasterClient = await FarcasterClientInterface.start(runtime);
-        if (farcasterClient) {
-            clients.farcaster = farcasterClient;
-        }
+        if (farcasterClient) clients.farcaster = farcasterClient;
     }
-
+    {{/if}}
+    {{#if client-lens}}
     if (clientTypes.includes("lens")) {
         const lensClient = new LensAgentClient(runtime);
         lensClient.start();
         clients.lens = lensClient;
     }
-
+    {{/if}}
+    {{#if client-simsai}}
     if (clientTypes.includes(Clients.SIMSAI)) {
         const simsaiClient = await JeeterClientInterface.start(runtime);
         if (simsaiClient) clients.simsai = simsaiClient;
     }
-
-    elizaLogger.log("client keys", Object.keys(clients));
-
+    {{/if}}
+    {{#if client-deva}}
     if (clientTypes.includes("deva")) {
-        if (clientTypes.includes("deva")) {
-            const devaClient = await DevaClientInterface.start(runtime);
-            if (devaClient) clients.deva = devaClient;
-        }
+        const devaClient = await DevaClientInterface.start(runtime);
+        if (devaClient) clients.deva = devaClient;
     }
-
+    {{/if}}
+    {{#if client-slack}}
     if (clientTypes.includes("slack")) {
         const slackClient = await SlackClientInterface.start(runtime);
-        if (slackClient) clients.slack = slackClient; // Use object property instead of push
+        if (slackClient) clients.slack = slackClient;
     }
+    {{/if}}
+
+    elizaLogger.log("client keys", Object.keys(clients));
 
     function determineClientType(client: Client): string {
         // Check if client has a direct type identifier
@@ -942,37 +1162,21 @@ export async function createAgent(
     }
 
     let goatPlugin: any | undefined;
-
+    {{#if plugin-goat}}
     if (getSecret(character, "EVM_PRIVATE_KEY")) {
-        goatPlugin = await createGoatPlugin((secret) =>
-            getSecret(character, secret)
-        );
+        goatPlugin = await createGoatPlugin((secret) => getSecret(character, secret));
     }
+    {{/if}}
 
     let zilliqaPlugin: any | undefined;
+    {{#if plugin-zilliqa}}
     if (getSecret(character, "ZILLIQA_PRIVATE_KEY")) {
-        zilliqaPlugin = await createZilliqaPlugin((secret) =>
-            getSecret(character, secret)
-        );
+        zilliqaPlugin = await createZilliqaPlugin((secret) => getSecret(character, secret));
     }
+    {{/if}}
 
-    // Initialize Reclaim adapter if environment variables are present
-    // let verifiableInferenceAdapter;
-    // if (
-    //     process.env.RECLAIM_APP_ID &&
-    //     process.env.RECLAIM_APP_SECRET &&
-    //     process.env.VERIFIABLE_INFERENCE_ENABLED === "true"
-    // ) {
-    //     verifiableInferenceAdapter = new ReclaimAdapter({
-    //         appId: process.env.RECLAIM_APP_ID,
-    //         appSecret: process.env.RECLAIM_APP_SECRET,
-    //         modelProvider: character.modelProvider,
-    //         token,
-    //     });
-    //     elizaLogger.log("Verifiable inference adapter initialized");
-    // }
-    // Initialize Opacity adapter if environment variables are present
     let verifiableInferenceAdapter;
+    {{#if plugin-opacity}}
     if (
         process.env.OPACITY_TEAM_ID &&
         process.env.OPACITY_CLOUDFLARE_NAME &&
@@ -993,6 +1197,9 @@ export async function createAgent(
         elizaLogger.log("modelProvider", character.modelProvider);
         elizaLogger.log("token", token);
     }
+    {{/if}}
+
+    {{#if plugin-primus}}
     if (
         process.env.PRIMUS_APP_ID &&
         process.env.PRIMUS_APP_SECRET &&
@@ -1007,6 +1214,7 @@ export async function createAgent(
         });
         elizaLogger.log("Verifiable inference primus adapter initialized");
     }
+    {{/if}}
 
     return new AgentRuntime({
         databaseAdapter: db,
@@ -1016,83 +1224,122 @@ export async function createAgent(
         character,
         // character.plugins are handled when clients are added
         plugins: [
+            bootstrapPlugin,
+            nodePlugin,
+            {{#if plugin-bittensor}}
             parseBooleanFromText(getSecret(character, "BITMIND")) &&
             getSecret(character, "BITMIND_API_TOKEN")
                 ? bittensorPlugin
                 : null,
-            parseBooleanFromText(
-                getSecret(character, "EMAIL_AUTOMATION_ENABLED")
-            )
+            {{/if}}
+            {{#if plugin-email-automation}}
+            parseBooleanFromText(getSecret(character, "EMAIL_AUTOMATION_ENABLED"))
                 ? emailAutomationPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-iq6900}}
             getSecret(character, "IQ_WALLET_ADDRESS") &&
             getSecret(character, "IQSOlRPC")
                 ? elizaCodeinPlugin
                 : null,
-            bootstrapPlugin,
+            {{/if}}
+            {{#if plugin-agentkit}}
             getSecret(character, "CDP_API_KEY_NAME") &&
             getSecret(character, "CDP_API_KEY_PRIVATE_KEY") &&
             getSecret(character, "CDP_AGENT_KIT_NETWORK")
                 ? agentKitPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-dexscreener}}
             getSecret(character, "DEXSCREENER_API_KEY")
                 ? dexScreenerPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-football}}
             getSecret(character, "FOOTBALL_API_KEY") ? footballPlugin : null,
+            {{/if}}
+            {{#if plugin-conflux}}
             getSecret(character, "CONFLUX_CORE_PRIVATE_KEY")
                 ? confluxPlugin
                 : null,
-            nodePlugin,
+            {{/if}}
+            {{#if plugin-router-nitro}}
             getSecret(character, "ROUTER_NITRO_EVM_PRIVATE_KEY") &&
             getSecret(character, "ROUTER_NITRO_EVM_ADDRESS")
                 ? nitroPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-web-search}}
             getSecret(character, "TAVILY_API_KEY") ? webSearchPlugin : null,
+            {{/if}}
+            {{#if plugin-solana}}
             getSecret(character, "SOLANA_PUBLIC_KEY") ||
             (getSecret(character, "WALLET_PUBLIC_KEY") &&
                 !getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))
                 ? [solanaPlugin, solanaPluginV2]
                 : null,
+            {{/if}}
+            {{#if plugin-solana-agent-kit}}
             getSecret(character, "SOLANA_PRIVATE_KEY")
                 ? solanaAgentkitPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-autonome}}
             getSecret(character, "AUTONOME_JWT_TOKEN") ? autonomePlugin : null,
+            {{/if}}
+            {{#if plugin-near}}
             (getSecret(character, "NEAR_ADDRESS") ||
                 getSecret(character, "NEAR_WALLET_PUBLIC_KEY")) &&
             getSecret(character, "NEAR_WALLET_SECRET_KEY")
                 ? nearPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-evm}}
             getSecret(character, "EVM_PUBLIC_KEY") ||
             (getSecret(character, "WALLET_PUBLIC_KEY") &&
                 getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))
                 ? evmPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-injective}}
             (getSecret(character, "EVM_PUBLIC_KEY") ||
                 getSecret(character, "INJECTIVE_PUBLIC_KEY")) &&
             getSecret(character, "INJECTIVE_PRIVATE_KEY")
                 ? injectivePlugin
                 : null,
+            {{/if}}
+            {{#if plugin-cosmos}}
             getSecret(character, "COSMOS_RECOVERY_PHRASE") &&
-                getSecret(character, "COSMOS_AVAILABLE_CHAINS") &&
-                createCosmosPlugin(),
+            getSecret(character, "COSMOS_AVAILABLE_CHAINS") &&
+            createCosmosPlugin(),
+            {{/if}}
+            {{#if plugin-nft-generation}}
             (getSecret(character, "SOLANA_PUBLIC_KEY") ||
                 (getSecret(character, "WALLET_PUBLIC_KEY") &&
-                    !getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith(
-                        "0x"
-                    ))) &&
+                    !getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))) &&
             getSecret(character, "SOLANA_ADMIN_PUBLIC_KEY") &&
             getSecret(character, "SOLANA_PRIVATE_KEY") &&
             getSecret(character, "SOLANA_ADMIN_PRIVATE_KEY")
                 ? nftGenerationPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-0g}}
             getSecret(character, "ZEROG_PRIVATE_KEY") ? zgPlugin : null,
+            {{/if}}
+            {{#if plugin-coinmarketcap}}
             getSecret(character, "COINMARKETCAP_API_KEY")
                 ? coinmarketcapPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-zerion}}
             getSecret(character, "ZERION_API_KEY") ? zerionPlugin : null,
+            {{/if}}
+            {{#if plugin-coinbase}}
             getSecret(character, "COINBASE_COMMERCE_KEY")
                 ? coinbaseCommercePlugin
                 : null,
+            {{/if}}
+            {{#if plugin-image-generation}}
             getSecret(character, "FAL_API_KEY") ||
             getSecret(character, "OPENAI_API_KEY") ||
             getSecret(character, "VENICE_API_KEY") ||
@@ -1102,7 +1349,11 @@ export async function createAgent(
             getSecret(character, "LIVEPEER_GATEWAY_URL")
                 ? imageGenerationPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-3d-generation}}
             getSecret(character, "FAL_API_KEY") ? ThreeDGenerationPlugin : null,
+            {{/if}}
+            {{#if plugin-coinbase}}
             ...(getSecret(character, "COINBASE_API_KEY") &&
             getSecret(character, "COINBASE_PRIVATE_KEY")
                 ? [
@@ -1112,65 +1363,119 @@ export async function createAgent(
                       advancedTradePlugin,
                   ]
                 : []),
+            {{/if}}
+            {{#if plugin-tee}}
             ...(teeMode !== TEEMode.OFF && walletSecretSalt ? [teePlugin] : []),
+            {{/if}}
+            {{#if plugin-tee-verifiable-log}}
             teeMode !== TEEMode.OFF &&
             walletSecretSalt &&
             getSecret(character, "VLOG")
                 ? verifiableLogPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-sgx}}
             getSecret(character, "SGX") ? sgxPlugin : null,
+            {{/if}}
+            {{#if plugin-tee-log}}
             getSecret(character, "ENABLE_TEE_LOG") &&
             ((teeMode !== TEEMode.OFF && walletSecretSalt) ||
                 getSecret(character, "SGX"))
                 ? teeLogPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-omniflix}}
             getSecret(character, "OMNIFLIX_API_URL") &&
             getSecret(character, "OMNIFLIX_MNEMONIC")
                 ? OmniflixPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-coinbase}}
             getSecret(character, "COINBASE_API_KEY") &&
             getSecret(character, "COINBASE_PRIVATE_KEY") &&
             getSecret(character, "COINBASE_NOTIFICATION_URI")
                 ? webhookPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-goat}}
             goatPlugin,
+            {{/if}}
+            {{#if plugin-zilliqa}}
             zilliqaPlugin,
+            {{/if}}
+            {{#if plugin-coingecko}}
             getSecret(character, "COINGECKO_API_KEY") ||
             getSecret(character, "COINGECKO_PRO_API_KEY")
                 ? coingeckoPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-moralis}}
             getSecret(character, "MORALIS_API_KEY") ? moralisPlugin : null,
+            {{/if}}
+            {{#if plugin-goat}}
             getSecret(character, "EVM_PROVIDER_URL") ? goatPlugin : null,
+            {{/if}}
+            {{#if plugin-abstract}}
             getSecret(character, "ABSTRACT_PRIVATE_KEY")
                 ? abstractPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-b2}}
             getSecret(character, "B2_PRIVATE_KEY") ? b2Plugin : null,
+            {{/if}}
+            {{#if plugin-binance}}
             getSecret(character, "BINANCE_API_KEY") &&
             getSecret(character, "BINANCE_SECRET_KEY")
                 ? binancePlugin
                 : null,
+            {{/if}}
+            {{#if plugin-flow}}
             getSecret(character, "FLOW_ADDRESS") &&
             getSecret(character, "FLOW_PRIVATE_KEY")
                 ? flowPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-lens-network}}
             getSecret(character, "LENS_ADDRESS") &&
             getSecret(character, "LENS_PRIVATE_KEY")
                 ? lensPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-aptos}}
             getSecret(character, "APTOS_PRIVATE_KEY") ? aptosPlugin : null,
+            {{/if}}
+            {{#if plugin-mind-network}}
             getSecret(character, "MIND_COLD_WALLET_ADDRESS")
-                ? mindNetworkPlugin
-                : null,
+            ? mindNetworkPlugin
+            : null,
+            {{/if}}
+            {{#if plugin-multiversx}}
             getSecret(character, "MVX_PRIVATE_KEY") ? multiversxPlugin : null,
+            {{/if}}
+            {{#if plugin-zksync-era}}
             getSecret(character, "ZKSYNC_PRIVATE_KEY") ? zksyncEraPlugin : null,
+            {{/if}}
+            {{#if plugin-cronoszkevm}}
             getSecret(character, "CRONOSZKEVM_PRIVATE_KEY")
                 ? cronosZkEVMPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-tee-marlin}}
             getSecret(character, "TEE_MARLIN") ? teeMarlinPlugin : null,
+            {{/if}}
+            {{#if plugin-ton}}
             getSecret(character, "TON_PRIVATE_KEY") ? tonPlugin : null,
+            {{/if}}
+            {{#if plugin-thirdweb}}
             getSecret(character, "THIRDWEB_SECRET_KEY") ? thirdwebPlugin : null,
+            {{/if}}
+            {{#if plugin-sui}}
             getSecret(character, "SUI_PRIVATE_KEY") ? suiPlugin : null,
+            {{/if}}
+            {{#if plugin-story}}
             getSecret(character, "STORY_PRIVATE_KEY") ? storyPlugin : null,
+            {{/if}}
+            {{#if plugin-squid-router}}
             getSecret(character, "SQUID_SDK_URL") &&
             getSecret(character, "SQUID_INTEGRATOR_ID") &&
             getSecret(character, "SQUID_EVM_ADDRESS") &&
@@ -1178,116 +1483,208 @@ export async function createAgent(
             getSecret(character, "SQUID_API_THROTTLE_INTERVAL")
                 ? squidRouterPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-fuel}}
             getSecret(character, "FUEL_PRIVATE_KEY") ? fuelPlugin : null,
+            {{/if}}
+            {{#if plugin-avalanche}}
             getSecret(character, "AVALANCHE_PRIVATE_KEY")
                 ? avalanchePlugin
                 : null,
+            {{/if}}
+            {{#if plugin-birdeye}}
             getSecret(character, "BIRDEYE_API_KEY") ? birdeyePlugin : null,
+            {{/if}}
+            {{#if plugin-echochambers}}
             getSecret(character, "ECHOCHAMBERS_API_URL") &&
             getSecret(character, "ECHOCHAMBERS_API_KEY")
                 ? echoChambersPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-letzai}}
             getSecret(character, "LETZAI_API_KEY") ? letzAIPlugin : null,
+            {{/if}}
+            {{#if plugin-stargaze}}
             getSecret(character, "STARGAZE_ENDPOINT") ? stargazePlugin : null,
+            {{/if}}
+            {{#if plugin-giphy}}
             getSecret(character, "GIPHY_API_KEY") ? giphyPlugin : null,
+            {{/if}}
+            {{#if plugin-gitcoin-passport}}
             getSecret(character, "PASSPORT_API_KEY")
                 ? gitcoinPassportPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-genlayer}}
             getSecret(character, "GENLAYER_PRIVATE_KEY")
                 ? genLayerPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-avail}}
             getSecret(character, "AVAIL_SEED") &&
             getSecret(character, "AVAIL_APP_ID")
                 ? availPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-open-weather}}
             getSecret(character, "OPEN_WEATHER_API_KEY")
                 ? openWeatherPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-obsidian}}
             getSecret(character, "OBSIDIAN_API_TOKEN") ? obsidianPlugin : null,
+            {{/if}}
+            {{#if plugin-arthera}}
             getSecret(character, "ARTHERA_PRIVATE_KEY")?.startsWith("0x")
                 ? artheraPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-allora}}
             getSecret(character, "ALLORA_API_KEY") ? alloraPlugin : null,
+            {{/if}}
+            {{#if plugin-hyperliquid}}
             getSecret(character, "HYPERLIQUID_PRIVATE_KEY")
                 ? hyperliquidPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-hyperliquid-testnet}}
             getSecret(character, "HYPERLIQUID_TESTNET")
                 ? hyperliquidPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-akash}}
             getSecret(character, "AKASH_MNEMONIC") &&
             getSecret(character, "AKASH_WALLET_ADDRESS")
                 ? akashPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-chainbase}}
             getSecret(character, "CHAINBASE_API_KEY") ? chainbasePlugin : null,
+            {{/if}}
+            {{#if plugin-quai}}
             getSecret(character, "QUAI_PRIVATE_KEY") ? quaiPlugin : null,
+            {{/if}}
+            {{#if plugin-reservoir}}
             getSecret(character, "RESERVOIR_API_KEY")
                 ? createNFTCollectionsPlugin()
                 : null,
+            {{/if}}
+            {{#if plugin-0x}}
             getSecret(character, "ZERO_EX_API_KEY") ? zxPlugin : null,
+            {{/if}}
+            {{#if plugin-dkg}}
             getSecret(character, "DKG_PRIVATE_KEY") ? dkgPlugin : null,
+            {{/if}}
+            {{#if plugin-pyth-data}}
             getSecret(character, "PYTH_TESTNET_PROGRAM_KEY") ||
             getSecret(character, "PYTH_MAINNET_PROGRAM_KEY")
                 ? pythDataPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-lightning}}
             getSecret(character, "LND_TLS_CERT") &&
             getSecret(character, "LND_MACAROON") &&
             getSecret(character, "LND_SOCKET")
                 ? lightningPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-openai}}
             getSecret(character, "OPENAI_API_KEY") &&
             parseBooleanFromText(
                 getSecret(character, "ENABLE_OPEN_AI_COMMUNITY_PLUGIN")
             )
                 ? openaiPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-devin}}
             getSecret(character, "DEVIN_API_TOKEN") ? devinPlugin : null,
+            {{/if}}
+            {{#if plugin-initia}}
             getSecret(character, "INITIA_PRIVATE_KEY") ? initiaPlugin : null,
+            {{/if}}
+            {{#if plugin-holdstation}}
             getSecret(character, "HOLDSTATION_PRIVATE_KEY")
                 ? holdstationPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-nvidia-nim}}
             getSecret(character, "NVIDIA_NIM_API_KEY") ||
             getSecret(character, "NVIDIA_NGC_API_KEY")
                 ? nvidiaNimPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-bnb}}
             getSecret(character, "BNB_PRIVATE_KEY") ||
             getSecret(character, "BNB_PUBLIC_KEY")?.startsWith("0x")
                 ? bnbPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-email}}
             (getSecret(character, "EMAIL_INCOMING_USER") &&
                 getSecret(character, "EMAIL_INCOMING_PASS")) ||
             (getSecret(character, "EMAIL_OUTGOING_USER") &&
                 getSecret(character, "EMAIL_OUTGOING_PASS"))
                 ? emailPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-sei}}
             getSecret(character, "SEI_PRIVATE_KEY") ? seiPlugin : null,
+            {{/if}}
+            {{#if plugin-hyperbolic}}
             getSecret(character, "HYPERBOLIC_API_KEY")
                 ? hyperbolicPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-suno}}
             getSecret(character, "SUNO_API_KEY") ? sunoPlugin : null,
+            {{/if}}
+            {{#if plugin-udio}}
             getSecret(character, "UDIO_AUTH_TOKEN") ? udioPlugin : null,
+            {{/if}}
+            {{#if plugin-imgflip}}
             getSecret(character, "IMGFLIP_USERNAME") &&
             getSecret(character, "IMGFLIP_PASSWORD")
                 ? imgflipPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-lit}}
             getSecret(character, "FUNDING_PRIVATE_KEY") &&
             getSecret(character, "EVM_RPC_URL")
                 ? litPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-ethstorage}}
             getSecret(character, "ETHSTORAGE_PRIVATE_KEY")
                 ? ethstoragePlugin
                 : null,
+            {{/if}}
+            {{#if plugin-mina}}
             getSecret(character, "MINA_PRIVATE_KEY") ? minaPlugin : null,
+            {{/if}}
+            {{#if plugin-form}}
             getSecret(character, "FORM_PRIVATE_KEY") ? formPlugin : null,
+            {{/if}}
+            {{#if plugin-ankr}}
             getSecret(character, "ANKR_WALLET") ? ankrPlugin : null,
+            {{/if}}
+            {{#if plugin-dcap}}
             getSecret(character, "DCAP_EVM_PRIVATE_KEY") &&
             getSecret(character, "DCAP_MODE")
                 ? dcapPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-quick-intel}}
             getSecret(character, "QUICKINTEL_API_KEY")
                 ? quickIntelPlugin
                 : null,
+            {{/if}}
+            {{#if plugin-gelato}}
             getSecret(character, "GELATO_RELAY_API_KEY") ? gelatoPlugin : null,
+            {{/if}}
+            {{#if plugin-trikon}}
             getSecret(character, "TRIKON_WALLET_ADDRESS") ? trikonPlugin : null,
+            {{/if}}
+            {{#if plugin-arbitrage}}
             getSecret(character, "ARBITRAGE_EVM_PRIVATE_KEY") &&
             (getSecret(character, "ARBITRAGE_EVM_PROVIDER_URL") ||
                 getSecret(character, "ARBITRAGE_ETHEREUM_WS_URL")) &&
@@ -1295,6 +1692,10 @@ export async function createAgent(
             getSecret(character, "ARBITRAGE_BUNDLE_EXECUTOR_ADDRESS")
                 ? arbitragePlugin
                 : null,
+            {{/if}}
+            {{#if plugin-stargaze}}
+            getSecret(character, "STARGAZE_ENDPOINT") ? stargazePlugin : null,
+            {{/if}}
         ]
             .flat()
             .filter(Boolean),
@@ -1302,7 +1703,11 @@ export async function createAgent(
         managers: [],
         cacheManager: cache,
         fetch: logFetch,
+        {{#if plugin-opacity}}
         verifiableInferenceAdapter,
+        {{else if plugin-primus}}
+        verifiableInferenceAdapter,
+        {{/if}}
     });
 }
 

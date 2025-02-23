@@ -20,7 +20,7 @@ export default function NewAgentUpload() {
     <ProfileDropdown />
     </div>
     </Header>
-    <Main className="flex flex-col items-center px-6 py-16 flex-1 text-gray-900 pt-[15vh] dark:text-gray-100">
+    <Main className="px-6 py-16 text-gray-900 pt-[15vh] dark:text-gray-100">
     <div className="max-w-3xl mx-auto">
     <Link to='/agent/new'>
         <button className="flex items-center text-yellow-500 dark:text-yellow-400 mb-8 hover:opacity-80">

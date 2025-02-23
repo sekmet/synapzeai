@@ -379,6 +379,10 @@ export function getMatchedEnvironmentVars(modelProvider: string, selectedClients
   return matchedVars;
 }
 
+export function extractPluginNames(plugins: Plugin[]): string[] {
+  return plugins.map(plugin => plugin.name);
+}
+
 export async function saveTemplateState(template: Template) {
   const agentDeployStore = useAgentDeployStore.getState();
 
@@ -387,8 +391,10 @@ export async function saveTemplateState(template: Template) {
   // Convert template format to AgentConfig format
   const config = {
     name: template.name,
-    plugins: template.plugins.map(name => ({ name, enabled: true })),
-    clients: template.clients.map(name => ({ name, enabled: true })),
+    pluginsConfig: template.plugins.map(name => ({ name, enabled: true })),
+    plugins: template.plugins.map(name => name),
+    clientsConfig: template.clients.map(name => ({ name, enabled: true })),
+    clients: template.clients.map(name => name),
     modelProvider: template.modelProvider,
     settings: template.settings,
     bio: template.bio,

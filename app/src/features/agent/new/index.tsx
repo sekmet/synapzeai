@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useEffect } from 'react'
 //import { Card } from '@/components/ui/card'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -6,8 +7,25 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Upload, FileText, Layout } from "lucide-react";
+import { useQuery } from '@tanstack/react-query';
+import { fetchPluginsListing } from '@/lib/plugins';
+import { usePluginStore, PluginItem } from '@/stores/pluginStore';
 
 export default function NewAgent() {
+
+  const { data: pluginsAvailable, isLoading } = useQuery({
+    queryKey: ['pluginsAvailable'],
+    queryFn: () => fetchPluginsListing(),
+  })
+  const pluginListing = usePluginStore.getState()
+
+  useEffect(() => {
+    if (!isLoading) {
+      pluginListing.setPlugins(pluginsAvailable as PluginItem[])
+    }
+  },[isLoading])
+  
+
   return (
     <>
       <Header fixed>

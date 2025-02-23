@@ -41,9 +41,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {userAgents ? (
           <AgentSwitcher agents={userAgents ?? {}} />
           ) : (
-          <div className={clsx(sidebarState === 'collapsed' ? null : 'px-4 py-3 font-semibold leading-6 text-sm shadow rounded-md text-gray-700 bg-sidebar','inline-flex items-center transition ease-in-out duration-150 cursor-not-allowed')}>
+          <div className={clsx(sidebarState === 'collapsed' ? null : 'px-4 py-3 font-semibold leading-6 text-sm shadow rounded-md text-gray-700 dark:text-gray-300 bg-sidebar','inline-flex items-center transition ease-in-out duration-150 cursor-not-allowed')}>
             <svg 
-            className={clsx(sidebarState === "collapsed" ? "animate-spin text-orange-500" : "animate-spin -ml-1 mr-3 h-6 w-6 text-orange-500")} 
+            className={clsx(sidebarState === "collapsed" ? "animate-spin text-gray-400 dark:text-blue-400" : "animate-spin -ml-1 mr-3 h-6 w-6 text-gray-400 dark:text-blue-400")} 
             xmlns="http://www.w3.org/2000/svg" 
             fill="none" 
             viewBox="0 0 24 24">

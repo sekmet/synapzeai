@@ -9,10 +9,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAgentActiveStore } from '@/stores/agentActive';
 import { toast } from '@/hooks/use-toast'
 import { ToastAction } from "@/components/ui/toast"
+//import { extractPluginNames } from '@/lib/templates';
 //import { Moon, Sun } from "lucide-react";
 //import { basicSetup } from "@codemirror/basic-setup";
 //import { oneDark } from "@codemirror/theme-one-dark";
 //import { Editor } from "./editor";
+
 export default function AgentConfigReview() {
     const router = useRouter()
     const canGoBack = useCanGoBack()

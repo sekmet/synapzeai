@@ -38,10 +38,12 @@ interface Plugin {
   logo?: any;
   icon: any;
   name: string;
+  value: string;
   version: string;
   description: string;
   author: string;
   githubUrl: string;
+  package: string;
   installed: boolean;
   agentConfig?: AgentConfig;
 }
@@ -194,7 +196,8 @@ export default function Apps() {
                     )}
                     <h2 className="mb-1 font-semibold">{app.name}</h2>
                   </div>
-                  <p className="line-clamp-2 text-gray-500">{app.description}</p>
+                  <small className="text-gray-500 font-semibold">{app.package}</small>
+                  <p className="line-clamp-2 text-gray-500 mt-2">{app.description}</p>
                 </div>
                 <div className="flex mt-2 justify-end items-end text-[11px] text-gray-500 dark:text-gray-300 gap-1 font-semibold">v{app.version}</div>
               </li>

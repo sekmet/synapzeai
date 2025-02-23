@@ -9,7 +9,6 @@ import {
 } from "@elizaos/core";
 
 import { ILogService } from "../types.ts";
-
 import { analyzeSentiment } from "./sentiment";
 import { getCustomerSatisfactionScore } from "./csat";
 
@@ -41,13 +40,14 @@ export class LogService extends Service implements ILogService {
 
         const enableLog = runtime.getSetting("ENABLE_LOGGING");
         if (enableLog === null) {
-            throw new Error("ENABLE_LOGGING is not set.");
+            elizaLogger.debug("ENABLE_LOGGING is not set.");
+            return;
         }
 
         this.enableLog = enableValues.includes(enableLog.toLowerCase());
 
         if (!this.enableLog) {
-            console.log("Logging is not enabled.");
+            elizaLogger.log("Logging is not enabled.");
             return;
         }
 

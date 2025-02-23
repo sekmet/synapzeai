@@ -1,63 +1,54 @@
-import { Link } from '@tanstack/react-router'
+import { useRouter, useCanGoBack, useParams } from '@tanstack/react-router'
 import { useState, useEffect, KeyboardEvent } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+//import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, ChevronsUpDown, Check, ArrowLeft } from "lucide-react"
+import { 
+  Plus, 
+  Trash2, 
+  ChevronsUpDown, 
+  Check, 
+  ArrowLeft 
+} from "lucide-react"
+import {
+  IconDatabaseCog,
+  IconRouter,
+  IconPlug,
+} from '@tabler/icons-react'
 //import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from '@/hooks/use-toast'
+//import { toast } from '@/hooks/use-toast'
 import { TagInput } from '@/components/ui/tag-input'
 import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { getAvailableTemplates, loadTemplate, saveTemplateState } from '@/lib/templates'
+import { /*getAvailableTemplates,*/ loadTemplate, saveTemplateState } from '@/lib/templates'
 import { useAgentDeployStore } from '@/stores/agentDeployStore';
-import { clsx } from 'clsx'
+//import { clsx } from 'clsx'
+import { type AgentSettings, type MessageExample, type ListItem, type Plugin } from '@/types/templates'
+import { usePluginStore } from '@/stores/pluginStore';
 
-interface ListItem {
-  id: string
-  content: string
-}
+const pluginListing = usePluginStore.getState()
 
-interface MessageExample {
-  id: string
-  userMessage: string
-  assistantMessage: string
-}
-
-interface AgentVoiceSettings {
-  model: string
-  provider?: string
-}
-
-interface AgentSettings {
-  secrets: Record<string, string>
-  voice?: AgentVoiceSettings
-  transcriptionProvider?: string
-  modelProvider?: string
-  customModelEndpoint?: string
-}
-
-interface Plugin {
-  value: string
-  label: string
-  category: string
-  package: string
-  description: string
-}
-
-const clients = [
+/*const clients = [
   { value: "twitter", label: "X (Twitter)" },
   { value: "discord", label: "Discord" },
   { value: "slack", label: "Slack" },
   { value: "telegram", label: "Telegram" },
-]
+]*/
 
-const plugins: Plugin[] = [
+const plugins: Plugin[] = pluginListing.getPlugins()
+const pluginsAdapters = plugins.filter((plugin) => plugin.package.includes('adapter-'))
+const pluginsClients = plugins.filter((plugin) => plugin.package.includes('client-'))
+const pluginsPlugins = plugins.filter((plugin) => plugin.package.includes('plugin-'))
+
+/*[
   {
     value: "0g",
     label: "0g",
@@ -93,9 +84,27 @@ const plugins: Plugin[] = [
     package: "@elizaos/plugin-avalanche",
     description: "A plugin for interacting with the Avalanche blockchain network within the ElizaOS ecosystem.",
   },
-]
+]*/
+
+const formSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(50, 'Name must be less than 50 characters'),
+  model: z.string().min(1, 'Model is required')
+})
+
+type FormValues = z.infer<typeof formSchema>
 
 export default function AgentConfigTemplateForm({ title }: { title: string }) {
+  const { templateId: templateIdParam } = useParams({ strict: false })
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      model: ''
+    }
+  })
+  
+  const canGoBack = useCanGoBack()
+  const router = useRouter()
   const [name, setName] = useState("")
   const { getProvisioning, setProvisioning } = useAgentDeployStore((state) => state);
   const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), completed: false, currentStep: 0, isProvisioning: status })
@@ -152,12 +161,18 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
   const [stylePostItems, setStylePostItems] = useState<ListItem[]>([{ id: "1", content: "uses ALL CAPS for key points" }])
 
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  
   const [openClients, setOpenClients] = useState(false)
   const [selectedClients, setSelectedClients] = useState<string[]>([])
+  
+  const [openAdapters, setOpenAdapters] = useState(false)
+  const [selectedAdapters, setSelectedAdapters] = useState<string[]>([])
+
   const [openPlugins, setOpenPlugins] = useState(false)
   const [selectedPlugins, setSelectedPlugins] = useState<string[]>([])
+
   //const [openTemplates, setOpenTemplates] = useState(false)
-  const templates = getAvailableTemplates()
+  //const templates = getAvailableTemplates()
 
   // Effect to save state changes
   useEffect(() => {
@@ -195,6 +210,23 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
   }, [name, settings, selectedClients, modelProvider, selectedPlugins, bioItems, 
       loreItems, knowledgeItems, messageExamples, topics, 
       styleAllItems, styleChatItems, stylePostItems, adjectives, selectedTemplate])
+
+
+  useEffect(() => {
+    if (templateIdParam && !name && !selectedTemplate) {
+      handleTemplateSelect(templateIdParam)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (name) {
+      form.setValue('name', name)
+    }
+    if (modelProvider) {
+      form.setValue('model', modelProvider.toLowerCase())
+    }
+  }, [name, modelProvider])
+
 
   const handleAddTopic = (e: KeyboardEvent) => {
     if (e.key === "Enter" && newTopic.trim()) {
@@ -321,11 +353,11 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
       // set template to state
       setSelectedTemplate(template)
 
-      toast({
+      /*toast({
         title: `🤖 ${template.name} template`,
         description: "Agent template loaded...",
         duration: 1000
-      })
+      })*/
     }
   }
 
@@ -430,21 +462,25 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
     </div>
   )
 
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values)
+    router.navigate({to: '/agent/new/secrets'})
+  }
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-full space-y-6">
-      <Link to='/agent/new'>
-        <button className="flex items-center text-yellow-500 dark:text-yellow-400 mb-6 hover:opacity-80">
+      {canGoBack ? (
+        <button onClick={() => router.history.back()} className="flex items-center text-yellow-500 dark:text-yellow-400 mb-6 hover:opacity-80">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Go back
-        </button>
-      </Link>
+        </button>) : null}
 
         <div className="flex justify-between items-center">
           <h1 className="text-4xl font-semibold text-gray-900 dark:text-white">{title ?? "Configure your agent"}</h1>
         </div>
 
-        <Card>
+        {/*<Card>
           <CardHeader>
             <CardTitle>Templates</CardTitle>
             <CardDescription>Select a template to get started</CardDescription>
@@ -460,51 +496,40 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
               </Button>
             ))}
           </CardContent>
-        </Card>
+        </Card>*/}
 
+        <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-6">
           <div className="space-y-4">
             <Label htmlFor="name" className="text-gray-900 dark:text-white text-lg font-semibold">Name</Label>
-            <Input id="name" className="text-gray-900 dark:text-white" placeholder="Enter model name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input 
+              id="name" 
+              className="text-gray-900 dark:text-white" 
+              placeholder="Enter agent name" 
+              {...form.register('name')}
+              onChange={(e) => {
+                setName(e.target.value)
+                form.setValue('name', e.target.value)
+              }} 
+            />
+            {form.formState.errors.name && (
+              <p className="text-sm text-red-500 mt-1">
+                {form.formState.errors.name.message}
+              </p>
+            )}
           </div>
 
-          {/*OPENAI = "openai",
-          ETERNALAI = "eternalai",
-          ANTHROPIC = "anthropic",
-          GROK = "grok",
-          GROQ = "groq",
-          LLAMACLOUD = "llama_cloud",
-          TOGETHER = "together",
-          LLAMALOCAL = "llama_local",
-          LMSTUDIO = "lmstudio",
-          GOOGLE = "google",
-          MISTRAL = "mistral",
-          CLAUDE_VERTEX = "claude_vertex",
-          REDPILL = "redpill",
-          OPENROUTER = "openrouter",
-          OLLAMA = "ollama",
-          HEURIST = "heurist",
-          GALADRIEL = "galadriel",
-          FAL = "falai",
-          GAIANET = "gaianet",
-          ALI_BAILIAN = "ali_bailian",
-          VOLENGINE = "volengine",
-          NANOGPT = "nanogpt",
-          HYPERBOLIC = "hyperbolic",
-          VENICE = "venice",
-          NVIDIA = "nvidia",
-          NINETEEN_AI = "nineteen_ai",
-          AKASH_CHAT_API = "akash_chat_api",
-          LIVEPEER = "livepeer",
-          LETZAI = "letzai",
-          DEEPSEEK = "deepseek",
-          INFERA = "infera",
-          BEDROCK = "bedrock",
-          ATOMA = "atoma",*/}
 
           <div className="space-y-4">
             <Label htmlFor="model" className="text-gray-900 dark:text-white text-lg font-semibold">Model provider</Label>
-            <Select value={modelProvider.toLowerCase()} onValueChange={setModelProvider}>
+            <Select 
+              value={modelProvider.toLowerCase()}
+              onValueChange={(value) => {
+                form.setValue('model', value)
+                setModelProvider(value)
+              }}
+              {...form.register('model')}
+            >
               <SelectTrigger>
                 <SelectValue 
                 placeholder="Select provider" 
@@ -545,9 +570,14 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
                 <SelectItem value="atoma"><span className="text-gray-900 dark:text-white">Atoma</span></SelectItem>
               </SelectContent>
             </Select>
+            {form.formState.errors.model && (
+              <p className="text-sm text-red-500 mt-1">
+                {form.formState.errors.model.message}
+              </p>
+            )}
           </div>
 
-          <div className="space-y-4">
+          {/*<div className="space-y-4">
             <div className="flex items-baseline justify-between">
               <Label className="text-gray-900 dark:text-white text-lg font-semibold">Clients</Label>
               <p className="text-sm text-gray-900 dark:text-white mt-1">Supported client types, such as Discord or X</p>
@@ -600,6 +630,149 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
                 </Command>
               </PopoverContent>
             </Popover>
+          </div>*/}
+
+          <div className="space-y-4">
+            <div className="flex items-baseline justify-between">
+              <Label className="text-gray-900 dark:text-white text-lg font-semibold">Clients</Label>
+              <span className="text-xs text-gray-900 dark:text-white">Optional</span>
+            </div>
+            <p className="text-sm text-gray-900 dark:text-white mt-1">
+            Supported client types, such as Discord or X
+            </p>
+            <Popover open={openClients} onOpenChange={setOpenClients}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openClients}
+                  className="w-full justify-between text-gray-900 dark:text-white"
+                >
+                  {selectedClients.length === 0
+                    ? "Select clients..."
+                    : pluginsClients
+                        .filter((client) => selectedClients.includes(client.value.replace('client-', '')))
+                        .map((client) => client.label)
+                        .join(", ")}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-gray-900 dark:text-white" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full max-w-sm sm:max-w-5xl p-0" align="start">
+                <Command className="w-full" value={selectedClients.join(", ")}>
+                  <CommandInput placeholder="Search clients..." />
+                  <CommandList>
+                    <CommandEmpty>No client found.</CommandEmpty>
+                    <CommandGroup>
+                      {pluginsClients.map((plugin) => (
+                        <CommandItem
+                          key={plugin.package}
+                          onSelect={() => {
+                            setSelectedClients((prev) =>
+                              prev.includes(plugin.value.replace('client-', ''))
+                                ? prev.filter((item) => item !== plugin.value.replace('client-', ''))
+                                : [...prev, plugin.value.replace('client-', '')],
+                            )
+                          }}
+                          className="flex flex-col items-start py-3"
+                        >
+                          <div className="flex items-center w-full">
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4 shrink-0",
+                                selectedClients.includes(plugin.value.replace('client-', '')) ? "opacity-100" : "opacity-0",
+                              )}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <IconRouter />
+                                <span className="font-medium">{plugin.label}</span>
+                                <span className="text-xs text-gray-900 dark:text-white px-2 py-0.5 rounded-md bg-muted">
+                                  {plugin.category}
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-900 dark:text-white mt-1">{plugin.package}</div>
+                              <div className="text-sm text-gray-900 dark:text-white mt-1 truncate">{plugin.description}</div>
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+
+          <div className="space-y-4">
+            <div className="flex items-baseline justify-between">
+              <Label className="text-gray-900 dark:text-white text-lg font-semibold">Adapters</Label>
+              <span className="text-xs text-gray-900 dark:text-white">Optional</span>
+            </div>
+            <p className="text-sm text-gray-900 dark:text-white mt-1">
+              Supported database adapters, such as Postgres or Mongo db
+            </p>
+            <Popover open={openAdapters} onOpenChange={setOpenAdapters}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openAdapters}
+                  className="w-full justify-between text-gray-900 dark:text-white"
+                >
+                  {selectedAdapters.length === 0
+                    ? "Select adapters..."
+                    : pluginsAdapters
+                        .filter((adapter) => selectedAdapters.includes(adapter.package))
+                        .map((adapter) => adapter.label)
+                        .join(", ")}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-gray-900 dark:text-white" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full max-w-sm sm:max-w-5xl p-0" align="start">
+                <Command className="w-full" value={selectedAdapters.join(", ")}>
+                  <CommandInput placeholder="Search adapters..." />
+                  <CommandList>
+                    <CommandEmpty>No adapter found.</CommandEmpty>
+                    <CommandGroup>
+                      {pluginsAdapters.map((plugin) => (
+                        <CommandItem
+                          key={plugin.package}
+                          onSelect={() => {
+                            setSelectedAdapters((prev) =>
+                              prev.includes(plugin.package)
+                                ? prev.filter((item) => item !== plugin.package)
+                                : [...prev, plugin.package],
+                            )
+                          }}
+                          className="flex flex-col items-start py-3"
+                        >
+                          <div className="flex items-center w-full">
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4 shrink-0",
+                                selectedAdapters.includes(plugin.package) ? "opacity-100" : "opacity-0",
+                              )}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <IconDatabaseCog />
+                                <span className="font-medium">{plugin.label}</span>
+                                <span className="text-xs text-gray-900 dark:text-white px-2 py-0.5 rounded-md bg-muted">
+                                  {plugin.category}
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-900 dark:text-white mt-1">{plugin.package}</div>
+                              <div className="text-sm text-gray-900 dark:text-white mt-1 truncate">{plugin.description}</div>
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-4">
@@ -620,20 +793,20 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
                 >
                   {selectedPlugins.length === 0
                     ? "Select one or multiple plugins"
-                    : plugins
+                    : pluginsPlugins
                         .filter((plugin) => selectedPlugins.includes(plugin.package))
                         .map((plugin) => plugin.label)
                         .join(", ")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-gray-900 dark:text-white" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-full p-0" align="start">
+              <PopoverContent className="w-full max-w-sm sm:max-w-5xl p-0" align="start">
                 <Command className="w-full" value={selectedPlugins.join(", ")}>
                   <CommandInput placeholder="Search plugins..." />
                   <CommandList>
                     <CommandEmpty>No plugin found.</CommandEmpty>
                     <CommandGroup>
-                      {plugins.map((plugin) => (
+                      {pluginsPlugins.map((plugin) => (
                         <CommandItem
                           key={plugin.package}
                           onSelect={() => {
@@ -654,18 +827,20 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
+                                <IconPlug />
                                 <span className="font-medium">{plugin.label}</span>
                                 <span className="text-xs text-gray-900 dark:text-white px-2 py-0.5 rounded-md bg-muted">
                                   {plugin.category}
                                 </span>
                               </div>
                               <div className="text-xs text-gray-900 dark:text-white mt-1">{plugin.package}</div>
-                              <div className="text-sm text-gray-900 dark:text-white mt-1">{plugin.description}</div>
+                              <div className="text-sm text-gray-900 dark:text-white mt-1 truncate">{plugin.description}</div>
                             </div>
                           </div>
                         </CommandItem>
                       ))}
                     </CommandGroup>
+
                   </CommandList>
                 </Command>
               </PopoverContent>
@@ -844,10 +1019,10 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
               />*/}
             </div>
           </div>
-          <Link to='/agent/new/secrets'>
-          <Button className="w-full bg-yellow-300 hover:bg-yellow-500 text-black mt-6">Continue to Settings</Button>
-          </Link>
+
+          <Button type="submit" className="w-full bg-yellow-300 hover:bg-yellow-500 text-black mt-6">Continue to Settings</Button>
         </div>
+        </form>
       </div>
     </div>
   )

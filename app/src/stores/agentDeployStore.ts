@@ -927,8 +927,10 @@ interface AgentSettings {
 
 export interface AgentConfig {
   name: string
-  plugins: AgentPlugin[]
-  clients: AgentClient[]
+  pluginsConfig?: AgentPlugin[]
+  plugins?: string[]
+  clientsConfig?: AgentClient[]
+  clients?: string[]
   modelProvider: string
   settings: AgentSettings
   system?: string
@@ -969,9 +971,9 @@ interface AgentDeploySettings {
     updateEnv: (env: Partial<AgentEnvironmentVars>) => void
     setProvisioning: (provisioning: AgentProvisioningStatus) => void
     getProvisioning: () => AgentProvisioningStatus
-    addPlugin: (plugin: AgentPlugin) => void
+    addPlugin: (pluginConfig: AgentPlugin) => void
     removePlugin: (pluginName: string) => void
-    addClient: (client: AgentClient) => void
+    addClient: (clientConfig: AgentClient) => void
     removeClient: (clientName: string) => void
     reset: () => void
 }
@@ -1004,13 +1006,13 @@ export const useAgentDeployStore = create<AgentDeployState>()(
         setProvisioning: (provisioning) =>
           set((state) => ({ ...state, provisioning })),
         getProvisioning: () => get().provisioning,
-        addPlugin: (plugin) =>
+        addPlugin: (pluginConfig) =>
           set((state) => ({
             ...state,
             config: state.config
               ? {
                   ...state.config,
-                  plugins: [...state.config.plugins, plugin],
+                  pluginsConfig: state.config.pluginsConfig ? [...state.config.pluginsConfig, pluginConfig] : [pluginConfig],
                 }
               : null,
           })),
@@ -1020,19 +1022,19 @@ export const useAgentDeployStore = create<AgentDeployState>()(
             config: state.config
               ? {
                   ...state.config,
-                  plugins: state.config.plugins.filter(
+                  pluginsConfig: state.config.pluginsConfig ? state.config.pluginsConfig.filter(
                     (p) => p.name !== pluginName
-                  ),
+                  ) : [],
                 }
               : null,
           })),
-        addClient: (client) =>
+        addClient: (clientConfig) =>
           set((state) => ({
             ...state,
             config: state.config
               ? {
                   ...state.config,
-                  clients: [...state.config.clients, client],
+                  clientsConfig: state.config.clientsConfig ? [...state.config.clientsConfig, clientConfig] : [clientConfig],
                 }
               : null,
           })),
@@ -1042,9 +1044,9 @@ export const useAgentDeployStore = create<AgentDeployState>()(
             config: state.config
               ? {
                   ...state.config,
-                  clients: state.config.clients.filter(
+                  clientsConfig: state.config.clientsConfig ? state.config.clientsConfig.filter(
                     (c) => c.name !== clientName
-                  ),
+                  ) : [],
                 }
               : null,
           })),

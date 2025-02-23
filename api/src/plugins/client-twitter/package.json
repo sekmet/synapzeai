@@ -1,0 +1,146 @@
+{
+  "name": "@elizaos-plugins/client-twitter",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+      "TWITTER_DRY_RUN": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable dry run mode for Twitter operations"
+      },
+      "TWITTER_USERNAME": {
+        "type": "string",
+        "minLength": 1,
+        "description": "X/Twitter username is required"
+      },
+      "TWITTER_PASSWORD": {
+        "type": "string",
+        "minLength": 1,
+        "description": "X/Twitter password is required"
+      },
+      "TWITTER_EMAIL": {
+        "type": "string",
+        "format": "email",
+        "description": "Valid X/Twitter email is required"
+      },
+      "TWITTER_APPROVAL_CHECK_INTERVAL": {
+        "type": "integer",
+        "default": 3600,
+        "description": "Settings for packages plugin"
+      },
+      "TWITTER_APPROVAL_DISCORD_BOT_TOKEN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TWITTER_COOKIES_AUTH_TOKEN": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TWITTER_COOKIES_CT0": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "TWITTER_COOKIES_GUEST_ID": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      },
+      "MAX_TWEET_LENGTH": {
+        "type": "integer",
+        "default": 280,
+        "description": "Maximum length of tweets"
+      },
+      "TWITTER_SEARCH_ENABLE": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable Twitter search functionality"
+      },
+      "TWITTER_2FA_SECRET": {
+        "optional": true,
+        "type": "string",
+        "description": "Twitter 2FA secret for authentication"
+      },
+      "TWITTER_RETRY_LIMIT": {
+        "type": "integer",
+        "default": 5,
+        "description": "Number of retry attempts for Twitter operations"
+      },
+      "TWITTER_POLL_INTERVAL": {
+        "type": "integer",
+        "default": 120,
+        "description": "Interval for polling Twitter updates (in seconds)"
+      },
+      "TWITTER_TARGET_USERS": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]$|^[A-Za-z]$",
+          "minLength": 1,
+          "maxLength": 15
+        },
+        "default": [],
+        "optional": true,
+        "description": "List of Twitter usernames to target"
+      },
+      "ENABLE_TWITTER_POST_GENERATION": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable automatic Twitter post generation"
+      },
+      "POST_INTERVAL_MIN": {
+        "type": "integer",
+        "default": 90,
+        "description": "Minimum interval between posts (in minutes)"
+      },
+      "POST_INTERVAL_MAX": {
+        "type": "integer",
+        "default": 180,
+        "description": "Maximum interval between posts (in minutes)"
+      },
+      "ENABLE_ACTION_PROCESSING": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable processing of Twitter actions"
+      },
+      "ACTION_INTERVAL": {
+        "type": "integer",
+        "default": 5,
+        "description": "Interval for processing actions (in minutes)"
+      },
+      "POST_IMMEDIATELY": {
+        "type": "boolean",
+        "default": false,
+        "description": "Post content immediately without delay"
+      },
+      "TWITTER_SPACES_ENABLE": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable Twitter Spaces functionality"
+      },
+      "MAX_ACTIONS_PROCESSING": {
+        "type": "integer",
+        "default": 1,
+        "description": "Maximum number of actions to process at once"
+      },
+      "ACTION_TIMELINE_TYPE": {
+        "type": "string",
+        "enum": [
+          "foryou",
+          "following"
+        ],
+        "default": "foryou",
+        "description": "Type of timeline to process actions from"
+      },
+      "ELEVENLABS_XI_API_KEY": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Settings for packages plugin"
+      }
+    }
+  }
+}
