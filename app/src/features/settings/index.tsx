@@ -15,12 +15,16 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import SidebarNav from './components/sidebar-nav'
 import { useAuthStore } from '@/stores/authStore'
+import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 import { ChevronLeft } from 'lucide-react'
 
 export default function Settings() {
   const { getOnboarding } = useAuthStore((state) => state)
+  const { getAgent } = useAgentActiveStore((state) => state)
   const router = useRouter()
   const onboarding = !getOnboarding().completed
+  const activeAgent = getAgent() as Agent ?? null;
+
   return (
     <>
       {/* ===== Top Heading ===== */}
@@ -57,7 +61,7 @@ export default function Settings() {
         <Separator className='my-4 lg:my-6' />
         <div className='flex flex-1 flex-col space-y-2 overflow-hidden md:space-y-2 lg:flex-row lg:space-x-12 lg:space-y-0'>
           <aside className='top-0 lg:sticky lg:w-1/5'>
-            <SidebarNav items={sidebarNavItems} />
+            <SidebarNav items={activeAgent ? sidebarNavItems : sidebarNavItems.filter(item => item.title !== 'Agent')} />
           </aside>
           <div className='flex w-full overflow-y-hidden p-1 pr-4'>
             <Outlet />

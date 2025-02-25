@@ -12,6 +12,7 @@ import { handleServerError } from '@/utils/handle-server-error'
 import { toast } from '@/hooks/use-toast'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
+import { AuthProvider } from './context/auth-context';
 import {PrivyProvider} from '@privy-io/react-auth';
 import './index.css'
 // Generated Routes
@@ -101,11 +102,13 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <PrivyProvider appId="cm6xcmmbg01a92e4ck4x3is92">
       <QueryClientProvider client={queryClient}>
+        <AuthProvider defaultUserId={''} storageKey='synapze:auth-user'>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
             <RouterProvider router={router} />
           </FontProvider>
         </ThemeProvider>
+        </AuthProvider>
       </QueryClientProvider>
       </PrivyProvider>
     </StrictMode>

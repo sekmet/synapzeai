@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 //import { Separator } from '@/components/ui/separator'
-import { useNavigate } from '@tanstack/react-router'
+//import { useNavigate } from '@tanstack/react-router'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { usePrivy, useLogin } from '@privy-io/react-auth'
-import { useQuery } from "@tanstack/react-query";
-import { useAuthStore, AuthUser } from '@/stores/authStore'
-import { fetchCurrentUser, createUser } from '@/lib/users'
+//import { usePrivy, useLogin } from '@privy-io/react-auth'
+//import { useQuery } from "@tanstack/react-query";
+import { useAuthStore/*, AuthUser*/ } from '@/stores/authStore'
+//import { fetchCurrentUser, createUser } from '@/lib/users'
 import { useAgentDeployStore } from '@/stores/agentDeployStore'
 
 interface HeaderProps extends React.HTMLAttributes<HTMLElement> {
@@ -22,20 +22,20 @@ export const Header = ({
 }: HeaderProps) => {
   const [offset, setOffset] = React.useState(0)
   const { getProvisioning } = useAgentDeployStore((state) => state)
-  const { getOnboarding, setOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
+  const { getOnboarding, /*setOnboarding, setUser, getUser, setApiKey */} = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
   const isProvisioning = getProvisioning().isProvisioning;
 
-  const {ready, authenticated } = usePrivy();
+  /*const {ready, authenticated } = usePrivy();
   // Disable login when Privy is not ready or the user is already authenticated
   //const disableLogin = !ready || (ready && authenticated);
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser', getUser()?.id],
     queryFn: () => fetchCurrentUser(getUser()?.id ?? ''),
-  })
+  })*/
 
-  const navigate = useNavigate()
-  const { login } = useLogin({
+  //const navigate = useNavigate()
+  /*const { login } = useLogin({
 
     onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
       if (wasAlreadyAuthenticated) {
@@ -73,7 +73,7 @@ export const Header = ({
               //TODO remove hardcoded and get api-key from keystack server
               setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
               setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
-              navigate({ to: '/' })
+              //navigate({ to: '/' })
           } else {
             const isUser = currentUser;
               // If the user is returning, fetch their data from your backend
@@ -101,7 +101,7 @@ export const Header = ({
       navigate({ to: '/sign-in-2' })
     }
 
-  }, [ready, authenticated, login]);
+  }, [ready, authenticated, login]);*/
 
 
   useEffect(() => {

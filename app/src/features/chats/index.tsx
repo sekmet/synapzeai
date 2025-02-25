@@ -71,7 +71,7 @@ export default function Chats() {
   
     useEffect(() => {
       //console.log({refresh})
-      console.log({userAgents}, agentId)
+      //console.log({userAgents}, agentId)
     }, [refresh])
 
   const activeAgent = getAgent() as Agent ?? null;
