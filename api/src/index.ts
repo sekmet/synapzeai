@@ -209,7 +209,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
         <h1>Welcome to Synapze</h1>
         <h3>Email Verification</h3>
         <p>Click the link below to verify your email address:</p>
-        <a href="${process.env.APP_HOST_URL}/verify-email/${verificationToken}">
+        <a href="${process.env.APP_HOST_URL}/verify-email/${_verificationToken}">
           Verify Email
         </a>
       `,
