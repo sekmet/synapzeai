@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { z } from 'zod'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { /*useFieldArray,*/ useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -28,7 +28,7 @@ interface UserData {
   }>
   wallets: any[]
 }
-import { cn } from '@/lib/utils'
+//import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
@@ -195,10 +195,10 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
     //console.log(userData)
   }, [userData, form])
 
-  const { fields, append } = useFieldArray<ProfileFormValues>({
+  /*const { fields, append } = useFieldArray<ProfileFormValues>({
     control: form.control,
     name: "urls",
-  })
+  })*/
 
   const verifyUserEmail = async (id: string, email: string) => {
 
