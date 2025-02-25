@@ -187,18 +187,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
             email_address = ${email}
         WHERE id = ${id}
       `;
-    } else {
-      // Create new user with verification token
-      /*const userId = crypto.randomUUID();
-      await Bun.sql`
-        INSERT INTO users (id, email_address, verification_token, verified, created_at, updated_at)
-        VALUES (${userId}, ${email}, ${_verificationToken}, false, ${now}, ${now})
-      `;*/
-      return c.json({
-        success: true,
-        message: 'User ID invalid or already verified',
-      });
-    }
+
 
     // Configure email transport (replace with your SMTP settings)
     const transporter = nodemailer.createTransport({
@@ -231,6 +220,19 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
       message: 'Verification email sent successfully',
       description: 'Please check your inbox click the link to verify your account.'
     });
+
+    } else {
+      // Create new user with verification token
+      /*const userId = crypto.randomUUID();
+      await Bun.sql`
+        INSERT INTO users (id, email_address, verification_token, verified, created_at, updated_at)
+        VALUES (${userId}, ${email}, ${_verificationToken}, false, ${now}, ${now})
+      `;*/
+      return c.json({
+        success: true,
+        message: 'User ID invalid or already verified',
+      });
+    }
 
   } catch (error) {
     if (error instanceof z.ZodError) {
