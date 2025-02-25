@@ -13,7 +13,7 @@ import { fetchPluginsListing } from '@/lib/plugins';
 import { usePluginStore, PluginItem } from '@/stores/pluginStore';
 import { getSubscriptionAllowanceByCustomerId, fetchUserAgents } from '@/lib/api/agent';
 import { useAuthStore } from '@/stores/authStore';
-import { toast } from '@/hooks/use-toast'
+//import { toast } from '@/hooks/use-toast'
 import clsx from 'clsx';
 
 export default function NewAgent() {
