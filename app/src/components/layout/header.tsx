@@ -30,7 +30,7 @@ export const Header = ({
   // Disable login when Privy is not ready or the user is already authenticated
   //const disableLogin = !ready || (ready && authenticated);
   const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
+    queryKey: ['currentUser', getUser()?.id],
     queryFn: () => fetchCurrentUser(getUser()?.id ?? ''),
   })
 
@@ -39,9 +39,10 @@ export const Header = ({
 
     onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
       if (wasAlreadyAuthenticated) {
+          const isUser = currentUser;
           // In this case, the user was already `authenticated` when this component was mounted.
           // For already-`authenticated` users, we redirect them to their profile page.
-          if (currentUser?.id === undefined) {
+          if (isUser?.id === undefined && !getUser()?.id) {
              // If the user is new, create it in your backend
              createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
           }
@@ -51,8 +52,8 @@ export const Header = ({
           setUser(user as AuthUser) // authUser being the new format
           //TODO remove hardcoded and get api-key from keystack server
           setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
-          console.log({currentUser})
-          setOnboarding({ ...getOnboarding(), completed: currentUser?.onboarding === false ? true : false })
+          //console.log({isUser})
+          setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
 
           //navigate({ to: '/' })
       } else {
@@ -63,19 +64,21 @@ export const Header = ({
           // own DBs.
           if (isNewUser) {
               // If the user is new, create it in your backend
-              console.log("NEW USER", isNewUser)
+              //console.log("NEW USER", isNewUser)
+              const isUser = currentUser;
 
               createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)
               //console.log(setUser(user as AuthUser)) // authUser being the new format
               setUser(user as AuthUser) 
               //TODO remove hardcoded and get api-key from keystack server
-              setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')              
-              
+              setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
+              setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
               navigate({ to: '/' })
           } else {
+            const isUser = currentUser;
               // If the user is returning, fetch their data from your backend
               //console.log("RETURNING USER", user)
-              if (currentUser?.id === undefined) {
+              if (isUser?.id === undefined) {
                 // If the user is new, create it in your backend
                 createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)    
              }
@@ -83,7 +86,7 @@ export const Header = ({
               setUser(user as AuthUser) 
               //TODO remove hardcoded and get api-key from keystack server
               setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
-              setOnboarding({ ...getOnboarding(), completed: currentUser?.onboarding === false ? true : false })
+              setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
           }
       }
   },
