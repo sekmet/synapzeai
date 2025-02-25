@@ -549,7 +549,6 @@ export default function AgentConfigTemplateForm({ title }: { title: string }) {
                 <SelectItem value="redpill"><span className="text-gray-900 dark:text-white">Redpill</span></SelectItem>
                 <SelectItem value="openrouter"><span className="text-gray-900 dark:text-white">OpenRouter</span></SelectItem>
                 <SelectItem value="ollama"><span className="text-gray-900 dark:text-white">Ollama</span></SelectItem>
-                <SelectItem value="llama_cloud"><span className="text-gray-900 dark:text-white">Llama Cloud</span></SelectItem>
                 <SelectItem value="heurist"><span className="text-gray-900 dark:text-white">Heurist</span></SelectItem>
                 <SelectItem value="galadriel"><span className="text-gray-900 dark:text-white">Galadriel</span></SelectItem>
                 <SelectItem value="falai"><span className="text-gray-900 dark:text-white">FalAI</span></SelectItem>

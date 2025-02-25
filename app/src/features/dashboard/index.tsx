@@ -37,7 +37,7 @@ import {
 
 export default function Dashboard() {
   const { getOnboarding } = useAuthStore((state) => state)
-  const isOnboarding = !getOnboarding().completed
+  const onboarding = !getOnboarding().completed
   const { getAgent, getAgentContainerId, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
   const activeAgent = getAgent() as Agent
@@ -45,32 +45,32 @@ export default function Dashboard() {
 
   const { data: engagedSessions } = useQuery({
     queryKey: ['engagedSessions', refresh],
-    queryFn: () => getEngagedSessions(getAgentContainerId() ?? ''),
+    queryFn: () => activeAgent ? getEngagedSessions(getAgentContainerId() ?? '') : [],
   });
 
   const { data: rejectedSessions } = useQuery({
     queryKey: ['rejectedSessions', refresh],
-    queryFn: () => getSessionsRejectedTime(getAgentContainerId() ?? ''),
+    queryFn: () => activeAgent ? getSessionsRejectedTime(getAgentContainerId() ?? '') : [],
   });
 
   const { data: transferRate } = useQuery({
     queryKey: ['transferRate', refresh],
-    queryFn: () => getTransferRate(getAgentContainerId() ?? ''),
+    queryFn: () => activeAgent ? getTransferRate(getAgentContainerId() ?? '') : [],
   });
 
   const { data: avgHandleTime } = useQuery({
     queryKey: ['avgHandleTime', refresh],
-    queryFn: () => getAvgSessionHandleTime(getAgentContainerId() ?? ''),
+    queryFn: () => activeAgent ? getAvgSessionHandleTime(getAgentContainerId() ?? '') : [],
   });
 
   const { data: avgCsat } = useQuery({
     queryKey: ['avgCsat', refresh],
-    queryFn: () => getAvgCsat(getAgentContainerId() ?? ''),
+    queryFn: () => activeAgent ? getAvgCsat(getAgentContainerId() ?? '') : [],
   });
 
   const { data: avgSentiment } = useQuery({
     queryKey: ['avgSentiment', refresh],
-    queryFn: () => getAvgSessionSentiment(getAgentContainerId() ?? ''),
+    queryFn: () => activeAgent ? getAvgSessionSentiment(getAgentContainerId() ?? '') : [],
   });
 
 
@@ -83,7 +83,7 @@ export default function Dashboard() {
       {/* ===== Top Heading ===== */}
       <Header>
         {/*<TopNav links={topNav} />*/}
-        {isOnboarding ? (
+        {onboarding ? (
           <div className='ml-auto flex items-center space-x-4'>
             <ThemeSwitch />
             <ProfileDropdown />
@@ -99,9 +99,6 @@ export default function Dashboard() {
 
       {/* ===== Main ===== */}
       <Main>
-        {isOnboarding ? (
-          <Onboarding />
-        ) : (
           <>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
@@ -244,7 +241,6 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
         </>
-        )}
       </Main>
     </>
   ) : (
@@ -275,7 +271,7 @@ export default function Dashboard() {
       {/* ===== Top Heading ===== */}
       <Header>
         {/*<TopNav links={topNav} />*/}
-        {isOnboarding ? (
+        {onboarding ? (
           <div className='ml-auto flex items-center space-x-4'>
             <ThemeSwitch />
             <ProfileDropdown />
@@ -291,6 +287,9 @@ export default function Dashboard() {
 
       {/* ===== Main ===== */}
       <Main>
+      {onboarding ? (
+          <Onboarding />
+        ) : (
     <div className='h-svh'>
     <div className='m-auto flex h-[60vh] w-full flex-col items-center justify-center gap-2'>
       <IconRobot size={72} />
@@ -306,7 +305,7 @@ export default function Dashboard() {
           </div>
 
     </div>
-  </div>
+  </div>)}
   </Main>
     </>
   )

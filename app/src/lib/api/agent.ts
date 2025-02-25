@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { AgentEnvironmentVars } from '@/stores/agentDeployStore';
+import { AgentEnvironmentVars } from '@/types/agent-enviroment-v1';
 import { useAgentDeployStore } from '@/stores/agentDeployStore';
 import { useAgentActiveStore, Agent } from '@/stores/agentActive';
 import { useAuthStore } from '@/stores/authStore';

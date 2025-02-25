@@ -39,7 +39,6 @@ export function Onboarding() {
     if (stepNumber === 5) createAgent()
   }
 
-
   const steps = [
     {
       number: 1,
@@ -85,10 +84,10 @@ export function Onboarding() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-4 sm:mb-8">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Welcome to Synapze!</h1>
-          <p className="text-lg text-muted-foreground">Follow the steps to complete your setup.</p>
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Welcome to Synapze!</h1>
+          <p className="sm:text-lg text-muted-foreground">Follow the steps to complete your setup.</p>
         </div>
       </div>
 

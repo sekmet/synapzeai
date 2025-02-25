@@ -85,7 +85,7 @@ export const usePluginStore = create<PluginStoreState>()(
             })
         }),
         {
-            name: 'plugin-store',
+            name: 'synapze:plugins',
         }
     )
 )

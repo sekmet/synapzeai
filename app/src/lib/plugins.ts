@@ -1,8 +1,27 @@
-  /**
-   * Extracts the first paragraph after the title from a README markdown string.
-   * @param {string} readmeContent - The raw README content.
-   * @returns {string | null} The extracted description or null if not found.
-   */
+export interface PluginParameter {
+  type: string | number | boolean;
+  description?: string;
+  minLength?: number;
+  maxLength?: number;
+  default?: string | number | boolean;
+  enum?: (string | number | boolean)[];
+}
+
+export interface PluginInfo {
+  name: string;
+  version: string;
+  type: string;
+  agentConfig?: {
+    pluginType: string;
+    pluginParameters: PluginParameter | null;
+  };
+}
+
+/**
+* Extracts the first paragraph after the title from a README markdown string.
+* @param {string} readmeContent - The raw README content.
+* @returns {string | null} The extracted description or null if not found.
+*/
   const extractDescriptionFromReadme = (readmeContent: string) => {
     const lines = readmeContent.split('\n');
     let titleFound = false;
@@ -146,3 +165,27 @@ export const fetchPluginsListing = async (forceRefresh = false) => {
       console.log('Plugins loaded');
     }
   };
+
+
+  export async function loadPluginParameters(pluginName: string): Promise<PluginInfo | null> {
+  
+    if (!pluginName) return null;
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/plugins/${pluginName}`, {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) {
+        console.error(`Failed to load plugin ${pluginName}:`, response.statusText);
+        return null;
+      }
+      const loadedPlugin: PluginInfo = await response.json();
+      return loadedPlugin;
+    } catch (error) {
+      console.error(`Error loading plugin ${pluginName}:`, error);
+      return null;
+    }
+  }

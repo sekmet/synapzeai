@@ -1,4 +1,4 @@
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useRouter } from '@tanstack/react-router'
 import {
   IconBrowserCheck,
   IconNotification,
@@ -15,14 +15,27 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import SidebarNav from './components/sidebar-nav'
 import { useAuthStore } from '@/stores/authStore'
+import { ChevronLeft } from 'lucide-react'
 
 export default function Settings() {
   const { getOnboarding } = useAuthStore((state) => state)
+  const router = useRouter()
   const onboarding = !getOnboarding().completed
   return (
     <>
       {/* ===== Top Heading ===== */}
-      {onboarding ? null : (
+      {onboarding ? (
+        <Header>
+            <button onClick={() => router.navigate({to: '/'})} className="mt-3 flex items-center text-gray-700 dark:text-yellow-300 mb-6 hover:opacity-80">
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Back
+          </button>
+        <div className='ml-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ProfileDropdown />
+        </div>          
+        </Header>
+      ) : (
         <Header>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>

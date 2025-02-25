@@ -32,7 +32,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   })
 
   useEffect(() => {
-    //console.log({refresh})
+    //console.log({refresh})]
+    console.log({isProvisioning},{onboarding})
   }, [refresh])
 
   return onboarding || isProvisioning ? null : (

@@ -96,8 +96,6 @@ export const useAuthStore = create<AuthState>()(
   }
 },
 {
-  name: 'auth-user',
+  name: 'synapze:auth-user',
 }
 ))
-
-// export const useAuth = () => useAuthStore((state) => state)

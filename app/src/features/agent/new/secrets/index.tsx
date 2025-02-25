@@ -18,7 +18,7 @@ export default function NewAgentSecrets() {
     <ProfileDropdown />
     </div>
     </Header>
-    <Main className="px-6 py-16 text-white pt-[5vh] dark:text-gray-100">
+    <Main className="sm:px-6 sm:py-16 text-white pt-[5vh] dark:text-gray-100">
     <AgentConfigSecrets />
     </Main>
     </>

@@ -143,6 +143,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
 
     // Configure email transport (replace with your SMTP settings)
     const transporter = nodemailer.createTransport({
+      pool: true,
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
@@ -188,7 +189,7 @@ app.notFound((c) => {
   // DB connection
   
   // Root route
-  app.get('/', (c) => c.text('SYNAPZE API Server v0.0.3'))
+  app.get('/', (c) => c.text('SYNAPZE API Server v0.0.6'))
 
 // Docker Info endpoint
 app.get(`${apiPrefix}/docker/info`, async (c) => {

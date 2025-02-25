@@ -2,6 +2,17 @@ import { useState, useEffect } from "react";
 import { useRouter, useCanGoBack } from '@tanstack/react-router'
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
+import { EditorView } from "@codemirror/view";
+/*import { 
+    syntaxHighlighting,
+    defaultHighlightStyle
+} from "@codemirror/language"*/
+import { 
+    xcodeLightStyle, 
+    xcodeLightInit,
+    xcodeDarkStyle, 
+    xcodeDarkInit 
+} from '@uiw/codemirror-theme-xcode';
 import { ChevronLeft } from "lucide-react";
 import { useAgentDeployStore, AgentConfig } from '@/stores/agentDeployStore';
 import { useAgentDeployment } from '@/hooks/use-agent-deployment';
@@ -9,25 +20,54 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAgentActiveStore } from '@/stores/agentActive';
 import { toast } from '@/hooks/use-toast'
 import { ToastAction } from "@/components/ui/toast"
-//import { extractPluginNames } from '@/lib/templates';
-//import { Moon, Sun } from "lucide-react";
-//import { basicSetup } from "@codemirror/basic-setup";
-//import { oneDark } from "@codemirror/theme-one-dark";
-//import { Editor } from "./editor";
+
 
 export default function AgentConfigReview() {
     const router = useRouter()
     const canGoBack = useCanGoBack()
+    const [theme, setTheme] = useState(localStorage.getItem('vite-ui-theme'));
     const [deploying, setDeploying] = useState(false)
     const { setRefresh, getAgent, setAgent, clearAgent } = useAgentActiveStore((state) => state)
     const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
-    const { getConfig, setConfig, getEnv, getProvisioning, setProvisioning } = useAgentDeployStore((state) => state)
+    const { getConfig, setConfig, getEnv, getPluginSecrets, getProvisioning, setProvisioning } = useAgentDeployStore((state) => state)
     const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), completed: false, isProvisioning: status })
+    
     let characterConfig = getConfig();
-    let characterEnvVars = getEnv();
+    let characterEnvVars = null;
+    let characterSecrets = null;
+
     const agentId = '';
     const isNewAgent = !agentId;
 
+    // process env vars to extract alls keys
+    const keysToExtract: any = {};
+    const envSections = getEnv();
+    // Properly iterate through the nested structure
+    for (const sectionKey in envSections) {
+      const section = envSections[sectionKey as keyof typeof envSections];
+      if (typeof section === 'object' && section !== null) {
+        Object.entries(section).forEach(envPair => {
+          Object.assign(keysToExtract, { [envPair[0]]: envPair[1] });
+        });
+      }
+    }
+    characterEnvVars = keysToExtract;
+  
+    // process plugins secrets to extract alls secrets
+    const secretsToExtract: any = {};
+    const pluginsSecrets = getPluginSecrets();
+    // Properly iterate through the nested structure
+    for (const sectionPlugin in pluginsSecrets) {
+      const plugin = pluginsSecrets[sectionPlugin as keyof typeof pluginsSecrets];
+      if (typeof plugin === 'object' && plugin !== null) {
+        Object.entries(plugin).forEach(envPair => {
+          Object.assign(secretsToExtract, { [envPair[0]]: envPair[1] });
+        });
+      }
+    }
+    characterSecrets = secretsToExtract;
+
+    
     const {
       updateAgent,
       isUpdating,
@@ -92,7 +132,8 @@ export default function AgentConfigReview() {
             composePath: '',
             agentAlias: ''
           },
-          envVars: characterEnvVars
+          envVars: characterEnvVars,
+          secrets: characterSecrets
         };
 
         updateAgent(agentData);
@@ -112,8 +153,20 @@ export default function AgentConfigReview() {
       }
     };
 
-    useEffect(() => {
+    const currentTheme = theme === 'dark' 
+    ? {
+        style: xcodeDarkStyle, 
+        init: xcodeDarkInit
+    }
+    : { 
+        style: xcodeLightStyle, 
+        init: xcodeLightInit
+    }
 
+    useEffect(() => {
+        setTheme(localStorage.getItem('vite-ui-theme'));
+        console.log(characterEnvVars)
+        console.log(characterSecrets)
     }, [deploying])
 
     return (
@@ -138,16 +191,23 @@ export default function AgentConfigReview() {
             final step before your agent is deployed.
           </p>
           <div className="border rounded-lg overflow-hidden">
-            <CodeMirror
-              ref={(ref) => {
-                if (ref) console.log(ref);
-              }}
+          <CodeMirror
               className="border rounded-md overflow-hidden text-medium"
               value={JSON.stringify(characterConfig, null, 2)}
-              extensions={[json()]}
+              extensions={[
+                json(), 
+                EditorView.lineWrapping
+              ]}
               onChange={(value) => { 
                 updateAgentConfig(JSON.parse(value) as unknown as AgentConfig)
               }}
+              theme={currentTheme.init({
+                settings: {
+                  fontFamily: 'Inter',
+                  fontSize: '16px',
+                  ...currentTheme.style
+                }
+              })}
               basicSetup={{
                 lineNumbers: true,
                 foldGutter: false,

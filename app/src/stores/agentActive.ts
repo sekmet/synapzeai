@@ -107,7 +107,7 @@ export const useAgentActiveStore = create<AgentActiveState>()(
             getRefresh: () => get().refresh
         }),
         {
-            name: 'active-agent',
+            name: 'synapze:active-agent',
         }
     )
 )

@@ -45,7 +45,7 @@ export const useAgentStore = create<AgentStoreState>()(
             clearAgents: () => set({ agents: [] })
         }),
         {
-            name: 'agents-store',
+            name: 'synapze:agents',
         }
     )
 )

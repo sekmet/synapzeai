@@ -67,7 +67,7 @@ export function AgentSwitcher({
             </DropdownMenuLabel>
             {agents.map((agent, index) => (
               <DropdownMenuItem
-                key={agent.name}
+                key={`${agent.name}:${index}`}
                 onClick={() => setActiveAgent(agent)}
                 className='gap-2 p-2'
               >

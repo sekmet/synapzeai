@@ -61,3 +61,64 @@ export function stringToUniqueBigNumber(str: string | undefined): bigint {
   
   return uniqueNum;
 }
+
+
+export function capitalizeSpecificWords(input: string): string {
+    // Helper function to capitalize a word (first letter uppercase, rest lowercase)
+    function capitalize(word: string): string {
+      if (word.length === 0) return '';
+      return word[0].toUpperCase() + word.slice(1).toLowerCase();
+  }
+
+  // Define the words to capitalize
+  const words = ['ai', 'chat', 'network', 'api'];
+
+  // Replace all underscores and hyphens with spaces
+  const replaced = input.replace(/[_-]/g, ' ');
+
+  // Split by one or more whitespace characters to get an array of words
+  const wordsArray = replaced.split(/\s+/);
+
+  // Create a set of words to capitalize, in lowercase for case-insensitive comparison
+  const wordsSet = new Set(words.map(w => w.toLowerCase()));
+
+  // Process each word: capitalize if it is in the set, otherwise leave unchanged
+  const processedWords = wordsArray.map(word => {
+      if (wordsSet.has(word.toLowerCase())) {
+          return capitalize(word);
+      } else {
+          return word;
+      }
+  });
+
+  // Join the words back with single spaces
+  const result = processedWords.join(' ');
+  return result;
+}
+
+
+export function uppercaseSpecificWords(input: string): string {
+  // Helper function to escape special characters for regex
+  function escapeRegExp(string: string): string {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Define the words to uppercase (example words; can be modified as needed)
+  const words = ['ai', 'key', 'id', 'fid', 'api', 'uuid', 'url'];
+
+  // Start with the original input string
+  let result = input;
+
+  // Process each word in the words array
+  for (const word of words) {
+      // Uppercase the word
+      const uppercased = word.toUpperCase();
+      // Create a regex to match the word case-insensitively, ensuring whole words only
+      const regex = new RegExp('\\b' + escapeRegExp(word) + '\\b', 'gi');
+      // Replace all occurrences of the word with its uppercased version
+      result = result.replace(regex, uppercased);
+  }
+
+  // Return the modified string
+  return result;
+}

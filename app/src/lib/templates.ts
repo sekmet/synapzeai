@@ -1,4 +1,7 @@
-import { useAgentDeployStore, AgentEnvironmentVars } from '@/stores/agentDeployStore';
+import { useAgentDeployStore, AgentPluginsSecrets } from '@/stores/agentDeployStore';
+import { AgentEnvironmentVars } from '@/types/agent-enviroment-v1';
+import { providerMappings as mMappings, clientMappings as cMappings /*, pluginMappings as pMappings*/ } from './mappings';
+import { loadPluginParameters, type PluginInfo, type PluginParameter } from '@/lib/plugins';
 
 interface Template {
   name: string;
@@ -140,254 +143,52 @@ export function getAgentEnvironmentFields(): string[] {
  * @returns Array of matched environment variable names
  */
 export function getMatchedEnvironmentVars(modelProvider: string, selectedClients: string[]): Partial<AgentEnvironmentVars> {
-  const matchedVars: Partial<AgentEnvironmentVars> = {};
-
+  const results: Partial<AgentEnvironmentVars> = {};
   // Model Provider mappings
-  const providerMappings: Record<string, (keyof AgentEnvironmentVars)[]> = {
-    'openai': [
-      'OPENAI_API_KEY',
-      'OPENAI_API_URL',
-      'SMALL_OPENAI_MODEL',
-      'MEDIUM_OPENAI_MODEL',
-      'LARGE_OPENAI_MODEL',
-      'EMBEDDING_OPENAI_MODEL',
-      'IMAGE_OPENAI_MODEL',
-      'USE_OPENAI_EMBEDDING',
-      'ENABLE_OPEN_AI_COMMUNITY_PLUGIN',
-      'OPENAI_DEFAULT_MODEL',
-      'OPENAI_MAX_TOKENS',
-      'OPENAI_TEMPERATURE'
-    ],
-    'atoma': [
-      'ATOMASDK_BEARER_AUTH',
-      'ATOMA_API_URL',
-      'SMALL_ATOMA_MODEL',
-      'MEDIUM_ATOMA_MODEL',
-      'LARGE_ATOMA_MODEL'
-    ],
-    'eternal': [
-      'ETERNALAI_URL',
-      'ETERNALAI_MODEL',
-      'ETERNALAI_CHAIN_ID',
-      'ETERNALAI_RPC_URL',
-      'ETERNALAI_AGENT_CONTRACT_ADDRESS',
-      'ETERNALAI_AGENT_ID',
-      'ETERNALAI_API_KEY',
-      'ETERNALAI_LOG'
-    ],
-    'hyperbolic': [
-      'HYPERBOLIC_API_KEY',
-      'HYPERBOLIC_MODEL',
-      'IMAGE_HYPERBOLIC_MODEL',
-      'SMALL_HYPERBOLIC_MODEL',
-      'MEDIUM_HYPERBOLIC_MODEL',
-      'LARGE_HYPERBOLIC_MODEL',
-      'HYPERBOLIC_ENV',
-      'HYPERBOLIC_GRANULAR_LOG',
-      'HYPERBOLIC_SPASH',
-      'HYPERBOLIC_LOG_LEVEL'
-    ],
-    'infera': [
-      'INFERA_API_KEY',
-      'INFERA_MODEL',
-      'INFERA_SERVER_URL',
-      'SMALL_INFERA_MODEL',
-      'MEDIUM_INFERA_MODEL',
-      'LARGE_INFERA_MODEL'
-    ],
-    'venice': [
-      'VENICE_API_KEY',
-      'SMALL_VENICE_MODEL',
-      'MEDIUM_VENICE_MODEL',
-      'LARGE_VENICE_MODEL',
-      'IMAGE_VENICE_MODEL'
-    ],
-    'nineteen': [
-      'NINETEEN_AI_API_KEY',
-      'SMALL_NINETEEN_AI_MODEL',
-      'MEDIUM_NINETEEN_AI_MODEL',
-      'LARGE_NINETEEN_AI_MODEL',
-      'IMAGE_NINETEEN_AI_MODE'
-    ],
-    'galadriel': [
-      'GALADRIEL_API_KEY',
-      'SMALL_GALADRIEL_MODEL',
-      'MEDIUM_GALADRIEL_MODEL',
-      'LARGE_GALADRIEL_MODEL',
-      'GALADRIEL_FINE_TUNE_API_KEY'
-    ],
-    'lmstudio': [
-      'LMSTUDIO_SERVER_URL'
-    ],
-    'akash_chat_api': [
-      'AKASH_CHAT_API_KEY',
-      'AKASH_CHAT_API_URL',
-      'SMALL_AKASH_CHAT_API_MODEL',
-      'MEDIUM_AKASH_CHAT_API_MODEL',
-      'LARGE_AKASH_CHAT_API_MODEL'
-    ],
-    'elevenlabs': [
-      'ELEVENLABS_XI_API_KEY',
-      'ELEVENLABS_MODEL_ID',
-      'ELEVENLABS_VOICE_ID',
-      'ELEVENLABS_VOICE_STABILITY',
-      'ELEVENLABS_VOICE_SIMILARITY_BOOST',
-      'ELEVENLABS_VOICE_STYLE',
-      'ELEVENLABS_VOICE_USE_SPEAKER_BOOST',
-      'ELEVENLABS_OPTIMIZE_STREAMING_LATENCY',
-      'ELEVENLABS_OUTPUT_FORMAT'
-    ],
-    'openrouter': [
-      'OPENROUTER_API_KEY',
-      'OPENROUTER_MODEL',
-      'SMALL_OPENROUTER_MODEL',
-      'MEDIUM_OPENROUTER_MODEL',
-      'LARGE_OPENROUTER_MODEL'
-    ],
-    'redpill': [
-      'REDPILL_API_KEY',
-      'REDPILL_MODEL',
-      'SMALL_REDPILL_MODEL',
-      'MEDIUM_REDPILL_MODEL',
-      'LARGE_REDPILL_MODEL'
-    ],
-    'grok': [
-      'GROK_API_KEY',
-      'SMALL_GROK_MODEL',
-      'MEDIUM_GROK_MODEL',
-      'LARGE_GROK_MODEL',
-      'EMBEDDING_GROK_MODEL'
-    ],
-    'ollama': [
-      'OLLAMA_SERVER_URL',
-      'OLLAMA_MODEL',
-      'USE_OLLAMA_EMBEDDING',
-      'OLLAMA_EMBEDDING_MODEL',
-      'SMALL_OLLAMA_MODEL',
-      'MEDIUM_OLLAMA_MODEL',
-      'LARGE_OLLAMA_MODEL'
-    ],
-    'google': [
-      'GOOGLE_MODEL',
-      'SMALL_GOOGLE_MODEL',
-      'MEDIUM_GOOGLE_MODEL',
-      'LARGE_GOOGLE_MODEL',
-      'EMBEDDING_GOOGLE_MODEL'
-    ],
-    'mistral': [
-      'MISTRAL_MODEL',
-      'SMALL_MISTRAL_MODEL',
-      'MEDIUM_MISTRAL_MODEL',
-      'LARGE_MISTRAL_MODEL'
-    ],
-    'livepeer': [
-      'LIVEPEER_GATEWAY_URL',
-      'IMAGE_LIVEPEER_MODEL',
-      'SMALL_LIVEPEER_MODEL',
-      'MEDIUM_LIVEPEER_MODEL',
-      'LARGE_LIVEPEER_MODEL'
-    ]
-  };
+  const providerMappings: Record<string, readonly string[]> = mMappings;
 
   // Client mappings
-  const clientMappings: Record<string, (keyof AgentEnvironmentVars)[]> = {
-    'discord': [
-      'DISCORD_APPLICATION_ID',
-      'DISCORD_API_TOKEN',
-      'DISCORD_VOICE_CHANNEL_ID'
-    ],
-    'telegram': [
-      'TELEGRAM_BOT_TOKEN',
-      'TELEGRAM_ACCOUNT_PHONE',
-      'TELEGRAM_ACCOUNT_APP_ID',
-      'TELEGRAM_ACCOUNT_APP_HASH',
-      'TELEGRAM_ACCOUNT_DEVICE_MODEL',
-      'TELEGRAM_ACCOUNT_SYSTEM_VERSION'
-    ],
-    'twitter': [
-      'TWITTER_DRY_RUN',
-      'TWITTER_USERNAME',
-      'TWITTER_PASSWORD',
-      'TWITTER_EMAIL',
-      'TWITTER_2FA_SECRET',
-      'TWITTER_COOKIES_AUTH_TOKEN',
-      'TWITTER_COOKIES_CT0',
-      'TWITTER_COOKIES_GUEST_ID',
-      'TWITTER_POLL_INTERVAL',
-      'TWITTER_SEARCH_ENABLE',
-      'TWITTER_TARGET_USERS',
-      'TWITTER_RETRY_LIMIT',
-      'TWITTER_SPACES_ENABLE',
-      'ENABLE_TWITTER_POST_GENERATION',
-      'POST_INTERVAL_MIN',
-      'POST_INTERVAL_MAX',
-      'POST_IMMEDIATELY',
-      'ACTION_INTERVAL',
-      'ENABLE_ACTION_PROCESSING',
-      'MAX_ACTIONS_PROCESSING',
-      'ACTION_TIMELINE_TYPE',
-      'TWITTER_APPROVAL_DISCORD_CHANNEL_ID',
-      'TWITTER_APPROVAL_DISCORD_BOT_TOKEN',
-      'TWITTER_APPROVAL_ENABLED',
-      'TWITTER_APPROVAL_CHECK_INTERVAL'
-    ],
-    'whatsapp': [
-      'WHATSAPP_ACCESS_TOKEN',
-      'WHATSAPP_PHONE_NUMBER_ID',
-      'WHATSAPP_BUSINESS_ACCOUNT_ID',
-      'WHATSAPP_WEBHOOK_VERIFY_TOKEN',
-      'WHATSAPP_API_VERSION'
-    ],
-    'alexa': [
-      'ALEXA_SKILL_ID',
-      'ALEXA_CLIENT_ID',
-      'ALEXA_CLIENT_SECRET'
-    ],
-    'simsai': [
-      'SIMSAI_API_KEY',
-      'SIMSAI_AGENT_ID',
-      'SIMSAI_USERNAME',
-      'SIMSAI_DRY_RUN'
-    ],
-    'farcaster': [
-      'FARCASTER_FID',
-      'FARCASTER_NEYNAR_API_KEY',
-      'FARCASTER_NEYNAR_SIGNER_UUID',
-      'FARCASTER_DRY_RUN',
-      'FARCASTER_POLL_INTERVAL'
-    ]
-  };
+  const clientMappings: Record<string, readonly string[]> = cMappings;
 
   // Add model provider vars
   const normalizedProvider = modelProvider.toLowerCase();
   if (providerMappings[normalizedProvider]) {
+    const matchedVars: Partial<AgentEnvironmentVars> = {};
+    //providerMappings[normalizedProvider].forEach(key => {
+    //  matchedVars[key as keyof AgentEnvironmentVars] = undefined;
+    //});
     providerMappings[normalizedProvider].forEach(key => {
-      matchedVars[key] = undefined;
+      //matchedVars[normalizedProvider][key as keyof AgentEnvironmentVars] = undefined;
+      matchedVars[key as keyof AgentEnvironmentVars] = undefined;
+      //console.log(key, matchedVars[key as keyof AgentEnvironmentVars]);
     });
+
+    //console.log({[normalizedProvider]: matchedVars});
+    Object.assign(results, {[normalizedProvider]: matchedVars});
   }
 
   // Add client vars
   selectedClients.forEach(client => {
+    const matchedVars: Partial<AgentEnvironmentVars> = {};
     const normalizedClient = client.toLowerCase();
     if (clientMappings[normalizedClient]) {
       clientMappings[normalizedClient].forEach(key => {
-        matchedVars[key] = undefined;
+        matchedVars[key as keyof AgentEnvironmentVars] = undefined;
       });
+      //console.log(clientMappings[normalizedClient]);
+      //console.log({[normalizedClient]: matchedVars});
+      Object.assign(results, {[normalizedClient]: matchedVars});
     }
   });
 
-  return matchedVars;
+  //console.log({results});
+  return results;
 }
 
-export function extractPluginNames(plugins: Plugin[]): string[] {
-  return plugins.map(plugin => plugin.name);
-}
 
 export async function saveTemplateState(template: Template) {
   const agentDeployStore = useAgentDeployStore.getState();
 
-  //console.log(agentDeployStore.getConfig())
-  
   // Convert template format to AgentConfig format
   const config = {
     name: template.name,
@@ -407,40 +208,76 @@ export async function saveTemplateState(template: Template) {
     adjectives: template.adjectives
   };
 
-  const envVars = getMatchedEnvironmentVars(template.modelProvider, template.clients);
-  //console.log({envVars})
-
-  // get env vars with default values
-  const keysToExtract: string[] = [];
-  Object.keys(envVars).forEach(envKey => {
-    keysToExtract.push(envKey)
-  })
-  // fetch the api to get the default values for the env vars
-  const envDefaultValues = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/envs/extract`,{
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ keysToExtract }),
-  });
-
-  const envDefaultValuesJson = await envDefaultValues.json();
-  const envVariablesChecked = envDefaultValuesJson.envVariables;
-
-  // check if the env var value is undefined and set it to an empty string
+  const envSections = getMatchedEnvironmentVars(template.modelProvider, template.clients);
+  //console.log({envSections})
   const env: any = {};
-  Object.keys(envVars).forEach(key => {
-    if (envVariablesChecked[key] === undefined) {
-      env[key] = '';
-    } else {
-      env[key] = envVariablesChecked[key];
-    }
-  });
 
-  //console.log({env})
+  // Properly iterate through the nested structure
+  for (const sectionKey in envSections) {
+    // get env vars with default values
+    const keysToExtract: string[] = [];
+
+    const section = envSections[sectionKey as keyof typeof envSections];
+    if (typeof section === 'object' && section !== null) {
+      Object.keys(section).forEach(envKey => {
+        keysToExtract.push(envKey);
+      });
+    }
+
+    //console.log('Keys to extract:', keysToExtract);
+    // fetch the api to get the default values for the env vars
+    const envDefaultValues = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/envs/extract`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ keysToExtract }),
+    });
+
+    const defaultValuesResponse = await envDefaultValues.json();
+    //console.log(`${sectionKey} Default values:`, defaultValuesResponse);
+    const envVariablesChecked = defaultValuesResponse.envVariables;
+
+    if (typeof section === 'object' && section !== null) {
+      Object.assign(env, {[sectionKey]: {} })
+      Object.keys(section).forEach((envKey: any) => {
+        //console.log({envKey})
+        //console.log(envVariablesChecked[envKey])
+        Object.assign(env[sectionKey], {[envKey]: envVariablesChecked[envKey] ?? ''})
+      });
+    }
+
+  }
+
   // Set the environment variables in the store
   agentDeployStore.setEnv(env);
+
+  const secrets: AgentPluginsSecrets = {};
+  // Load the plugin parameters
+  template.plugins.forEach(async (plugin) => {
+    const pluginName = plugin.replace('@elizaos/', '');
+    const pluginInfo: PluginInfo | null = await loadPluginParameters(pluginName);
+    const pluginParams: PluginParameter | null | undefined = pluginInfo?.agentConfig?.pluginParameters;
+    //console.log({pluginParams})
+    
+    if (pluginParams) {
+      // Initialize the section for this plugin if it doesn't exist
+      if (!secrets[pluginName]) {
+        secrets[pluginName] = {};
+      }
+      
+      Object.keys(pluginParams).forEach((key: string) => {
+        const value = pluginParams[key as keyof PluginParameter] as any;
+        secrets[pluginName][key] = value?.default || '';
+      });
+    }
+    
+    // Set the agent secrets in the store
+    agentDeployStore.setPluginSecrets(secrets);
+  });
+
+
   // Update the agent config in the store
   agentDeployStore.setConfig(config);
 
