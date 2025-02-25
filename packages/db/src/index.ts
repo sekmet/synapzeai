@@ -53,6 +53,9 @@ import {
   createSubscription,
   createPayment,
   getSubscriptionById,
+  getSubscriptionByCustomerId,
+  getSubscriptionByOrganizationId,
+  getSubscriptionAllowance,
   updateSubscription,
   updatePaymentStatus,
   deleteSubscription
@@ -568,8 +571,8 @@ app.delete(`${apiPrefix}/organizations/:id`, async (c) => {
 app.post(`${apiPrefix}/subscription-plans`, async (c) => {
   try {
     const body = await c.req.json();
-    const { name, description, price, currency, interval } = body;
-    const plan = await createSubscriptionPlan(name, description, price, currency, interval);
+    const { name, description, price, currency, interval, items, metadata } = body;
+    const plan = await createSubscriptionPlan(name, description, price, currency, interval, items, metadata);
     return c.json(plan, 201);
   } catch (err) {
     console.error(err);
@@ -581,11 +584,14 @@ app.post(`${apiPrefix}/subscription-plans`, async (c) => {
 app.post(`${apiPrefix}/subscriptions`, async (c) => {
   try {
     const body = await c.req.json();
-    const { customerEmail, planId, status, startDate, nextBillingDate } = body;
+    const { customerId, organizationId, customerEmail, planId, status, metadata, startDate, nextBillingDate } = body;
     const subscription = await createSubscription(
+      customerId,
+      organizationId,
       customerEmail,
       planId,
       status,
+      metadata,
       new Date(startDate),
       new Date(nextBillingDate)
     );
@@ -609,16 +615,56 @@ app.get(`${apiPrefix}/subscriptions/:id`, async (c) => {
   }
 });
 
+// Get a subscription by organization id (includes billing info and payments)
+app.get(`${apiPrefix}/subscriptions/organization/:id`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const subscription = await getSubscriptionByOrganizationId(id);
+    if (!subscription) return c.json({ error: 'Subscription not found' }, 404);
+    return c.json(subscription);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to get subscription' }, 500);
+  }
+});
+
+// Get a subscription by customer id (includes billing info and payments)
+app.get(`${apiPrefix}/subscriptions/customer/:id`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const subscription = await getSubscriptionByCustomerId(id);
+    if (!subscription) return c.json({ error: 'Subscription not found' }, 404);
+    return c.json(subscription);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to get subscription' }, 500);
+  }
+});
+
+// Get subscription allowance by customer id
+app.get(`${apiPrefix}/subscriptions/allowance/:id`, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const allowance = await getSubscriptionAllowance(id);
+    if (!allowance) return c.json({ error: 'Subscription not found' }, 404);
+    return c.json(allowance);
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Failed to get subscription allowance' }, 500);
+  }
+});
+
 // Update a subscription by id
 app.put(`${apiPrefix}/subscriptions/:id`, async (c) => {
   try {
     const id = c.req.param('id');
     const body = await c.req.json();
-    const { status, endDate } = body;
+    const { status, endDate, metadata } = body;
     const updatedSubscription = await updateSubscription(
       id,
       status,
-      endDate ? new Date(endDate) : undefined
+      endDate ? new Date(endDate) : undefined,
+      metadata
     );
     if (!updatedSubscription) return c.json({ error: 'Subscription not found' }, 404);
     return c.json(updatedSubscription);

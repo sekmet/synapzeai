@@ -17,18 +17,19 @@ export async function createSubscriptionPlan(
   price: number,
   currency: string,
   interval: string,
-  items: number
+  items: number,
+  metadata: Record<string, string>
 ) {
   try {
     const now = new Date().toISOString();
     const result = await Bun.sql`
       INSERT INTO subscription_plans (
-        name, description, price, currency, interval, items,
+        name, description, price, currency, interval, items, metadata,
         created_at, updated_at
       )
       VALUES (
         ${name}, ${description}, ${price}, ${currency}, ${interval},
-        ${items}, ${now}, ${now}
+        ${items}, ${JSON.stringify(metadata) ?? '{}'}, ${now}, ${now}
       )
       RETURNING *
     `.values();
@@ -41,9 +42,12 @@ export async function createSubscriptionPlan(
 }
 
 export async function createSubscription(
+  customerId: string,
+  organizationId: string,
   customerEmail: string,
   planId: string,
   status: string,
+  metadata: Record<string, string>,
   startDate: Date,
   nextBillingDate: Date
 ) {
@@ -51,11 +55,11 @@ export async function createSubscription(
     const now = new Date().toISOString();
     const result = await Bun.sql`
       INSERT INTO subscriptions (
-        customer_email, plan_id, status, start_date, 
+        customer_id, organization_id, customer_email, plan_id, status, metadata, start_date, 
         next_billing_date, created_at, updated_at
       )
       VALUES (
-        ${customerEmail}, ${planId}, ${status}, ${startDate.toISOString()},
+        ${customerId}, ${organizationId}, ${customerEmail}, ${planId}, ${status}, ${JSON.stringify(metadata) ?? '{}'} ${startDate.toISOString()},
         ${nextBillingDate.toISOString()}, ${now}, ${now}
       )
       RETURNING *
@@ -127,10 +131,98 @@ export async function getSubscriptionById(id: string) {
   }
 }
 
+export async function getSubscriptionByCustomerId(customer_id: string) {
+  try {
+    const subscription = await Bun.sql`
+      SELECT s.*, sp.name as plan_name, sp.price as plan_price
+      FROM subscriptions s
+      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.customer_id = ${customer_id}
+    `.values();
+
+    const billingInfo = await Bun.sql`
+      SELECT * FROM billing_information
+      WHERE subscription_id = ${subscription[0][0]}
+    `.values();
+
+    const payments = await Bun.sql`
+      SELECT * FROM payments
+      WHERE subscription_id = ${subscription[0][0]}
+      ORDER BY created_at DESC
+    `.values();
+
+    return {
+      ...subscription[0],
+      billingInfo: billingInfo[0] ?? null,
+      payments
+    };
+  } catch (error) {
+    console.error('Failed to get subscription:', error);
+    throw error;
+  }
+}
+
+
+export async function getSubscriptionByOrganizationId(organization_id: string) {
+  try {
+    const subscription = await Bun.sql`
+      SELECT s.*, sp.name as plan_name, sp.price as plan_price
+      FROM subscriptions s
+      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.organization_id = ${organization_id}
+    `.values();
+
+    const billingInfo = await Bun.sql`
+      SELECT * FROM billing_information
+      WHERE subscription_id = ${subscription[0][0]}
+    `.values();
+
+    const payments = await Bun.sql`
+      SELECT * FROM payments
+      WHERE subscription_id = ${subscription[0][0]}
+      ORDER BY created_at DESC
+    `.values();
+
+    return {
+      ...subscription[0],
+      billingInfo: billingInfo[0] ?? null,
+      payments
+    };
+  } catch (error) {
+    console.error('Failed to get subscription:', error);
+    throw error;
+  }
+}
+
+
+export async function getSubscriptionAllowance(customer_id: string) {
+  try {
+    const subscription = await Bun.sql`
+      SELECT s.id, s.status, sp.items, sp.name, sp.price
+      FROM subscriptions s
+      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.customer_id = ${customer_id}
+    `.values();
+
+    return {
+      id: subscription[0][0],
+      status: subscription[0][1],
+      items: subscription[0][2],
+      plan_name: subscription[0][3],
+      plan_price: subscription[0][4]
+    };
+  } catch (error) {
+    console.error('Failed to get subscription:', error);
+    throw error;
+  }
+}
+
+
 export async function updateSubscription(
   id: string,
   status?: string,
-  endDate?: Date
+  endDate?: Date,
+  metadata?: Record<string, string>
 ) {
   try {
     const now = new Date().toISOString();
@@ -138,7 +230,8 @@ export async function updateSubscription(
       UPDATE subscriptions 
       SET status = COALESCE(${status}, status),
           end_date = COALESCE(${endDate?.toISOString()}, end_date),
-          updated_at = ${now}
+          updated_at = ${now},
+          metadata = COALESCE(${JSON.stringify(metadata) ?? '{}'}, metadata)
       WHERE id = ${id}
       RETURNING *
     `.values();
