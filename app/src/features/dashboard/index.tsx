@@ -36,7 +36,7 @@ import {
 } from '@/lib/api/reports'
 
 export default function Dashboard() {
-  const { getOnboarding, getUser } = useAuthStore((state) => state)
+  const { getOnboarding, getUser, onboarding: isOnboarding } = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
   const { getAgent, getAgentContainerId, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
@@ -75,7 +75,7 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-  }, [activeAgent, refresh])
+  }, [activeAgent, isOnboarding, refresh])
 
 
   return activeAgent && getUser()?.id ? (
@@ -243,7 +243,7 @@ export default function Dashboard() {
         </>
       </Main>
     </>
-  ) : getUser()?.id ?(
+  ) : getUser()?.id ? (
     isProvisioning ? (
       (
         <>
@@ -271,7 +271,7 @@ export default function Dashboard() {
       {/* ===== Top Heading ===== */}
       <Header>
         {/*<TopNav links={topNav} />*/}
-        {onboarding ? (
+        {onboarding && isOnboarding ? (
           <div className='ml-auto flex items-center space-x-4'>
             <ThemeSwitch />
             <ProfileDropdown />
@@ -287,7 +287,7 @@ export default function Dashboard() {
 
       {/* ===== Main ===== */}
       <Main>
-      {onboarding ? (
+      {onboarding && isOnboarding ? (
           <Onboarding />
         ) : (
     <div className='h-svh'>
