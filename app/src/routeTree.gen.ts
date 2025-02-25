@@ -76,6 +76,9 @@ const AuthenticatedSettingsAccountLazyImport = createFileRoute(
 const AuthenticatedChatsAgentIdLazyImport = createFileRoute(
   '/_authenticated/chats/$agentId',
 )()
+const authVerifyEmailVerificationTokenLazyImport = createFileRoute(
+  '/(auth)/verify-email/$verificationToken',
+)()
 const AuthenticatedAgentNewIndexLazyImport = createFileRoute(
   '/_authenticated/agent/new/',
 )()
@@ -342,6 +345,19 @@ const AuthenticatedChatsAgentIdLazyRoute =
     import('./routes/_authenticated/chats/$agentId.lazy').then((d) => d.Route),
   )
 
+const authVerifyEmailVerificationTokenLazyRoute =
+  authVerifyEmailVerificationTokenLazyImport
+    .update({
+      id: '/(auth)/verify-email/$verificationToken',
+      path: '/verify-email/$verificationToken',
+      getParentRoute: () => rootRoute,
+    } as any)
+    .lazy(() =>
+      import('./routes/(auth)/verify-email/$verificationToken.lazy').then(
+        (d) => d.Route,
+      ),
+    )
+
 const AuthenticatedAgentNewIndexLazyRoute =
   AuthenticatedAgentNewIndexLazyImport.update({
     id: '/agent/new/',
@@ -518,6 +534,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/(auth)/verify-email/$verificationToken': {
+      id: '/(auth)/verify-email/$verificationToken'
+      path: '/verify-email/$verificationToken'
+      fullPath: '/verify-email/$verificationToken'
+      preLoaderRoute: typeof authVerifyEmailVerificationTokenLazyImport
+      parentRoute: typeof rootRoute
     }
     '/_authenticated/chats/$agentId': {
       id: '/_authenticated/chats/$agentId'
@@ -760,6 +783,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/verify-email/$verificationToken': typeof authVerifyEmailVerificationTokenLazyRoute
   '/chats/$agentId': typeof AuthenticatedChatsAgentIdLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/agent': typeof AuthenticatedSettingsAgentLazyRoute
@@ -795,6 +819,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
+  '/verify-email/$verificationToken': typeof authVerifyEmailVerificationTokenLazyRoute
   '/chats/$agentId': typeof AuthenticatedChatsAgentIdLazyRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/agent': typeof AuthenticatedSettingsAgentLazyRoute
@@ -834,6 +859,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/(auth)/verify-email/$verificationToken': typeof authVerifyEmailVerificationTokenLazyRoute
   '/_authenticated/chats/$agentId': typeof AuthenticatedChatsAgentIdLazyRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/agent': typeof AuthenticatedSettingsAgentLazyRoute
@@ -873,6 +899,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
+    | '/verify-email/$verificationToken'
     | '/chats/$agentId'
     | '/settings/account'
     | '/settings/agent'
@@ -907,6 +934,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
+    | '/verify-email/$verificationToken'
     | '/chats/$agentId'
     | '/settings/account'
     | '/settings/agent'
@@ -944,6 +972,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/(auth)/verify-email/$verificationToken'
     | '/_authenticated/chats/$agentId'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/agent'
@@ -981,6 +1010,7 @@ export interface RootRouteChildren {
   errors404LazyRoute: typeof errors404LazyRoute
   errors500LazyRoute: typeof errors500LazyRoute
   errors503LazyRoute: typeof errors503LazyRoute
+  authVerifyEmailVerificationTokenLazyRoute: typeof authVerifyEmailVerificationTokenLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -996,6 +1026,8 @@ const rootRouteChildren: RootRouteChildren = {
   errors404LazyRoute: errors404LazyRoute,
   errors500LazyRoute: errors500LazyRoute,
   errors503LazyRoute: errors503LazyRoute,
+  authVerifyEmailVerificationTokenLazyRoute:
+    authVerifyEmailVerificationTokenLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -1019,7 +1051,8 @@ export const routeTree = rootRoute
         "/(errors)/403",
         "/(errors)/404",
         "/(errors)/500",
-        "/(errors)/503"
+        "/(errors)/503",
+        "/(auth)/verify-email/$verificationToken"
       ]
     },
     "/_authenticated": {
@@ -1092,6 +1125,9 @@ export const routeTree = rootRoute
     "/_authenticated/": {
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
+    },
+    "/(auth)/verify-email/$verificationToken": {
+      "filePath": "(auth)/verify-email/$verificationToken.lazy.tsx"
     },
     "/_authenticated/chats/$agentId": {
       "filePath": "_authenticated/chats/$agentId.lazy.tsx",

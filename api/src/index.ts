@@ -106,7 +106,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     // Validate request body
     const schema = z.object({
       id: z.string(),
-      email: z.string().email('Invalid email address'),
+      email: z.string().email('Invalid email address').optional(),
       verificationToken: z.string().optional()//.min('Verification token is required')
     });
 
@@ -125,7 +125,11 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
 
     const user = userQuery[0];
     if (user[6] as boolean) { // verified status is at index 3
-      return c.json({ success: true, message: 'Email already verified' }, 200);
+      return c.json({ 
+        success: true, 
+        message: 'Email already verified',
+        description: 'Your email is already verified.'
+      }, 200);
     }
 
     // Update user as verified
@@ -134,18 +138,24 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     // Verify the token matches
     if (verificationToken) {
       if (user[7] !== verificationToken) {
-        return c.json({ error: 'Invalid verification token' }, 400);
+        return c.json({ success: false, error: 'Invalid verification token' }, 500);
       } else {
         await Bun.sql`
           UPDATE users 
-          SET verified = true, 
-              email_address = ${email},
+          SET verified = true,
               verification_token = NULL,
               onboarding = false,
               updated_at = ${now}
           WHERE id = ${id}
         `;
       }
+
+      return c.json({
+        success: true,
+        message: 'Email Verified!',
+        description: 'Your email was verified successfully, thank you!',
+      });
+
     }
 
     // Check if user already exists and is verified
@@ -156,7 +166,8 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     if (existingUserQuery.length > 0 && existingUserQuery[0][0]) { // verified status is at index 3
       return c.json({
         success: true,
-        message: 'Email already verified',
+        message: 'Already verified',
+        description: 'Your email is already verified.'
       });
     }
 
@@ -208,7 +219,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
         <h1>Welcome to Synapze</h1>
         <h3>Email Verification</h3>
         <p>Click the link below to verify your email address:</p>
-        <a href="${process.env.APP_HOST_URL}/verify-email?token=${verificationToken}">
+        <a href="${process.env.APP_HOST_URL}/verify-email/${verificationToken}">
           Verify Email
         </a>
       `,
@@ -217,6 +228,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     return c.json({
       success: true,
       message: 'Verification email sent successfully',
+      description: 'Please check your inbox click the link to verify your account.'
     });
 
   } catch (error) {
@@ -224,7 +236,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
       return c.json({ error: `${error.errors[0].path[0]}: ${error.errors[0].message}` }, 400);
     }
     console.error('Email verification error:', error);
-    return c.json({ error: 'Failed to send verification email' }, 500);
+    return c.json({ success: false, error: 'Failed to send verification email' }, 500);
   }
 });
 

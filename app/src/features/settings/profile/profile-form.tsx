@@ -200,16 +200,22 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
     name: "urls",
   })
 
+  const verifyUserEmail = async (id: string, email: string) => {
+
+    const response = await sendEmailVerification(id, email);
+    return response;
+  }
+
   const verifyEmailMutation = useMutation<
-    { success: boolean; id: string; message: string },
+    { success: boolean; id: string; message: string; description: string; },
     Error,
     { id: string; email: string }
   >({
-    mutationFn: ({ id, email }) => sendEmailVerification(id, email),
-    onSuccess: () => {
+    mutationFn: ({ id, email }) => verifyUserEmail(id, email),
+    onSuccess: (data) => {
       toast({
-        title: 'Verification Email Sent',
-        description: 'Please check your email to verify your account.',
+        title: data.message ?? 'Verification Email Sent',
+        description: data.description ?? 'Please check your email to verify your account.',
       })
     },
     onError: () => {

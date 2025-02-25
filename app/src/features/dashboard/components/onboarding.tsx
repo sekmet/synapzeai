@@ -7,10 +7,10 @@ import { useAuthStore } from '@/stores/authStore'
 
 // Fetch user data from API
 const fetchUserVerificationStatus = async (userId: string) => {
-  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/auth/is-verified`,{
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/auth/is-verified`,{
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ id: userId }),
