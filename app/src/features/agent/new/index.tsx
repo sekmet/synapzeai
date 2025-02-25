@@ -34,7 +34,7 @@ export default function NewAgent() {
     queryFn: () => fetchUserAgents(getUser()?.id ?? ''),
   })
 
-  const isAgentsDeployedLimitReached = agentsDeployed && (Number(agentsDeployed.length) === Number(subscriptionAllowance.items));
+  const isAgentsDeployedLimitReached = (Number(agentsDeployed?.length) === Number(subscriptionAllowance?.items));
 
   if (isAgentsDeployedLimitReached) {
     console.error('Maximum agent deployment reached');
@@ -52,8 +52,10 @@ export default function NewAgent() {
       pluginListing.setPlugins(pluginsAvailable as PluginItem[])
     }
 
-    if (isAgentsDeployedLimitReached || !subscriptionAllowance) {
-      setOpenDialogLimitReached(true)
+    if (!isLoading) {
+      if (isAgentsDeployedLimitReached || !subscriptionAllowance) {
+        setOpenDialogLimitReached(true)
+      }
     }
 
   },[isLoading])
