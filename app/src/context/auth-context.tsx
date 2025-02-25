@@ -5,9 +5,10 @@ import { useAuthStore, AuthUser } from '@/stores/authStore'
 import { fetchCurrentUser, createUser } from '@/lib/users'
 
 type AuthProviderProps = {
-    children: React.ReactNode
-    defaultUserId?: string
-    storageKey?: string
+    children: React.ReactNode;
+    router?: any;
+    defaultUserId?: string;
+    storageKey?: string;
   }
   
   type AuthProviderState = {
@@ -24,12 +25,12 @@ type AuthProviderProps = {
 
   export function AuthProvider({
     children,
+    router,
     defaultUserId = '',
     storageKey = 'synapze:auth-user',
     ...props
   }: AuthProviderProps) {
     const { getOnboarding, setOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
-
     const [userId, _setUserId] = useState<any>(
       () => (getUser()?.id as string) || defaultUserId
     )
@@ -43,7 +44,6 @@ type AuthProviderProps = {
     })
 
     const { login } = useLogin({
-  
       onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
         if (wasAlreadyAuthenticated) {
             const isUser = currentUser;
@@ -105,15 +105,14 @@ type AuthProviderProps = {
   
     useEffect(() => {
       if (ready && !authenticated) {
-        //window.location.href = new URL(window.location.href).origin + '/sign-in-2'
         console.log('not authenticated')
+        router.navigate({ to: '/sign-in-2' })
       }
   
     }, [ready, authenticated, login]);    
 
   
     useEffect(() => {
-        console.log('from auth user provide', userId)
     }, [userId])
 
     const resetUserId = () => {
@@ -139,7 +138,7 @@ export const useAuthUser = () => {
     const context = useContext(AuthProviderContext)
   
     if (context === undefined)
-      throw new Error('useTheme must be used within a ThemeProvider')
+      throw new Error('useAuthUser must be used within a AuthProvider')
   
     return context
   }

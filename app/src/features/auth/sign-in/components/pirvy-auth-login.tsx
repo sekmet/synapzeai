@@ -60,9 +60,8 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
   useEffect(() => {
     if (ready && authenticated) {
       navigate({ to: '/' })
-    } else {
-      navigate({ to: '/sign-in-2' })
     }
+    
   }, [ready, authenticated, login]);
 
   return (

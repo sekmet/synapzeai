@@ -102,7 +102,7 @@ if (!rootElement.innerHTML) {
     <StrictMode>
       <PrivyProvider appId="cm6xcmmbg01a92e4ck4x3is92">
       <QueryClientProvider client={queryClient}>
-        <AuthProvider defaultUserId={''} storageKey='synapze:auth-user'>
+        <AuthProvider defaultUserId={''} router={router} storageKey='synapze:auth-user'>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
             <RouterProvider router={router} />

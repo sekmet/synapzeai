@@ -36,7 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     console.log({isProvisioning},{onboarding})
   }, [refresh])
 
-  return onboarding || isProvisioning ? null : (
+  return onboarding || isProvisioning ? null : getUser()?.id ? (
     <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
         {userAgents ? (
@@ -65,5 +65,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  );
+  ) : null;
 }

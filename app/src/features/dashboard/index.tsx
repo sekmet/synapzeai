@@ -36,7 +36,7 @@ import {
 } from '@/lib/api/reports'
 
 export default function Dashboard() {
-  const { getOnboarding } = useAuthStore((state) => state)
+  const { getOnboarding, getUser } = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
   const { getAgent, getAgentContainerId, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
@@ -78,7 +78,7 @@ export default function Dashboard() {
   }, [activeAgent, refresh])
 
 
-  return activeAgent ? (
+  return activeAgent && getUser()?.id ? (
     <>
       {/* ===== Top Heading ===== */}
       <Header>
@@ -243,7 +243,7 @@ export default function Dashboard() {
         </>
       </Main>
     </>
-  ) : (
+  ) : getUser()?.id ?(
     isProvisioning ? (
       (
         <>
@@ -309,7 +309,7 @@ export default function Dashboard() {
   </Main>
     </>
   )
-)
+) : null
 }
 
 /*const topNav = [
