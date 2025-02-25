@@ -183,7 +183,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
       await Bun.sql`
         UPDATE users 
         SET verification_token = ${_verificationToken},
-            updated_at = ${now}
+            updated_at = ${now},
             email_address = ${email}
         WHERE id = ${id}
       `;

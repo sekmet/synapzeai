@@ -109,8 +109,6 @@ export const Header = ({
     // Add scroll listener to the body
     document.addEventListener('scroll', onScroll, { passive: true })
 
-    console.log(onboarding || isProvisioning)
-    console.log({isProvisioning},{onboarding})
     // Clean up the event listener on unmount
     return () => document.removeEventListener('scroll', onScroll)
   }, [])
