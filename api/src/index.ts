@@ -68,16 +68,17 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
   try {
     // Validate request body
     const schema = z.object({
+      id: z.string(),
       email: z.string().email('Invalid email address'),
       verificationToken: z.string().optional()//.min('Verification token is required')
     });
 
     const body = await c.req.json();
-    const { email, verificationToken } = schema.parse(body);
+    const { id, email, verificationToken } = schema.parse(body);
 
     // Check if user exists and token is valid
     const userQuery = await Bun.sql`
-      SELECT * FROM users WHERE email_address = ${email} LIMIT 1
+      SELECT * FROM users WHERE id = ${id} LIMIT 1
     `.values();
 
     if (userQuery.length === 0) {
@@ -91,9 +92,10 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     }
 
     // Verify the token matches
-    if (user[7] !== verificationToken) {
-      
-      return c.json({ error: 'Invalid verification token' }, 400);
+    if (verificationToken) {
+      if (user[7] !== verificationToken) {
+        return c.json({ error: 'Invalid verification token' }, 400);
+      }
     }
 
     // Update user as verified
@@ -101,17 +103,18 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     await Bun.sql`
       UPDATE users 
       SET verified = true, 
+          email_address = ${email},
           verification_token = NULL,
           updated_at = ${now}
-      WHERE email_address = ${email}
+      WHERE id = ${id}
     `;
 
     // Check if user already exists and is verified
     const existingUserQuery = await Bun.sql`
-      SELECT verified FROM users WHERE email_address = ${email} LIMIT 1
+      SELECT verified FROM users WHERE id = ${id} LIMIT 1
     `.values();
 
-    if (existingUserQuery.length > 0 && existingUserQuery[0][1]) { // verified status is at index 3
+    if (existingUserQuery.length > 0 && existingUserQuery[0][0]) { // verified status is at index 3
       return c.json({
         success: true,
         message: 'Email already verified',
@@ -130,15 +133,20 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
         UPDATE users 
         SET verification_token = ${_verificationToken},
             updated_at = ${now}
-        WHERE email_address = ${email}
+            email_address = ${email}
+        WHERE id = ${id}
       `;
     } else {
       // Create new user with verification token
-      const userId = crypto.randomUUID();
+      /*const userId = crypto.randomUUID();
       await Bun.sql`
         INSERT INTO users (id, email_address, verification_token, verified, created_at, updated_at)
         VALUES (${userId}, ${email}, ${_verificationToken}, false, ${now}, ${now})
-      `;
+      `;*/
+      return c.json({
+        success: true,
+        message: 'User ID invalid or already verified',
+      });
     }
 
     // Configure email transport (replace with your SMTP settings)

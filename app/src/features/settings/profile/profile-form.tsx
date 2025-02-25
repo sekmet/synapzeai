@@ -45,14 +45,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAuthStore } from '@/stores/authStore'
 
 // API function to send email verification
-const sendEmailVerification = async (email: string) => {
+const sendEmailVerification = async (id: string, email: string) => {
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/auth/verify-email`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({
+      id,
+      email
+    }),
   })
 
   if (!response.ok) {
@@ -197,8 +200,8 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
     name: "urls",
   })
 
-  const verifyEmailMutation = useMutation<{ success: boolean; message: string }, Error, string>({
-    mutationFn: (email: string) => sendEmailVerification(email),
+  const verifyEmailMutation = useMutation<{ success: boolean; id: string; message: string; }, Error, string>({
+    mutationFn: (id: string, email: string) => sendEmailVerification(id, email),
     onSuccess: () => {
       toast({
         title: 'Verification Email Sent',
@@ -263,8 +266,8 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
     mutation.mutate(data)
   }
 
-  function onVerifyEmail(email: string) {
-    if (!email) {
+  function onVerifyEmail(id: string, email: string) {
+    if (!email || !id) {
       toast({
         title: 'Error',
         description: 'Please enter an email address.',
@@ -273,7 +276,7 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
       return
     }
     setVerifyEmailisLoading(true)
-    verifyEmailMutation.mutate(email)
+    verifyEmailMutation.mutate('id, email')
     setVerifyEmailisLoading(false)
   }
 
