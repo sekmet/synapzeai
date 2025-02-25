@@ -13,6 +13,7 @@ export default function VerifyEmail() {
    const { getUser } = useAuthStore((state) => state)
    const navigate = useNavigate()
   const [token, setToken] = useState("")
+  const [userId, setUserId] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [message, setMessage] = useState("")
 
@@ -20,7 +21,10 @@ export default function VerifyEmail() {
     if (verificationToken) {
       setToken(verificationToken)
     }
-  }, [])
+    if (getUser()?.id){
+        setUserId(getUser()?.id as string)
+    }
+  }, [userId, token])
 
   const handleVerify = async () => {
     if (!verificationToken) {
@@ -39,7 +43,7 @@ export default function VerifyEmail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: getUser()?.id,
+          id: userId,
           verificationToken: token
         }),
       })
@@ -50,7 +54,7 @@ export default function VerifyEmail() {
       setMessage("Email verified successfully!")
       setTimeout(() => {
         navigate({to: '/'})
-      }, 2000)
+      }, 3000)
     } catch (error) {
       setStatus("error")
       setMessage("Failed to verify email. Please try again.")

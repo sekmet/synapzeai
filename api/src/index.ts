@@ -124,13 +124,6 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
     console.log({ userQuery })
 
     const user = userQuery[0];
-    if (user[6] as boolean) { // verified status is at index 3
-      return c.json({ 
-        success: true, 
-        message: 'Email already verified',
-        description: 'Your email is already verified.'
-      }, 200);
-    }
 
     // Update user as verified
     const now = new Date().toISOString();
@@ -156,6 +149,14 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
         description: 'Your email was verified successfully, thank you!',
       });
 
+    }
+
+    if (user[6] as boolean) { // verified status is at index 3
+      return c.json({ 
+        success: true, 
+        message: 'Email already verified',
+        description: 'Your email is already verified.'
+      }, 200);
     }
 
     // Check if user already exists and is verified
