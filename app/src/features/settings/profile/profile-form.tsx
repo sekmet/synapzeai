@@ -320,7 +320,11 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
+              <div className='items-start gap-2 grid grid-cols-1 sm:grid-cols-3'>
+              <div className='w-full col-span-2'>
               <Input type="email" onChange={field.onChange} defaultValue={field.value} placeholder="Your email" />
+              </div>
+              <div className='w-full justify-end'>
               <Button 
               type="button" 
               disabled={!field.value || verifyEmailisLoading} 
@@ -328,6 +332,8 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
               className='text-gray-200 bg-orange-400 hover:bg-orange-600 hover:text-white'>
                 {verifyEmailisLoading ? 'Sending...' : 'Verify Email'}
               </Button>
+              </div>
+              </div>
               {/*<Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -369,7 +375,7 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
             </FormItem>
           )}
         />
-        <div>
+        {/*<div>
           {fields.map((field, index) => (
             <FormField
               control={form.control}
@@ -400,8 +406,8 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
           >
             Add URL
           </Button>
-        </div>
-        <Button type='submit' disabled={isLoading}>Update profile</Button>
+        </div>*/}
+        <Button type='submit' variant={'default'} disabled={isLoading}>Update profile</Button>
       </form>
     </Form>
   )

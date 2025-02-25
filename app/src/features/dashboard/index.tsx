@@ -118,7 +118,7 @@ export default function Dashboard() {
               <TabsTrigger value='overview'>
                 <IconChartPie size={21} className='mr-1' /> <span className='hidden sm:block'>Overview</span>
               </TabsTrigger>
-              <TabsTrigger value='agent-details'>
+              <TabsTrigger value='agent-details' disabled>
               <IconRobot size={21} className='mr-1' /> <span className='hidden sm:block'>Details</span>
               </TabsTrigger>
               <TabsTrigger value='agent-logs'>
