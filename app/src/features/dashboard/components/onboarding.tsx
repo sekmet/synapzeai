@@ -109,7 +109,7 @@ export function Onboarding() {
     setOnboarding({ ...getOnboarding(), completed: userVerificationStatus?.onboarding === false ? true : false })
   }, [activeStep, userVerificationStatus])
 
-  return (
+  return getUser()?.id ? (
     <div className="w-full max-w-2xl mx-auto p-6">
       <div className="flex justify-between items-center mb-4 sm:mb-8">
         <div className="space-y-2">
@@ -149,5 +149,5 @@ export function Onboarding() {
         ))}
       </div>
     </div>
-  )
+  ) : null
 }
