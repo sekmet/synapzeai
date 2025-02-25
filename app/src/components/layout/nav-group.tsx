@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
+import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 import { ChevronRight } from 'lucide-react'
 import {
   Collapsible,
@@ -31,6 +32,7 @@ import { NavCollapsible, NavItem, NavLink, type NavGroup } from './types'
 export function NavGroup({ title, items }: NavGroup) {
   const { state } = useSidebar()
   const href = useLocation({ select: (location) => location.href })
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
@@ -84,6 +86,11 @@ const SidebarMenuCollapsible = ({
   href: string
 }) => {
   const { setOpenMobile } = useSidebar()
+  const { getAgent } = useAgentActiveStore((state) => state)
+  const activeAgent = getAgent() as Agent ?? null;
+
+  item.items = activeAgent ? item.items : item.items.filter(subItem => subItem.title !== 'Agent')
+
   return (
     <Collapsible
       asChild

@@ -25,7 +25,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { refresh } = useAgentActiveStore((state) => state)
   const onboarding = !getOnboarding().completed
   const isProvisioning = getProvisioning().isProvisioning;
-
+  
   const { data: userAgents } = useQuery({
     queryKey: ['userAgents', refresh],
     queryFn: () => fetchUserAgents(getUser()?.id ?? ''),
