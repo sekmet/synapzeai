@@ -2,12 +2,38 @@ import { Check } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Card } from '@/components/ui/card'
 import { useState, useEffect } from "react"
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
+
+// Fetch user data from API
+const fetchUserVerificationStatus = async (userId: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/auth/is-verified`,{
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id: userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch user profile');
+  }
+
+  return response.json();
+};
 
 export function Onboarding() {
   const navigate = useNavigate()
-  const { getOnboarding, setOnboarding } = useAuthStore((state) => state)
+  const { getOnboarding, setOnboarding, getUser } = useAuthStore((state) => state)
   const [activeStep, setActiveStep] = useState<number>(getOnboarding().currentStep)
+
+  // Fetch user data
+  const { data: userVerificationStatus } = useQuery({
+    queryKey: ['userVerification', getUser()?.id],
+    queryFn: () => fetchUserVerificationStatus(getUser()?.id ?? ''),
+    enabled: true,
+  })
 
   const verifyEmail = () => {
     console.log("Verify email")
@@ -51,7 +77,7 @@ export function Onboarding() {
       number: 2,
       title: "Verify your Email",
       description: "Confirm your email address.",
-      completed: activeStep >= 2 ? true : false,
+      completed: activeStep >= 2 && userVerificationStatus?.success === true ? true : false,
       onClick: () => verifyEmail()
     },
     {

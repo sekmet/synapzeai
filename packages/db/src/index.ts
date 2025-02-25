@@ -94,7 +94,7 @@ app.onError((err, c) => {
 app.notFound((c) => c.json({ error: 'Not Found' }, 404));
 
 // Root and health endpoints
-app.get('/', (c) => c.text('SYNAPZE DB API Server v0.0.3'));
+app.get('/', (c) => c.text('SYNAPZE DB API Server v0.0.6'));
 app.get('/health', (c) => c.text('OK'));
 
 /**

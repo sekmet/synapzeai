@@ -63,7 +63,44 @@ if (process.env.NODE_ENV === 'development') {
   // Health check endpoint
   app.get('/health', (c) => c.json({ status: 'OK' }))
 
-  // Email verification endpoint
+// Email verification endpoint
+app.post(`${apiPrefix}/auth/is-verified`, async (c) => {
+  try {
+    // Validate request body
+    const schema = z.object({
+      id: z.string()
+    });
+
+    const body = await c.req.json();
+    const { id } = schema.parse(body);
+
+    // Check if user exists and token is valid
+    const userQuery = await Bun.sql`
+      SELECT * FROM users WHERE id = ${id} LIMIT 1
+    `.values();
+
+    if (userQuery.length === 0) {
+      return c.json({ success: false,error: 'User not found' }, 404);
+    }
+    console.log({ userQuery })
+
+    const user = userQuery[0];
+    if (user[6] as boolean) { // verified status is at index 6
+      return c.json({ success: true, message: 'User verified' }, 200);
+    } else {
+      return c.json({ success: false, message: 'User not verified' }, 200);
+    }
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return c.json({ success: false, error: `${error.errors[0].path[0]}: ${error.errors[0].message}` }, 400);
+    }
+    console.error('Verification error:', error);
+    return c.json({ success: false, error: 'Failed to verify user' }, 500);
+  }
+});
+
+// Email verification endpoint
 app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
   try {
     // Validate request body
@@ -91,23 +128,25 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
       return c.json({ success: true, message: 'Email already verified' }, 200);
     }
 
+    // Update user as verified
+    const now = new Date().toISOString();
+    
     // Verify the token matches
     if (verificationToken) {
       if (user[7] !== verificationToken) {
         return c.json({ error: 'Invalid verification token' }, 400);
+      } else {
+        await Bun.sql`
+          UPDATE users 
+          SET verified = true, 
+              email_address = ${email},
+              verification_token = NULL,
+              onboarding = false,
+              updated_at = ${now}
+          WHERE id = ${id}
+        `;
       }
     }
-
-    // Update user as verified
-    const now = new Date().toISOString();
-    await Bun.sql`
-      UPDATE users 
-      SET verified = true, 
-          email_address = ${email},
-          verification_token = NULL,
-          updated_at = ${now}
-      WHERE id = ${id}
-    `;
 
     // Check if user already exists and is verified
     const existingUserQuery = await Bun.sql`
@@ -151,8 +190,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
 
     // Configure email transport (replace with your SMTP settings)
     const transporter = nodemailer.createTransport({
-      pool: true,
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      host: process.env.SMTP_HOST || 'mail.synapze.xyz',
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
@@ -163,13 +201,14 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
 
     // Send verification email
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Synapze AI" <aisynapze@gmail.com>',
+      from: process.env.SMTP_FROM || '"Synapze" <hello@synapze.xyz>',
       to: email,
       subject: 'Verify your email address',
       html: `
-        <h1>Email Verification</h1>
+        <h1>Welcome to Synapze</h1>
+        <h3>Email Verification</h3>
         <p>Click the link below to verify your email address:</p>
-        <a href="${process.env.APP_URL}/verify-email?token=${verificationToken}">
+        <a href="${process.env.APP_HOST_URL}/verify-email?token=${verificationToken}">
           Verify Email
         </a>
       `,
@@ -179,6 +218,7 @@ app.post(`${apiPrefix}/auth/verify-email`, async (c) => {
       success: true,
       message: 'Verification email sent successfully',
     });
+
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json({ error: `${error.errors[0].path[0]}: ${error.errors[0].message}` }, 400);

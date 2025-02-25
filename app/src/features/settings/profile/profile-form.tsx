@@ -200,8 +200,12 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
     name: "urls",
   })
 
-  const verifyEmailMutation = useMutation<{ success: boolean; id: string; message: string; }, Error, string>({
-    mutationFn: (id: string, email: string) => sendEmailVerification(id, email),
+  const verifyEmailMutation = useMutation<
+    { success: boolean; id: string; message: string },
+    Error,
+    { id: string; email: string }
+  >({
+    mutationFn: ({ id, email }) => sendEmailVerification(id, email),
     onSuccess: () => {
       toast({
         title: 'Verification Email Sent',
@@ -276,7 +280,7 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
       return
     }
     setVerifyEmailisLoading(true)
-    verifyEmailMutation.mutate('id, email')
+    verifyEmailMutation.mutate({ id, email })
     setVerifyEmailisLoading(false)
   }
 
@@ -314,7 +318,7 @@ export default function ProfileForm({ initialData }: { initialData?: ProfileForm
               <Button 
               type="button" 
               disabled={!field.value || verifyEmailisLoading} 
-              onClick={() => onVerifyEmail(field.value)}
+              onClick={() => onVerifyEmail(`${userData?.id}`, field.value)}
               className='text-gray-200 bg-orange-400 hover:bg-orange-600 hover:text-white'>
                 {verifyEmailisLoading ? 'Sending...' : 'Verify Email'}
               </Button>
