@@ -105,7 +105,8 @@ type AuthProviderProps = {
   
     useEffect(() => {
       if (ready && !authenticated) {
-        window.location.href = new URL(window.location.href).origin + '/sign-in-2'
+        //window.location.href = new URL(window.location.href).origin + '/sign-in-2'
+        console.log('not authenticated')
       }
   
     }, [ready, authenticated, login]);    
