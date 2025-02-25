@@ -123,6 +123,7 @@ export default function AgentConfigReview() {
           //...(agentId && { id: agentId }), // Only include id if it exists
           name: characterConfig.name,
           configuration: characterConfig,
+          userId: getUser()?.id,
           organizationId: organization[0],
           containerId: '',
           status: 'active',

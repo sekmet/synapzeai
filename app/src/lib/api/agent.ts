@@ -8,6 +8,7 @@ import { useAgentStore } from '@/stores/agentStore';
 // Agent API functions
 interface AgentData {
   id?: string;
+  userId?: string;
   organizationId?: string;
   containerId?: string;
   name?: string;
@@ -634,8 +635,45 @@ async function retryGetAgentClientId(containerId: string, agentName: string, max
   throw new Error('Unexpected retry loop exit');
 }
 
+export const getSubscriptionAllowanceByCustomerId = async (id: string) => {
+  if (!id) return null;
+  
+  const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/subscriptions/allowance/${id}`,{
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_DB_API}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null;
+    }
+    const error = await response.text();
+    throw new Error(`Failed to fetch agent: ${error}`);
+  }
+
+  return response.json();
+};
+
 
 export const updateAgentDeployment = async (agentData: AgentData) => {
+
+  // check user subscription allowance number
+  const subscriptionAllowance = await getSubscriptionAllowanceByCustomerId(agentData.userId ?? '');
+  
+  if (!subscriptionAllowance) {
+    console.error('Subscription allowance not found');
+    return null;
+  }
+
+  // check user agents deployed number
+  const userAgentsDeployed = await fetchUserAgents(agentData.userId ?? '');
+  if (Number(userAgentsDeployed.length) === Number(subscriptionAllowance.items)) {
+    console.error('Maximum agent deployment reached');
+    return null;
+  }
+
   if (!agentData.id) {
     const agentProvisioning = useAgentDeployStore.getState();
     const userAuth = useAuthStore.getState();
