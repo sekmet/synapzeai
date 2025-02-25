@@ -105,9 +105,9 @@ export function Onboarding() {
 
   useEffect(() => {
     setActiveStep(getOnboarding().currentStep)
-    console.log(getOnboarding().currentStep)
+    //console.log(getOnboarding().currentStep)
     setOnboarding({ ...getOnboarding(), completed: userVerificationStatus?.onboarding === false ? true : false })
-  }, [activeStep])
+  }, [activeStep, userVerificationStatus])
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">

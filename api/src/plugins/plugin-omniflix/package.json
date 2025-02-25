@@ -5,30 +5,27 @@
   "agentConfig": {
     "pluginType": "elizaos:client:1.0.0",
     "pluginParameters": {
-      "apiEndpoint": {
+      "OMNIFLIX_MNEMONIC": {
         "type": "string",
         "minLength": 1,
-        "description": "Settings for packages plugin"
-      },
-      "mnemonic": {
-        "type": "string",
-        "minLength": 1,
-        "description": "Settings for packages plugin"
+        "description": "Either mnemonic or private key (one is required)"
       },
       "OMNIFLIX_API_URL": {
         "type": "string",
         "minLength": 1,
-        "description": "Settings for packages plugin"
+        "default": "https://rest.omniflix.network",
+        "description": "API endpoint for OmniFlix Network"
       },
-      "privateKey": {
+      "OMNIFLIX_PRIVATE_KEY": {
         "type": "string",
         "minLength": 1,
-        "description": "Settings for packages plugin"
+        "description": "Either mnemonic or private key (one is required)"
       },
-      "rpcEndpoint": {
+      "OMNIFLIX_RPC_ENDPOINT": {
         "type": "string",
         "minLength": 1,
-        "description": "Settings for packages plugin"
+        "default": "https://rpc.omniflix.network:443",
+        "description": "RPC endpoint for OmniFlix Network"
       }
     }
   }

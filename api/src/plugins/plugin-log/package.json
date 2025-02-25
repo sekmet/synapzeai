@@ -1,0 +1,15 @@
+{
+  "name": "@elizaos-plugins/plugin-log",
+  "version": "0.25.6-alpha.1",
+  "type": "module",
+  "agentConfig": {
+    "pluginType": "elizaos:client:1.0.0",
+    "pluginParameters": {
+        "ENABLE_LOGGING": {
+            "type": "string",
+            "default": "true",
+            "description": "Enable logging mode for conversations"
+        }
+    }
+}
+}

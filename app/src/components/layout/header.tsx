@@ -22,7 +22,7 @@ export const Header = ({
 }: HeaderProps) => {
   const [offset, setOffset] = React.useState(0)
   const { getProvisioning } = useAgentDeployStore((state) => state)
-  const { getOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
+  const { getOnboarding, setOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
   const isProvisioning = getProvisioning().isProvisioning;
 
@@ -52,6 +52,7 @@ export const Header = ({
           //TODO remove hardcoded and get api-key from keystack server
           setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
           console.log({currentUser})
+          setOnboarding({ ...getOnboarding(), completed: currentUser?.onboarding === false ? true : false })
 
           //navigate({ to: '/' })
       } else {
@@ -82,6 +83,7 @@ export const Header = ({
               setUser(user as AuthUser) 
               //TODO remove hardcoded and get api-key from keystack server
               setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
+              setOnboarding({ ...getOnboarding(), completed: currentUser?.onboarding === false ? true : false })
           }
       }
   },
