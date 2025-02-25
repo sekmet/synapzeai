@@ -16,18 +16,19 @@ export async function createSubscriptionPlan(
   description: string,
   price: number,
   currency: string,
-  interval: string
+  interval: string,
+  items: number
 ) {
   try {
     const now = new Date().toISOString();
     const result = await Bun.sql`
       INSERT INTO subscription_plans (
-        name, description, price, currency, interval, 
+        name, description, price, currency, interval, items,
         created_at, updated_at
       )
       VALUES (
         ${name}, ${description}, ${price}, ${currency}, ${interval},
-        ${now}, ${now}
+        ${items}, ${now}, ${now}
       )
       RETURNING *
     `.values();

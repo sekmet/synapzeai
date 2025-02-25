@@ -35,6 +35,8 @@ export function Onboarding() {
     enabled: true,
   })
 
+  const onboardingStatus = userVerificationStatus?.onboarding === false ? true : false
+
   const verifyEmail = () => {
     console.log("Verify email")
     navigate({ to: '/settings' })
@@ -106,10 +108,10 @@ export function Onboarding() {
   useEffect(() => {
     setActiveStep(getOnboarding().currentStep)
     //console.log(getOnboarding().currentStep)
-    setOnboarding({ ...getOnboarding(), completed: userVerificationStatus?.onboarding === false ? true : false })
+    setOnboarding({ ...getOnboarding(), completed: onboardingStatus })
   }, [activeStep, userVerificationStatus])
 
-  return getUser()?.id ? (
+  return getUser()?.id && !onboardingStatus ? (
     <div className="w-full max-w-2xl mx-auto p-6">
       <div className="flex justify-between items-center mb-4 sm:mb-8">
         <div className="space-y-2">
