@@ -86,9 +86,9 @@ app.post(`${apiPrefix}/auth/is-verified`, async (c) => {
 
     const user = userQuery[0];
     if (user[6] as boolean) { // verified status is at index 6
-      return c.json({ success: true, message: 'User verified' }, 200);
+      return c.json({ success: true, message: 'User verified', onboarding: user[8] as boolean }, 200);
     } else {
-      return c.json({ success: false, message: 'User not verified' }, 200);
+      return c.json({ success: false, message: 'User not verified', onboarding: user[8] as boolean }, 200);
     }
 
   } catch (error) {

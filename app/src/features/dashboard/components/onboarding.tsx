@@ -106,6 +106,7 @@ export function Onboarding() {
   useEffect(() => {
     setActiveStep(getOnboarding().currentStep)
     console.log(getOnboarding().currentStep)
+    setOnboarding({ ...getOnboarding(), completed: userVerificationStatus?.onboarding === false ? true : false })
   }, [activeStep])
 
   return (
