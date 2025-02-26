@@ -55,11 +55,12 @@ export const useAuthStore = create<AuthState>()(
   (set, get) => {
   const cookieState = Cookies.get(ACCESS_TOKEN)
   const initToken = cookieState ? JSON.parse(cookieState) : ''
+  const onboarding = Cookies.get('synapze:onboarding') !== 'false'
   return {
       user: null,
       onboarding: {
         currentStep: 1,
-        completed: false
+        completed: onboarding ? false : true
       },
       setUser: (user) =>
         set((state) => ({ ...state, user })),

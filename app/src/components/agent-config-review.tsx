@@ -28,7 +28,7 @@ export default function AgentConfigReview() {
     const [theme, setTheme] = useState(localStorage.getItem('vite-ui-theme'));
     const [deploying, setDeploying] = useState(false)
     const { setRefresh, getAgent, setAgent, clearAgent } = useAgentActiveStore((state) => state)
-    const { setOnboarding, getOnboarding, getUser } = useAuthStore((state) => state)
+    const { getUser } = useAuthStore((state) => state)
     const { getConfig, setConfig, getEnv, getPluginSecrets, getProvisioning, setProvisioning } = useAgentDeployStore((state) => state)
     const setIsProvisioning = (status: boolean) => setProvisioning({ ...getProvisioning(), completed: false, isProvisioning: status })
     
@@ -139,8 +139,6 @@ export default function AgentConfigReview() {
 
         updateAgent(agentData);
         clearAgent()
-        // Mark onboarding as completed
-        setOnboarding({ ...getOnboarding(), completed: true })
         setRefresh(new Date().getTime())
         setAgent(getAgent()!);
         setIsProvisioning(true);

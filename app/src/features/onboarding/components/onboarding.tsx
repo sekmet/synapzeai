@@ -1,9 +1,13 @@
+import Cookies from 'js-cookie'
 import { Check } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Card } from '@/components/ui/card'
 import { useState, useEffect } from "react"
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
+
+const ONBOARDING_COOKIE_NAME = 'synapze:onboarding'
+const ONBOARDING_COOKIE_MAX_AGE = 60 * 60 * 24 * 21
 
 // Fetch user data from API
 const fetchUserVerificationStatus = async (userId: string) => {
@@ -27,6 +31,7 @@ export function Onboarding() {
   const navigate = useNavigate()
   const { getOnboarding, setOnboarding, getUser } = useAuthStore((state) => state)
   const [activeStep, setActiveStep] = useState<number>(getOnboarding().currentStep)
+  const onboarding = Cookies.get('synapze:onboarding') !== 'false'
 
   // Fetch user data
   const { data: userVerificationStatus } = useQuery({
@@ -35,7 +40,6 @@ export function Onboarding() {
     enabled: true,
   })
 
-  const onboardingStatus = userVerificationStatus?.onboarding === false ? true : false
 
   const verifyEmail = () => {
     console.log("Verify email")
@@ -59,6 +63,7 @@ export function Onboarding() {
   const createAgent = () => {
     if (userVerificationStatus?.success === true) {
       console.log("Create agent")
+      document.cookie = `${ONBOARDING_COOKIE_NAME}=${false}; path=/; max-age=${ONBOARDING_COOKIE_MAX_AGE}`
       navigate({ to: '/agent/new' })
     }
   }
@@ -123,7 +128,7 @@ export function Onboarding() {
   useEffect(() => {
     setActiveStep(getOnboarding().currentStep)
     //console.log(getOnboarding().currentStep)
-    setOnboarding({ ...getOnboarding(), completed: onboardingStatus })
+    setOnboarding({ ...getOnboarding(), completed: onboarding ? false : true })
   }, [activeStep, userVerificationStatus])
 
   return (

@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { usePrivy, useLogin } from '@privy-io/react-auth'
 import { useQuery } from "@tanstack/react-query";
@@ -23,13 +24,17 @@ type AuthProviderProps = {
 
   const AuthProviderContext = createContext<AuthProviderState>(initialState)
 
+  const ONBOARDING_COOKIE_NAME = 'synapze:onboarding'
+  const ONBOARDING_COOKIE_MAX_AGE = 60 * 60 * 24 * 21
+
   export function AuthProvider({
     children,
     router,
     defaultUserId = '',
-    storageKey = 'synapze:auth-user',
+    storageKey = 'synapze:auth-user', 
     ...props
   }: AuthProviderProps) {
+    const onboarding = Cookies.get('synapze:onboarding') !== 'false'
     const { getOnboarding, setOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
     const [userId, _setUserId] = useState<any>(
       () => (getUser()?.id as string) || defaultUserId
@@ -40,17 +45,20 @@ type AuthProviderProps = {
     //const disableLogin = !ready || (ready && authenticated);
     const { data: currentUser } = useQuery({
       queryKey: ['currentUser', getUser()?.id],
-      queryFn: () => fetchCurrentUser(getUser()?.id ?? ''),
+      queryFn: () => fetchCurrentUser(getUser()?.id ?? '').then((res) => {
+        if (res?.id && res.onboarding === true) {
+          // This sets the cookie to keep the sidebar state.
+          document.cookie = `${ONBOARDING_COOKIE_NAME}=${true}; path=/; max-age=${ONBOARDING_COOKIE_MAX_AGE}`
+        } else {
+          document.cookie = `${ONBOARDING_COOKIE_NAME}=${false}; path=/; max-age=${ONBOARDING_COOKIE_MAX_AGE}`
+        }
+        return res
+      })
     })
 
     const { login } = useLogin({
 
       onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
-
-        if (currentUser?.id && currentUser.onboarding === true) {
-          router.navigate({ to: '/onboarding' })
-        }
-
         if (wasAlreadyAuthenticated) {
             const isUser = currentUser;
             // In this case, the user was already `authenticated` when this component was mounted.
@@ -66,7 +74,7 @@ type AuthProviderProps = {
             //TODO remove hardcoded and get api-key from keystack server
             setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
             //console.log({isUser})
-            setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
+            setOnboarding({ ...getOnboarding(), completed: onboarding === false ? true : false })
   
             //navigate({ to: '/' })
         } else {
@@ -78,14 +86,13 @@ type AuthProviderProps = {
             if (isNewUser) {
                 // If the user is new, create it in your backend
                 //console.log("NEW USER", isNewUser)
-                const isUser = currentUser;
   
                 createUser(user.id, user?.email?.address ?? '', user?.linkedAccounts ?? [], user?.mfaMethods ?? [], user?.hasAcceptedTerms ?? false, user.createdAt)
                 //console.log(setUser(user as AuthUser)) // authUser being the new format
                 setUser(user as AuthUser) 
                 //TODO remove hardcoded and get api-key from keystack server
                 setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
-                setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
+                setOnboarding({ ...getOnboarding(), completed: onboarding === false ? true : false })
                 //navigate({ to: '/' })
             } else {
               const isUser = currentUser;
@@ -99,15 +106,11 @@ type AuthProviderProps = {
                 setUser(user as AuthUser) 
                 //TODO remove hardcoded and get api-key from keystack server
                 setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
-                setOnboarding({ ...getOnboarding(), completed: isUser?.onboarding === false ? true : false })
+                setOnboarding({ ...getOnboarding(), completed: onboarding === false ? true : false })
             }
         }
     },
       onError: (error) => {
-        if (currentUser?.id && currentUser.onboarding === true) {
-          router.navigate({ to: '/onboarding' })
-        }
-
         console.log(error);
         // Any logic you'd like to execute after a user exits the login flow or there is an error
       },

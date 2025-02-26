@@ -1,21 +1,25 @@
 import Cookies from 'js-cookie'
+import { useRouter } from '@tanstack/react-router'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
-import { useAuthStore } from '@/stores/authStore'
 
 export const Route = createFileRoute('/_authenticated')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const router = useRouter()
   const defaultOpen = Cookies.get('sidebar:state') !== 'false'
-  const { getOnboarding } = useAuthStore((state) => state)
-  const onboarding = !getOnboarding().completed
-  
+  const onboarding = Cookies.get('synapze:onboarding') !== 'false'
+
+  if (onboarding) {
+    router.navigate({ to: '/onboarding' })
+  }
+
   return (
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>

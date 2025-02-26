@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -35,9 +35,7 @@ import {
 } from '@/lib/api/reports'
 
 export default function Dashboard() {
-  const router = useRouter()
-  const { getOnboarding, getUser } = useAuthStore((state) => state)
-  const onboarding = !getOnboarding().completed
+  const { getUser } = useAuthStore((state) => state)
   const { getAgent, getAgentContainerId, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
   const activeAgent = getAgent() as Agent
@@ -75,11 +73,6 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-
-    if (onboarding) {
-      router.navigate({ to: '/onboarding' })
-    }
-
   }, [activeAgent, refresh])
 
 

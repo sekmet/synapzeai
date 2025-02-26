@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Cookies from 'js-cookie'
 import { z } from 'zod'
 import { /*useFieldArray,*/ useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -143,11 +144,10 @@ let defaultValues: Partial<ProfileFormValues> = {
 }
 
 export default function ProfileForm({ initialData }: { initialData?: ProfileFormValues }) {
-  //const { user } = useAuthStore()
-  const { getOnboarding, setOnboarding, getUser } = useAuthStore((state) => state)
+  const onboarding = Cookies.get('synapze:onboarding') !== 'false'
+  const { setOnboarding, getUser } = useAuthStore((state) => state)
   const queryClient = useQueryClient()
   const [verifyEmailisLoading, setVerifyEmailisLoading] = useState(false)
-  const onboarding = !getOnboarding().completed
 
   if (initialData) {
     defaultValues = initialData

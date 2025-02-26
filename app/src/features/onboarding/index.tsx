@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-
+import Cookies from 'js-cookie'
+import { useRouter } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 //import { TopNav } from '@/components/layout/top-nav'
@@ -13,14 +14,19 @@ import { useAgentActiveStore, Agent } from '@/stores/agentActive'
 //import { useQuery } from "@tanstack/react-query";
 
 export default function OnBoarding() {
-  const { getOnboarding, getUser } = useAuthStore((state) => state)
-  const onboarding = !getOnboarding().completed
+  const router = useRouter()
+  const { getUser } = useAuthStore((state) => state)
+  const onboarding = Cookies.get('synapze:onboarding') !== 'false'
   const { getAgent, refresh } = useAgentActiveStore((state) => state)
   //const { getProvisioning } = useAgentDeployStore((state) => state)
   const activeAgent = getAgent() as Agent
 
+  if (!onboarding) {
+    router.navigate({ to: '/' })
+  }
+
+
   useEffect(() => {
-    console.log(onboarding)
   }, [activeAgent, refresh])
 
 
