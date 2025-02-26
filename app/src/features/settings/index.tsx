@@ -30,7 +30,7 @@ export default function Settings() {
       {/* ===== Top Heading ===== */}
       {onboarding ? (
         <Header>
-            <button onClick={() => router.navigate({to: '/'})} className="mt-3 flex items-center text-gray-700 dark:text-yellow-300 mb-6 hover:opacity-80">
+            <button onClick={() => router.navigate({to: '/onboarding'})} className="mt-3 flex items-center text-gray-700 dark:text-yellow-300 mb-6 hover:opacity-80">
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </button>

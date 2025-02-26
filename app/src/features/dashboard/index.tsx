@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -20,7 +20,6 @@ import { UpdateAgent } from './components/update-agent'
 import { AgentLogs } from './components/agent-logs'
 import { useAuthStore } from '@/stores/authStore'
 //import { RecentSales } from './components/recent-sales'
-import { Onboarding } from './components/onboarding'
 import { ProvisioningSteps } from './components/provisioning'
 import { IconRobot, IconChartPie, IconLogs, IconPencil } from '@tabler/icons-react';
 import { useAgentActiveStore, Agent } from '@/stores/agentActive'
@@ -36,7 +35,8 @@ import {
 } from '@/lib/api/reports'
 
 export default function Dashboard() {
-  const { getOnboarding, getUser, onboarding: isOnboarding } = useAuthStore((state) => state)
+  const router = useRouter()
+  const { getOnboarding, getUser } = useAuthStore((state) => state)
   const onboarding = !getOnboarding().completed
   const { getAgent, getAgentContainerId, refresh } = useAgentActiveStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
@@ -75,7 +75,12 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-  }, [activeAgent, isOnboarding, refresh])
+
+    if (onboarding) {
+      router.navigate({ to: '/onboarding' })
+    }
+
+  }, [activeAgent, refresh])
 
 
   return activeAgent && getUser()?.id ? (
@@ -83,18 +88,11 @@ export default function Dashboard() {
       {/* ===== Top Heading ===== */}
       <Header>
         {/*<TopNav links={topNav} />*/}
-        {onboarding ? (
-          <div className='ml-auto flex items-center space-x-4'>
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        ) : 
-        (<div className='ml-auto flex items-center space-x-4'>
+        <div className='ml-auto flex items-center space-x-4'>
           <Search />
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
-      )}
       </Header>
 
       {/* ===== Main ===== */}
@@ -271,25 +269,15 @@ export default function Dashboard() {
       {/* ===== Top Heading ===== */}
       <Header>
         {/*<TopNav links={topNav} />*/}
-        {onboarding && isOnboarding ? (
-          <div className='ml-auto flex items-center space-x-4'>
-            <ThemeSwitch />
-            <ProfileDropdown />
-          </div>
-        ) : 
-        (<div className='ml-auto flex items-center space-x-4'>
+        <div className='ml-auto flex items-center space-x-4'>
           <Search />
           <ThemeSwitch />
           <ProfileDropdown />
         </div>
-      )}
       </Header>
 
       {/* ===== Main ===== */}
       <Main>
-      {onboarding && isOnboarding ? (
-          <Onboarding />
-        ) : (
     <div className='h-svh'>
     <div className='m-auto flex h-[60vh] w-full flex-col items-center justify-center gap-2'>
       <IconRobot size={72} />
@@ -305,7 +293,7 @@ export default function Dashboard() {
           </div>
 
     </div>
-  </div>)}
+  </div>
   </Main>
     </>
   )

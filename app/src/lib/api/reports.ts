@@ -44,10 +44,10 @@ export const getAgentEngagedSessions = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //onsole.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -72,10 +72,10 @@ export const getAgentHandleTime = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -99,10 +99,10 @@ export const getAgentCustomerSatisfactionScore = async (containerId: string) => 
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -126,10 +126,10 @@ export const getAgentSentimentScore = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -154,10 +154,10 @@ export const getEngagedSessions = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -181,10 +181,10 @@ export const getSessionsRejectedTime = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -208,10 +208,10 @@ export const getTransferRate = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -235,10 +235,10 @@ export const getAvgSessionHandleTime = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -262,10 +262,10 @@ export const getAvgCsat = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -290,10 +290,10 @@ export const getAvgSessionSentiment = async (containerId: string) => {
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }
@@ -319,10 +319,10 @@ export const getAgentPerformanceStats = async (containerId: string, agentName: s
       throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
     }
     
-    console.log('CLIENT RESPONSE', response.output);
+    //console.log('CLIENT RESPONSE', response.output);
   
     const parsedOutput = parseReportsOutputSQlite(response.output);
-    console.log('CLIENT RESPONSE Parsed', parsedOutput);
+    //console.log('CLIENT RESPONSE Parsed', parsedOutput);
   
     return parsedOutput;
   }

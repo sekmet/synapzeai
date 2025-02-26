@@ -18,6 +18,7 @@ import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
+import { Route as AuthenticatedOnboardingIndexImport } from './routes/_authenticated/onboarding/index'
 
 // Create Virtual Routes
 
@@ -33,12 +34,6 @@ const authForgotPasswordLazyImport = createFileRoute(
 )()
 const AuthenticatedSettingsRouteLazyImport = createFileRoute(
   '/_authenticated/settings',
-)()
-const AuthenticatedUsersIndexLazyImport = createFileRoute(
-  '/_authenticated/users/',
-)()
-const AuthenticatedTasksIndexLazyImport = createFileRoute(
-  '/_authenticated/tasks/',
 )()
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
@@ -207,24 +202,6 @@ const auth500Route = auth500Import.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthenticatedUsersIndexLazyRoute =
-  AuthenticatedUsersIndexLazyImport.update({
-    id: '/users/',
-    path: '/users/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/users/index.lazy').then((d) => d.Route),
-  )
-
-const AuthenticatedTasksIndexLazyRoute =
-  AuthenticatedTasksIndexLazyImport.update({
-    id: '/tasks/',
-    path: '/tasks/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/_authenticated/tasks/index.lazy').then((d) => d.Route),
-  )
-
 const AuthenticatedSettingsIndexLazyRoute =
   AuthenticatedSettingsIndexLazyImport.update({
     id: '/',
@@ -282,6 +259,13 @@ const AuthenticatedAgentIndexLazyRoute =
   } as any).lazy(() =>
     import('./routes/_authenticated/agent/index.lazy').then((d) => d.Route),
   )
+
+const AuthenticatedOnboardingIndexRoute =
+  AuthenticatedOnboardingIndexImport.update({
+    id: '/onboarding/',
+    path: '/onboarding/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 const AuthenticatedSettingsNotificationsLazyRoute =
   AuthenticatedSettingsNotificationsLazyImport.update({
@@ -584,6 +568,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/onboarding/': {
+      id: '/_authenticated/onboarding/'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingIndexImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/agent/': {
       id: '/_authenticated/agent/'
       path: '/agent'
@@ -625,20 +616,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedSettingsIndexLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
-    }
-    '/_authenticated/tasks/': {
-      id: '/_authenticated/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof AuthenticatedTasksIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
-    '/_authenticated/users/': {
-      id: '/_authenticated/users/'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AuthenticatedUsersIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/agent/new/from-scracth': {
       id: '/_authenticated/agent/new/from-scracth'
@@ -726,13 +703,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedChatsAgentIdLazyRoute: typeof AuthenticatedChatsAgentIdLazyRoute
+  AuthenticatedOnboardingIndexRoute: typeof AuthenticatedOnboardingIndexRoute
   AuthenticatedAgentIndexLazyRoute: typeof AuthenticatedAgentIndexLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedLogsIndexLazyRoute: typeof AuthenticatedLogsIndexLazyRoute
-  AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
-  AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
   AuthenticatedAgentNewFromScracthLazyRoute: typeof AuthenticatedAgentNewFromScracthLazyRoute
   AuthenticatedAgentNewReviewLazyRoute: typeof AuthenticatedAgentNewReviewLazyRoute
   AuthenticatedAgentNewSecretsLazyRoute: typeof AuthenticatedAgentNewSecretsLazyRoute
@@ -747,13 +723,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedChatsAgentIdLazyRoute: AuthenticatedChatsAgentIdLazyRoute,
+  AuthenticatedOnboardingIndexRoute: AuthenticatedOnboardingIndexRoute,
   AuthenticatedAgentIndexLazyRoute: AuthenticatedAgentIndexLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedLogsIndexLazyRoute: AuthenticatedLogsIndexLazyRoute,
-  AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
-  AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
   AuthenticatedAgentNewFromScracthLazyRoute:
     AuthenticatedAgentNewFromScracthLazyRoute,
   AuthenticatedAgentNewReviewLazyRoute: AuthenticatedAgentNewReviewLazyRoute,
@@ -790,14 +765,13 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/onboarding': typeof AuthenticatedOnboardingIndexRoute
   '/agent': typeof AuthenticatedAgentIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/logs': typeof AuthenticatedLogsIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
-  '/tasks': typeof AuthenticatedTasksIndexLazyRoute
-  '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
@@ -826,14 +800,13 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/onboarding': typeof AuthenticatedOnboardingIndexRoute
   '/agent': typeof AuthenticatedAgentIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/logs': typeof AuthenticatedLogsIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
-  '/tasks': typeof AuthenticatedTasksIndexLazyRoute
-  '/users': typeof AuthenticatedUsersIndexLazyRoute
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
@@ -866,14 +839,13 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/_authenticated/onboarding/': typeof AuthenticatedOnboardingIndexRoute
   '/_authenticated/agent/': typeof AuthenticatedAgentIndexLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/logs/': typeof AuthenticatedLogsIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
-  '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
-  '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
   '/_authenticated/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/_authenticated/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
   '/_authenticated/agent/new/secrets': typeof AuthenticatedAgentNewSecretsLazyRoute
@@ -906,14 +878,13 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/onboarding'
     | '/agent'
     | '/apps'
     | '/chats'
     | '/help-center'
     | '/logs'
     | '/settings/'
-    | '/tasks'
-    | '/users'
     | '/agent/new/from-scracth'
     | '/agent/new/review'
     | '/agent/new/secrets'
@@ -941,14 +912,13 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/onboarding'
     | '/agent'
     | '/apps'
     | '/chats'
     | '/help-center'
     | '/logs'
     | '/settings'
-    | '/tasks'
-    | '/users'
     | '/agent/new/from-scracth'
     | '/agent/new/review'
     | '/agent/new/secrets'
@@ -979,14 +949,13 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/onboarding/'
     | '/_authenticated/agent/'
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
     | '/_authenticated/help-center/'
     | '/_authenticated/logs/'
     | '/_authenticated/settings/'
-    | '/_authenticated/tasks/'
-    | '/_authenticated/users/'
     | '/_authenticated/agent/new/from-scracth'
     | '/_authenticated/agent/new/review'
     | '/_authenticated/agent/new/secrets'
@@ -1061,13 +1030,12 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/",
         "/_authenticated/chats/$agentId",
+        "/_authenticated/onboarding/",
         "/_authenticated/agent/",
         "/_authenticated/apps/",
         "/_authenticated/chats/",
         "/_authenticated/help-center/",
         "/_authenticated/logs/",
-        "/_authenticated/tasks/",
-        "/_authenticated/users/",
         "/_authenticated/agent/new/from-scracth",
         "/_authenticated/agent/new/review",
         "/_authenticated/agent/new/secrets",
@@ -1153,6 +1121,10 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings/notifications.lazy.tsx",
       "parent": "/_authenticated/settings"
     },
+    "/_authenticated/onboarding/": {
+      "filePath": "_authenticated/onboarding/index.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/agent/": {
       "filePath": "_authenticated/agent/index.lazy.tsx",
       "parent": "/_authenticated"
@@ -1176,14 +1148,6 @@ export const routeTree = rootRoute
     "/_authenticated/settings/": {
       "filePath": "_authenticated/settings/index.lazy.tsx",
       "parent": "/_authenticated/settings"
-    },
-    "/_authenticated/tasks/": {
-      "filePath": "_authenticated/tasks/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
-    "/_authenticated/users/": {
-      "filePath": "_authenticated/users/index.lazy.tsx",
-      "parent": "/_authenticated"
     },
     "/_authenticated/agent/new/from-scracth": {
       "filePath": "_authenticated/agent/new/from-scracth.lazy.tsx",

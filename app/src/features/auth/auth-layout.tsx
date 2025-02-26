@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: Props) {
           className='relative h-10 w-10 mr-2'
           alt='Synapze'
         />
-          <h1 className='text-xl font-medium'>Synpaze AI Agents</h1>
+          <h1 className='text-xl font-medium'>Synapze AI Agents</h1>
         </div>
         {children}
       </div>

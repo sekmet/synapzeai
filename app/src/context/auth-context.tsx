@@ -44,7 +44,13 @@ type AuthProviderProps = {
     })
 
     const { login } = useLogin({
+
       onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
+
+        if (currentUser?.id && currentUser.onboarding === true) {
+          router.navigate({ to: '/onboarding' })
+        }
+
         if (wasAlreadyAuthenticated) {
             const isUser = currentUser;
             // In this case, the user was already `authenticated` when this component was mounted.
@@ -98,11 +104,19 @@ type AuthProviderProps = {
         }
     },
       onError: (error) => {
+        if (currentUser?.id && currentUser.onboarding === true) {
+          router.navigate({ to: '/onboarding' })
+        }
+
         console.log(error);
         // Any logic you'd like to execute after a user exits the login flow or there is an error
       },
     });
   
+    useEffect(() => {
+
+    }, [userId])
+
     useEffect(() => {
       if (ready && !authenticated) {
         console.log('not authenticated')
@@ -110,10 +124,6 @@ type AuthProviderProps = {
       }
   
     }, [ready, authenticated, login]);    
-
-  
-    useEffect(() => {
-    }, [userId])
 
     const resetUserId = () => {
         localStorage.removeItem(storageKey)

@@ -1,0 +1,170 @@
+import { Check } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { Card } from '@/components/ui/card'
+import { useState, useEffect } from "react"
+import { useQuery } from '@tanstack/react-query'
+import { useAuthStore } from '@/stores/authStore'
+
+// Fetch user data from API
+const fetchUserVerificationStatus = async (userId: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/auth/is-verified`,{
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id: userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch user profile');
+  }
+
+  return response.json();
+};
+
+export function Onboarding() {
+  const navigate = useNavigate()
+  const { getOnboarding, setOnboarding, getUser } = useAuthStore((state) => state)
+  const [activeStep, setActiveStep] = useState<number>(getOnboarding().currentStep)
+
+  // Fetch user data
+  const { data: userVerificationStatus } = useQuery({
+    queryKey: ['userVerification', getUser()?.id],
+    queryFn: () => fetchUserVerificationStatus(getUser()?.id ?? ''),
+    enabled: true,
+  })
+
+  const onboardingStatus = userVerificationStatus?.onboarding === false ? true : false
+
+  const verifyEmail = () => {
+    console.log("Verify email")
+    navigate({ to: '/settings' })
+  }
+
+  const setupProfile = () => {
+    if (userVerificationStatus?.success === true) {
+      console.log("Setup profile")
+      navigate({ to: '/settings/account' })
+    }
+  }
+
+  const setupPreferences = () => {
+    if (userVerificationStatus?.success === true) {
+      console.log("Setup preferences")
+      navigate({ to: '/settings/appearance' })
+    }
+  }
+
+  const createAgent = () => {
+    if (userVerificationStatus?.success === true) {
+      console.log("Create agent")
+      navigate({ to: '/agent/new' })
+    }
+  }
+
+  const handleStepClick = (stepNumber: number) => {
+      if (stepNumber === 2) {
+        setOnboarding({ ...getOnboarding(), currentStep: stepNumber })
+        setActiveStep(stepNumber)
+        verifyEmail()
+      }
+
+      if (userVerificationStatus?.success === true) {
+
+        console.log(`Step ${stepNumber} clicked`)
+        setOnboarding({ ...getOnboarding(), currentStep: stepNumber })
+        setActiveStep(stepNumber)
+
+        if (stepNumber === 3) setupProfile()
+        if (stepNumber === 4) setupPreferences()
+        if (stepNumber === 5) createAgent()
+      }
+    }
+
+  const steps = [
+    {
+      number: 1,
+      title: "Create an Account",
+      description: "Start by creating your account.",
+      completed: activeStep >= 1 ? true : false,
+      onClick: () => setActiveStep(2)
+    },
+    {
+      number: 2,
+      title: "Verify your Email",
+      description: "Confirm your email address.",
+      completed: activeStep >= 2 && userVerificationStatus?.success === true ? true : false,
+      onClick: () => verifyEmail()
+    },
+    {
+      number: 3,
+      title: "Setup your Profile",
+      description: "Add personal details to your profile.",
+      completed: activeStep >= 3 && userVerificationStatus?.success === true ? true : false,
+      onClick: () => setupProfile()
+    },
+    {
+      number: 4,
+      title: "Choose your Preferences",
+      description: "Customize your account settings.",
+      completed: activeStep >= 4 && userVerificationStatus?.success === true ? true : false,
+      onClick: () => setupPreferences()
+    },
+    {
+      number: 5,
+      title: "Create your first agent",
+      description: "Begin exploring and enjoying our features.",
+      completed: activeStep >= 5 && userVerificationStatus?.success === true ? true : false,
+      onClick: () => createAgent()
+    },
+  ]
+
+  useEffect(() => {
+    setActiveStep(getOnboarding().currentStep)
+    //console.log(getOnboarding().currentStep)
+    setOnboarding({ ...getOnboarding(), completed: onboardingStatus })
+  }, [activeStep, userVerificationStatus])
+
+  return (
+    <div className="w-full max-w-2xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-4 sm:mb-8">
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Welcome to Synapze!</h1>
+          <p className="sm:text-lg text-muted-foreground">Follow the steps to complete your setup.</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {steps.map((step) => (
+          <Card
+            onClick={() => handleStepClick(step.number)}
+            key={step.number}
+            className={`p-4 transition-colors cursor-pointer ${
+              step.completed ? "bg-card hover:bg-accent/10" : "bg-muted/80 dark:bg-muted/90"
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${
+                  step.completed
+                    ? "bg-green-600 text-white"
+                    : "bg-muted text-muted-foreground dark:bg-muted/20"
+                }`}
+              >
+                {step.number}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-semibold">{step.title}</h2>
+                  {step.completed && <Check className="h-5 w-5 text-green-600" aria-hidden="true" />}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}

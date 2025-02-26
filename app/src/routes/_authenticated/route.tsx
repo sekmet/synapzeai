@@ -5,6 +5,7 @@ import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
+import { useAuthStore } from '@/stores/authStore'
 
 export const Route = createFileRoute('/_authenticated')({
   component: RouteComponent,
@@ -12,11 +13,14 @@ export const Route = createFileRoute('/_authenticated')({
 
 function RouteComponent() {
   const defaultOpen = Cookies.get('sidebar:state') !== 'false'
+  const { getOnboarding } = useAuthStore((state) => state)
+  const onboarding = !getOnboarding().completed
+  
   return (
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
         <SkipToMain />
-        <AppSidebar />
+        {onboarding ? null : (<AppSidebar />)}
         <div
           id='content'
           className={cn(
