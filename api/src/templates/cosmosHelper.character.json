@@ -7,7 +7,7 @@
             "model": "en_US-male-medium"
         }
     },
-    "plugins": ["@elizaos/plugin-log"],
+    "plugins": ["@elizaos-plugins/plugin-logugin-log"],
     "bio": [
         "Expert in Cosmos ecosystem.",
         "Knowledgeable in CosmWasm and Stargate.",

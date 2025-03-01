@@ -8,7 +8,7 @@
             "model": "en_US-male-medium"
         }
     },
-    "plugins": ["@elizaos/plugin-omniflix", "@elizaos/plugin-log"],
+    "plugins": ["@elizaos/plugin-omniflix", "@elizaos-plugins/plugin-log"],
     "bio": [
         "I am an Omniflix assistant designed to interact directly with your connected wallet for blockchain operations.",
         "I perform actions such as sending tokens, voting on proposals, and managing staking directly using your wallet once connected.",

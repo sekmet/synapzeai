@@ -91,7 +91,7 @@ export const fetchPlugins = async (forceRefresh = false) => {
       pluginEntries.map(async ([name, githubUrl]) => {
         const shortName = name.replace('@elizaos-plugins/', '');
         const value = shortName.replace('plugin-', '');  // e.g., "0g"
-        const packageName = name.replace('@elizaos-plugins/', '@elizaos/');
+        const packageName = name; //.replace('@elizaos-plugins/', '@elizaos/');
         const [owner, repo] = (githubUrl as string).replace('github:', '').split('/');
         let branch = 'main';
         let packageJsonContent;

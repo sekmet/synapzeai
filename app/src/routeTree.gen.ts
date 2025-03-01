@@ -27,8 +27,8 @@ const errors500LazyImport = createFileRoute('/(errors)/500')()
 const errors404LazyImport = createFileRoute('/(errors)/404')()
 const errors403LazyImport = createFileRoute('/(errors)/403')()
 const errors401LazyImport = createFileRoute('/(errors)/401')()
+const authSigninLazyImport = createFileRoute('/(auth)/signin')()
 const authSignUpLazyImport = createFileRoute('/(auth)/sign-up')()
-const authSignIn2LazyImport = createFileRoute('/(auth)/sign-in-2')()
 const authForgotPasswordLazyImport = createFileRoute(
   '/(auth)/forgot-password',
 )()
@@ -38,6 +38,9 @@ const AuthenticatedSettingsRouteLazyImport = createFileRoute(
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
 )()
+const AuthenticatedPluginsIndexLazyImport = createFileRoute(
+  '/_authenticated/plugins/',
+)()
 const AuthenticatedLogsIndexLazyImport = createFileRoute(
   '/_authenticated/logs/',
 )()
@@ -46,9 +49,6 @@ const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
 )()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
-)()
-const AuthenticatedAppsIndexLazyImport = createFileRoute(
-  '/_authenticated/apps/',
 )()
 const AuthenticatedAgentIndexLazyImport = createFileRoute(
   '/_authenticated/agent/',
@@ -149,6 +149,14 @@ const errors401LazyRoute = errors401LazyImport
   } as any)
   .lazy(() => import('./routes/(errors)/401.lazy').then((d) => d.Route))
 
+const authSigninLazyRoute = authSigninLazyImport
+  .update({
+    id: '/(auth)/signin',
+    path: '/signin',
+    getParentRoute: () => rootRoute,
+  } as any)
+  .lazy(() => import('./routes/(auth)/signin.lazy').then((d) => d.Route))
+
 const authSignUpLazyRoute = authSignUpLazyImport
   .update({
     id: '/(auth)/sign-up',
@@ -156,14 +164,6 @@ const authSignUpLazyRoute = authSignUpLazyImport
     getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(auth)/sign-up.lazy').then((d) => d.Route))
-
-const authSignIn2LazyRoute = authSignIn2LazyImport
-  .update({
-    id: '/(auth)/sign-in-2',
-    path: '/sign-in-2',
-    getParentRoute: () => rootRoute,
-  } as any)
-  .lazy(() => import('./routes/(auth)/sign-in-2.lazy').then((d) => d.Route))
 
 const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   .update({
@@ -211,6 +211,15 @@ const AuthenticatedSettingsIndexLazyRoute =
     import('./routes/_authenticated/settings/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedPluginsIndexLazyRoute =
+  AuthenticatedPluginsIndexLazyImport.update({
+    id: '/plugins/',
+    path: '/plugins/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/plugins/index.lazy').then((d) => d.Route),
+  )
+
 const AuthenticatedLogsIndexLazyRoute = AuthenticatedLogsIndexLazyImport.update(
   {
     id: '/logs/',
@@ -240,16 +249,6 @@ const AuthenticatedChatsIndexLazyRoute =
   } as any).lazy(() =>
     import('./routes/_authenticated/chats/index.lazy').then((d) => d.Route),
   )
-
-const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
-  {
-    id: '/apps/',
-    path: '/apps/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any,
-).lazy(() =>
-  import('./routes/_authenticated/apps/index.lazy').then((d) => d.Route),
-)
 
 const AuthenticatedAgentIndexLazyRoute =
   AuthenticatedAgentIndexLazyImport.update({
@@ -463,18 +462,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordLazyImport
       parentRoute: typeof rootRoute
     }
-    '/(auth)/sign-in-2': {
-      id: '/(auth)/sign-in-2'
-      path: '/sign-in-2'
-      fullPath: '/sign-in-2'
-      preLoaderRoute: typeof authSignIn2LazyImport
-      parentRoute: typeof rootRoute
-    }
     '/(auth)/sign-up': {
       id: '/(auth)/sign-up'
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof authSignUpLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/signin': {
+      id: '/(auth)/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof authSigninLazyImport
       parentRoute: typeof rootRoute
     }
     '/(errors)/401': {
@@ -582,13 +581,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/apps/': {
-      id: '/_authenticated/apps/'
-      path: '/apps'
-      fullPath: '/apps'
-      preLoaderRoute: typeof AuthenticatedAppsIndexLazyImport
-      parentRoute: typeof AuthenticatedRouteImport
-    }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
@@ -608,6 +600,13 @@ declare module '@tanstack/react-router' {
       path: '/logs'
       fullPath: '/logs'
       preLoaderRoute: typeof AuthenticatedLogsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/plugins/': {
+      id: '/_authenticated/plugins/'
+      path: '/plugins'
+      fullPath: '/plugins'
+      preLoaderRoute: typeof AuthenticatedPluginsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/settings/': {
@@ -705,10 +704,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatsAgentIdLazyRoute: typeof AuthenticatedChatsAgentIdLazyRoute
   AuthenticatedOnboardingIndexRoute: typeof AuthenticatedOnboardingIndexRoute
   AuthenticatedAgentIndexLazyRoute: typeof AuthenticatedAgentIndexLazyRoute
-  AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedLogsIndexLazyRoute: typeof AuthenticatedLogsIndexLazyRoute
+  AuthenticatedPluginsIndexLazyRoute: typeof AuthenticatedPluginsIndexLazyRoute
   AuthenticatedAgentNewFromScracthLazyRoute: typeof AuthenticatedAgentNewFromScracthLazyRoute
   AuthenticatedAgentNewReviewLazyRoute: typeof AuthenticatedAgentNewReviewLazyRoute
   AuthenticatedAgentNewSecretsLazyRoute: typeof AuthenticatedAgentNewSecretsLazyRoute
@@ -725,10 +724,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatsAgentIdLazyRoute: AuthenticatedChatsAgentIdLazyRoute,
   AuthenticatedOnboardingIndexRoute: AuthenticatedOnboardingIndexRoute,
   AuthenticatedAgentIndexLazyRoute: AuthenticatedAgentIndexLazyRoute,
-  AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedLogsIndexLazyRoute: AuthenticatedLogsIndexLazyRoute,
+  AuthenticatedPluginsIndexLazyRoute: AuthenticatedPluginsIndexLazyRoute,
   AuthenticatedAgentNewFromScracthLazyRoute:
     AuthenticatedAgentNewFromScracthLazyRoute,
   AuthenticatedAgentNewReviewLazyRoute: AuthenticatedAgentNewReviewLazyRoute,
@@ -751,8 +750,8 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authSignInRoute
   '/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   '/forgot-password': typeof authForgotPasswordLazyRoute
-  '/sign-in-2': typeof authSignIn2LazyRoute
   '/sign-up': typeof authSignUpLazyRoute
+  '/signin': typeof authSigninLazyRoute
   '/401': typeof errors401LazyRoute
   '/403': typeof errors403LazyRoute
   '/404': typeof errors404LazyRoute
@@ -767,10 +766,10 @@ export interface FileRoutesByFullPath {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/onboarding': typeof AuthenticatedOnboardingIndexRoute
   '/agent': typeof AuthenticatedAgentIndexLazyRoute
-  '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/logs': typeof AuthenticatedLogsIndexLazyRoute
+  '/plugins': typeof AuthenticatedPluginsIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
@@ -786,8 +785,8 @@ export interface FileRoutesByTo {
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
-  '/sign-in-2': typeof authSignIn2LazyRoute
   '/sign-up': typeof authSignUpLazyRoute
+  '/signin': typeof authSigninLazyRoute
   '/401': typeof errors401LazyRoute
   '/403': typeof errors403LazyRoute
   '/404': typeof errors404LazyRoute
@@ -802,10 +801,10 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/onboarding': typeof AuthenticatedOnboardingIndexRoute
   '/agent': typeof AuthenticatedAgentIndexLazyRoute
-  '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/logs': typeof AuthenticatedLogsIndexLazyRoute
+  '/plugins': typeof AuthenticatedPluginsIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
@@ -824,8 +823,8 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
-  '/(auth)/sign-in-2': typeof authSignIn2LazyRoute
   '/(auth)/sign-up': typeof authSignUpLazyRoute
+  '/(auth)/signin': typeof authSigninLazyRoute
   '/(errors)/401': typeof errors401LazyRoute
   '/(errors)/403': typeof errors403LazyRoute
   '/(errors)/404': typeof errors404LazyRoute
@@ -841,10 +840,10 @@ export interface FileRoutesById {
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/onboarding/': typeof AuthenticatedOnboardingIndexRoute
   '/_authenticated/agent/': typeof AuthenticatedAgentIndexLazyRoute
-  '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/logs/': typeof AuthenticatedLogsIndexLazyRoute
+  '/_authenticated/plugins/': typeof AuthenticatedPluginsIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/agent/new/from-scracth': typeof AuthenticatedAgentNewFromScracthLazyRoute
   '/_authenticated/agent/new/review': typeof AuthenticatedAgentNewReviewLazyRoute
@@ -864,8 +863,8 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/settings'
     | '/forgot-password'
-    | '/sign-in-2'
     | '/sign-up'
+    | '/signin'
     | '/401'
     | '/403'
     | '/404'
@@ -880,10 +879,10 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/onboarding'
     | '/agent'
-    | '/apps'
     | '/chats'
     | '/help-center'
     | '/logs'
+    | '/plugins'
     | '/settings/'
     | '/agent/new/from-scracth'
     | '/agent/new/review'
@@ -898,8 +897,8 @@ export interface FileRouteTypes {
     | '/otp'
     | '/sign-in'
     | '/forgot-password'
-    | '/sign-in-2'
     | '/sign-up'
+    | '/signin'
     | '/401'
     | '/403'
     | '/404'
@@ -914,10 +913,10 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/onboarding'
     | '/agent'
-    | '/apps'
     | '/chats'
     | '/help-center'
     | '/logs'
+    | '/plugins'
     | '/settings'
     | '/agent/new/from-scracth'
     | '/agent/new/review'
@@ -934,8 +933,8 @@ export interface FileRouteTypes {
     | '/(auth)/sign-in'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
-    | '/(auth)/sign-in-2'
     | '/(auth)/sign-up'
+    | '/(auth)/signin'
     | '/(errors)/401'
     | '/(errors)/403'
     | '/(errors)/404'
@@ -951,10 +950,10 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/notifications'
     | '/_authenticated/onboarding/'
     | '/_authenticated/agent/'
-    | '/_authenticated/apps/'
     | '/_authenticated/chats/'
     | '/_authenticated/help-center/'
     | '/_authenticated/logs/'
+    | '/_authenticated/plugins/'
     | '/_authenticated/settings/'
     | '/_authenticated/agent/new/from-scracth'
     | '/_authenticated/agent/new/review'
@@ -972,8 +971,8 @@ export interface RootRouteChildren {
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
   authForgotPasswordLazyRoute: typeof authForgotPasswordLazyRoute
-  authSignIn2LazyRoute: typeof authSignIn2LazyRoute
   authSignUpLazyRoute: typeof authSignUpLazyRoute
+  authSigninLazyRoute: typeof authSigninLazyRoute
   errors401LazyRoute: typeof errors401LazyRoute
   errors403LazyRoute: typeof errors403LazyRoute
   errors404LazyRoute: typeof errors404LazyRoute
@@ -988,8 +987,8 @@ const rootRouteChildren: RootRouteChildren = {
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
   authForgotPasswordLazyRoute: authForgotPasswordLazyRoute,
-  authSignIn2LazyRoute: authSignIn2LazyRoute,
   authSignUpLazyRoute: authSignUpLazyRoute,
+  authSigninLazyRoute: authSigninLazyRoute,
   errors401LazyRoute: errors401LazyRoute,
   errors403LazyRoute: errors403LazyRoute,
   errors404LazyRoute: errors404LazyRoute,
@@ -1014,8 +1013,8 @@ export const routeTree = rootRoute
         "/(auth)/otp",
         "/(auth)/sign-in",
         "/(auth)/forgot-password",
-        "/(auth)/sign-in-2",
         "/(auth)/sign-up",
+        "/(auth)/signin",
         "/(errors)/401",
         "/(errors)/403",
         "/(errors)/404",
@@ -1032,10 +1031,10 @@ export const routeTree = rootRoute
         "/_authenticated/chats/$agentId",
         "/_authenticated/onboarding/",
         "/_authenticated/agent/",
-        "/_authenticated/apps/",
         "/_authenticated/chats/",
         "/_authenticated/help-center/",
         "/_authenticated/logs/",
+        "/_authenticated/plugins/",
         "/_authenticated/agent/new/from-scracth",
         "/_authenticated/agent/new/review",
         "/_authenticated/agent/new/secrets",
@@ -1069,11 +1068,11 @@ export const routeTree = rootRoute
     "/(auth)/forgot-password": {
       "filePath": "(auth)/forgot-password.lazy.tsx"
     },
-    "/(auth)/sign-in-2": {
-      "filePath": "(auth)/sign-in-2.lazy.tsx"
-    },
     "/(auth)/sign-up": {
       "filePath": "(auth)/sign-up.lazy.tsx"
+    },
+    "/(auth)/signin": {
+      "filePath": "(auth)/signin.lazy.tsx"
     },
     "/(errors)/401": {
       "filePath": "(errors)/401.lazy.tsx"
@@ -1129,10 +1128,6 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/agent/index.lazy.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/apps/": {
-      "filePath": "_authenticated/apps/index.lazy.tsx",
-      "parent": "/_authenticated"
-    },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
       "parent": "/_authenticated"
@@ -1143,6 +1138,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/logs/": {
       "filePath": "_authenticated/logs/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/plugins/": {
+      "filePath": "_authenticated/plugins/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/": {

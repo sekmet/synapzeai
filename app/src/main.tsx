@@ -61,7 +61,7 @@ const queryClient = new QueryClient({
           })
           useAuthStore.getState().reset()
           const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/sign-in-2', search: { redirect } })
+          router.navigate({ to: '/signin', search: { redirect } })
         }
         if (error.response?.status === 500) {
           toast({

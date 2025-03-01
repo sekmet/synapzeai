@@ -132,7 +132,7 @@ type AuthProviderProps = {
     useEffect(() => {
       if (ready && !authenticated) {
         console.log('not authenticated')
-        router.navigate({ to: '/sign-in-2' })
+        router.navigate({ to: '/signin' })
       } else {
         if (userAgents && userAgents.length > 0) {
           if (!getAgent()) {

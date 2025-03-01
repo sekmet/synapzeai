@@ -63,9 +63,9 @@ export function AgentsDialogs() {
                 deleteAgentDeployment(currentAgent.id, currentAgent.metadata.composePath)
                 removeAgentSubdomain(currentAgent.metadata.composePath)
                 deleteAgent(currentAgent.id)
-                setRefresh(new Date().getTime())
                 setCurrentAgent(null)
-                setAgent(userAgentsActive[0])
+                setAgent(userAgentsActive[0] ?? null)
+                setRefresh(new Date().getTime())
               }, 500)
               setTimeout(() => {
                 navigate({ to: '/' })

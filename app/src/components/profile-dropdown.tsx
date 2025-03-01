@@ -25,7 +25,7 @@ export function ProfileDropdown() {
       console.log('User logged out');
       localStorage.clear();
       // Any logic you'd like to execute after a user successfully logs out
-      navigate({ to: '/sign-in-2' })
+      navigate({ to: '/signin' })
     },
   });
 

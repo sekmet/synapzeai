@@ -150,7 +150,7 @@ export const fetchPluginsListing = async (forceRefresh = false) => {
             value: value,
             label: formatCapitalizedString(value),
             category: "Blockchain & Web3",
-            package: name.replace('@elizaos-plugins/', '@elizaos/'),
+            package: name, //.replace('@elizaos-plugins/', '@elizaos/'),
             description: description,
           };
         })

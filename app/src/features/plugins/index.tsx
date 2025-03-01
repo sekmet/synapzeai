@@ -20,7 +20,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Search } from '@/components/search';
 import { ThemeSwitch } from '@/components/theme-switch';
 import { useQuery } from '@tanstack/react-query';
-import { fetchPlugins } from './data/apps';
+import { fetchPlugins } from './data/plugins';
 
 interface PluginParameters {
   [key: string]: {
@@ -48,32 +48,32 @@ interface Plugin {
   agentConfig?: AgentConfig;
 }
 
-const appText = new Map<string, string>([
+const pluginText = new Map<string, string>([
   ['all', 'All Plugins'],
   ['installed', 'Installed'],
   ['notInstalled', 'Not Installed'],
 ]);
 
-export default function Apps() {
+export default function Plugins() {
   const [sort, setSort] = useState('ascending');
-  const [appType, setAppType] = useState('all');
+  const [pluginType, setPluginType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: apps, isLoading } = useQuery({
-    queryKey: ['apps'],
+  const { data: plugins, isLoading } = useQuery({
+    queryKey: ['plugins'],
     queryFn: () => fetchPlugins(),
   });
 
-  const filteredApps = (apps as Plugin[] ?? [])
+  const filteredPlugins = (plugins as Plugin[] ?? [])
     .sort((a, b) =>
       sort === 'ascending'
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     )
-    .filter((app) =>
-      appType === 'installed'
-        ? app.installed
-        : appType === 'notInstalled'
-        ? !app.installed
+    .filter((plugin) =>
+      pluginType === 'installed'
+        ? plugin.installed
+        : pluginType === 'notInstalled'
+        ? !plugin.installed
         : true
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -107,9 +107,9 @@ export default function Apps() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Select value={appType} onValueChange={setAppType}>
+            <Select value={pluginType} onValueChange={setPluginType}>
               <SelectTrigger className="w-36">
-                <SelectValue>{appText.get(appType)}</SelectValue>
+                <SelectValue>{pluginText.get(pluginType)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Plugins</SelectItem>
@@ -168,38 +168,38 @@ export default function Apps() {
           </div>
         ) : (
           <ul className="faded-bottom no-scrollbar grid gap-4 overflow-auto pb-16 pt-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredApps.map((app) => (
+            {filteredPlugins.map((plugin) => (
               <li
-                key={app.name}
+                key={plugin.name}
                 className="rounded-lg border p-4 hover:shadow-md"
               >
                 <div className="mb-8 flex items-center justify-between">
                   <div
                     className="flex size-10 items-center justify-center rounded-lg bg-muted p-2"
                   >
-                    {app.icon}
+                    {plugin.icon}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`${app.installed ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
+                    className={`${plugin.installed ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
                   >
-                    {app.installed ? 'Installed' : 'Install'}
+                    {plugin.installed ? 'Installed' : 'Install'}
                   </Button>
                 </div>
                 <div>
                   <div className="flex items-center gap-1 mb-1">
-                    {app.logo && (
+                    {plugin.logo && (
                       <div className="border border-gray-300 dark:border-gray-600 w-10 h-10 rounded-lg mr-1">
-                        {app.logo}
+                        {plugin.logo}
                       </div>
                     )}
-                    <h2 className="mb-1 font-semibold">{app.name}</h2>
+                    <h2 className="mb-1 font-semibold">{plugin.name}</h2>
                   </div>
-                  <small className="text-gray-500 font-semibold">{app.package}</small>
-                  <p className="line-clamp-2 text-gray-500 mt-2">{app.description}</p>
+                  <small className="text-gray-500 font-semibold">{plugin.package}</small>
+                  <p className="line-clamp-2 text-gray-500 mt-2">{plugin.description}</p>
                 </div>
-                <div className="flex mt-2 justify-end items-end text-[11px] text-gray-500 dark:text-gray-300 gap-1 font-semibold">v{app.version}</div>
+                <div className="flex mt-2 justify-end items-end text-[11px] text-gray-500 dark:text-gray-300 gap-1 font-semibold">v{plugin.version}</div>
               </li>
             ))}
           </ul>

@@ -38,7 +38,7 @@
       "@elizaos/plugin-tee-log": "workspace:*",
       {{/if}}
       {{#if plugin-log}}
-      "@elizaos/plugin-log": "workspace:*",
+      "@elizaos-plugins/plugin-log": "workspace:*",
       {{/if}}
       {{#if client-discord}}
       "@elizaos/client-discord": "workspace:*",

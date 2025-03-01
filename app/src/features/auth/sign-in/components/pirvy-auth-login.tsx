@@ -35,7 +35,7 @@ export function PrivyAuthLogin({ className, ...props }: PrivyAuthFormProps) {
           if (isNewUser) {
               // If the user is new, create it in your backend
               console.log("NEW USER", isNewUser)
-              navigate({ to: '/sign-in-2' })
+              navigate({ to: '/signin' })
               /*await fetch('/signin', {
                   method: 'POST',
                   body: JSON.stringify(user)

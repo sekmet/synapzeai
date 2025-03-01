@@ -74,7 +74,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'Plugins',
-          url: '/apps',
+          url: '/plugins',
           icon: IconPackages,
         }
       ],
