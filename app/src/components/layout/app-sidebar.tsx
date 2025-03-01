@@ -15,15 +15,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from '@/stores/authStore'
 import { useAgentActiveStore } from '@/stores/agentActive'
 import { useAgentDeployStore } from '@/stores/agentDeployStore'
+import { useAgentStore } from '@/stores/agentStore'
 import { useSidebar } from '@/components/ui/sidebar'
 import { clsx } from 'clsx'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state: sidebarState } = useSidebar()
-  const { getUser, getOnboarding } = useAuthStore((state) => state)
+  const { getUser/*, getOnboarding*/ } = useAuthStore((state) => state)
   const { getProvisioning } = useAgentDeployStore((state) => state)
+  const { getAgents } = useAgentStore((state) => state)
   const { refresh } = useAgentActiveStore((state) => state)
-  const onboarding = !getOnboarding().completed
+  //const onboarding = !getOnboarding().completed
   const isProvisioning = getProvisioning().isProvisioning;
   
   const { data: userAgents } = useQuery({
@@ -33,14 +35,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   useEffect(() => {
     //console.log({refresh})]
-    console.log({isProvisioning},{onboarding})
   }, [refresh])
 
   return isProvisioning ? null : getUser()?.id ? (
     <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
         {userAgents ? (
-          <AgentSwitcher agents={userAgents ?? {}} />
+          <AgentSwitcher agents={getAgents() || (userAgents ?? {})} />
           ) : (
           <div className={clsx(sidebarState === 'collapsed' ? null : 'px-4 py-3 font-semibold leading-6 text-sm shadow rounded-md text-gray-700 dark:text-gray-300 bg-sidebar','inline-flex items-center transition ease-in-out duration-150 cursor-not-allowed')}>
             <svg 

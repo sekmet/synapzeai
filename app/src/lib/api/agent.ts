@@ -726,7 +726,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const composeResult = await generateAgentDockerComposeFile(
         agentId, 
         agentEnvVariables,
-        'synapze/elizav019e', 
+        'synapze/elizav0258a', 
         newAgentServerPort ?? '3300',
         `${import.meta.env.VITE_JWT_AGENT_SECRET}`,
         'synapze.xyz'

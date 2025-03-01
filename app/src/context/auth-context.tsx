@@ -3,6 +3,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { usePrivy, useLogin } from '@privy-io/react-auth'
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore, AuthUser } from '@/stores/authStore'
+import { useAgentActiveStore } from '@/stores/agentActive'
+import { fetchUserAgents } from '@/lib/api/agent'
 import { fetchCurrentUser, createUser } from '@/lib/users'
 
 type AuthProviderProps = {
@@ -36,6 +38,7 @@ type AuthProviderProps = {
   }: AuthProviderProps) {
     const onboarding = Cookies.get('synapze:onboarding') !== 'false'
     const { getOnboarding, setOnboarding, setUser, getUser, setApiKey } = useAuthStore((state) => state)
+    const { setAgent, getAgent, refresh } = useAgentActiveStore((state) => state)
     const [userId, _setUserId] = useState<any>(
       () => (getUser()?.id as string) || defaultUserId
     )
@@ -56,6 +59,12 @@ type AuthProviderProps = {
       })
     })
 
+    // get user agents
+    const { data: userAgents } = useQuery({
+      queryKey: ['userAgents', getUser()?.id, refresh],
+      queryFn: () => fetchUserAgents(getUser()?.id ?? ''),
+    })  
+
     const { login } = useLogin({
 
       onComplete: ({user, isNewUser, wasAlreadyAuthenticated}) => {
@@ -75,7 +84,7 @@ type AuthProviderProps = {
             setApiKey('test_Eg1fVjVCq2DagkgFkPKeWkwR33qNeThTrBjhmDYK6EwRvfup')
             //console.log({isUser})
             setOnboarding({ ...getOnboarding(), completed: onboarding === false ? true : false })
-  
+
             //navigate({ to: '/' })
         } else {
             // In this case, the user was not already `authenticated` when the component was mounted
@@ -124,9 +133,16 @@ type AuthProviderProps = {
       if (ready && !authenticated) {
         console.log('not authenticated')
         router.navigate({ to: '/sign-in-2' })
+      } else {
+        if (userAgents && userAgents.length > 0) {
+          if (!getAgent()) {
+            setAgent(userAgents[0])
+            //setRefresh(new Date().getTime())
+          }
+        }
       }
   
-    }, [ready, authenticated, login]);    
+    }, [ready, authenticated, login, userAgents]);    
 
     const resetUserId = () => {
         localStorage.removeItem(storageKey)

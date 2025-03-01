@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Outlet, useRouter } from '@tanstack/react-router'
 import {
   IconBrowserCheck,
@@ -20,10 +21,13 @@ import { ChevronLeft } from 'lucide-react'
 
 export default function Settings() {
   const { getOnboarding } = useAuthStore((state) => state)
-  const { getAgent } = useAgentActiveStore((state) => state)
+  const { getAgent, refresh } = useAgentActiveStore((state) => state)
   const router = useRouter()
   const onboarding = !getOnboarding().completed
   const activeAgent = getAgent() as Agent ?? null;
+
+  useEffect(() => {
+  }, [refresh])
 
   return (
     <>
