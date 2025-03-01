@@ -3,10 +3,7 @@ import { removeSubdomain, type CloudflareCredentials } from './cloudflare';
 export const removeAgentSubdomain = async (composePath: string) => {
 
     // Extract the directory from the composePath.
-    const _composePath = composePath.split('/');
-    _composePath.pop();
-    const dirPath = _composePath.join('/');
-    const agentAlias = `${dirPath.split('/').pop()}`.toLocaleLowerCase();
+    const agentAlias = `${composePath.split('/').pop()}`.toLocaleLowerCase();
     const agentServerDomain = process.env.AGENT_SERVER_DOMAIN;
   
     if (!agentServerDomain) {
