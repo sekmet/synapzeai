@@ -20,9 +20,9 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@types/bun": "latest",
+    "@types/bun": "^1.2.4",
     "biome": "^0.3.3",
-    "turbo": "^2.4.0"
+    "turbo": "^2.4.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

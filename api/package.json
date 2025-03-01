@@ -8,9 +8,9 @@
     "dev": "bun run --watch src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/dockerode": "^3.3.34",
-    "@types/jsonwebtoken": "^9.0.8",
+    "@types/bun": "^1.2.4",
+    "@types/dockerode": "^3.3.35",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/nodemailer": "^6.4.17",
     "@types/tar-fs": "^2.0.4"
   },
@@ -20,7 +20,7 @@
   "dependencies": {
     "dockerode": "^4.0.4",
     "handlebars": "^4.7.8",
-    "hono": "^4.7.0",
+    "hono": "^4.7.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",
     "stream": "^0.0.3",
