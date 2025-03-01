@@ -7,7 +7,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserAgents } from '@/lib/api/agent'
 import { useAgentActiveStore } from '@/stores/agentActive'
-import { deleteAgent, deleteAgentDeployment } from '@/lib/api/agent'
+import { deleteAgent, deleteAgentDeployment, removeAgentSubdomain } from '@/lib/api/agent'
 
 export function AgentsDialogs() {
   const { open, setOpen, currentAgent, setCurrentAgent } = useAgents()
@@ -61,6 +61,7 @@ export function AgentsDialogs() {
               setOpen(null)
               setTimeout(() => {
                 deleteAgentDeployment(currentAgent.id, currentAgent.metadata.composePath)
+                removeAgentSubdomain(currentAgent.metadata.composePath)
                 deleteAgent(currentAgent.id)
                 setRefresh(new Date().getTime())
                 setCurrentAgent(null)

@@ -15,6 +15,7 @@ import { runCopyFile } from './lib/copy/copy-file';
 import { runComposeRemove } from './lib/remove/compose-remove';
 import { parseAndExtractEnvVariables } from './lib/envs/parse-extract';
 import { createAgentSubdomain } from './lib/domains/create-domain';
+import { removeAgentSubdomain } from './lib/domains/remove-domain';
 import { signJwt } from './lib/jwt/sign';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -1507,6 +1508,34 @@ app.post(`${apiPrefix}/agent/create-subdomain`, async (c) => {
     return c.json({ 
       success: false, 
       error: err.message || 'Failed to create agent subdomain'
+    }, 500);
+  }
+});
+
+// Remove a agent subdomain endpoint
+app.post(`${apiPrefix}/agent/remove-subdomain`, async (c) => {
+  try {
+    const { composePath } = await c.req.json();
+
+    // Validate required parameter
+    if (!composePath) {
+      return c.json({ 
+        error: 'Missing required parameter: composePath' 
+      }, 400);
+    }
+
+    const result = await removeAgentSubdomain(composePath);
+
+    return c.json({ 
+      success: true, 
+      message: 'Agent subdomain removed successfully',
+      result
+    });
+
+  } catch (err) {
+    return c.json({ 
+      success: false, 
+      error: err.message || 'Failed to remove agent subdomain'
     }, 500);
   }
 });

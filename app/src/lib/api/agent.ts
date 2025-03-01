@@ -554,6 +554,25 @@ export const createAgentSubdomain = async (composePath: string) => {
 };
 
 
+export const removeAgentSubdomain = async (composePath: string) => {
+  const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/agent/remove-subdomain`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({composePath}),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to remove agent subdomain: ${error}`);
+  }
+
+  return response.json();
+};
+
+
 export const updateAgentContainerMetadata = async (agentId: string, metadata: Record<string, string>) => {
   const response = await fetch(`${import.meta.env.VITE_API_DB_HOST_URL}/v1/agents/${agentId}`, {
     method: "PUT",
