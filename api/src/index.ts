@@ -8,7 +8,8 @@ import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { Writable } from 'stream';
 import { generateDockerComposeFile } from './lib/compose';
-import { writeDefaultCharacterJson } from './lib/defaultchar';
+import { writeDefaultCharacterJson } from './lib/write-defaultchar';
+import { readDefaultCharacterJson } from './lib/read-defaultchar';
 import { runDeployment } from './lib/deploy/deploy-compose';
 import { runComposeDown } from './lib/down/compose-down';
 import { runCopyFile } from './lib/copy/copy-file';
@@ -1289,6 +1290,42 @@ app.post(`${apiPrefix}/docker/:agentId/write-compose-file`, async (c) => {
 });
 
 // Generate docker-compose file endpoint
+app.get(`${apiPrefix}/docker/:agentId/read-default-character-json`, async (c) => {
+  try {
+    const agentId = c.req.param('agentId');
+    const composePath = c.req.query('composePath');
+    
+    if (!composePath) {
+      return c.json({ 
+        success: false, 
+        message: 'composePath is required' 
+      }, 400);
+    }
+
+    const characterJson = readDefaultCharacterJson(composePath);
+    
+    if (!characterJson) {
+      return c.json({ 
+        success: false, 
+        message: 'Failed to read default character JSON' 
+      }, 404);
+    }
+
+    return c.json({ 
+      success: true, 
+      message: 'Default character JSON read successfully',
+      characterJson,
+      characterFilePath: `${path.dirname(composePath)}/default.character.json` 
+    });
+  } catch (err: any) {
+    console.error('Error reading default character JSON:', err);
+    return c.json({ 
+      success: false, 
+      message: err.message || 'Failed to read default character JSON'
+    }, 500);
+  }
+});
+
 app.post(`${apiPrefix}/docker/:agentId/write-default-character-json`, async (c) => {
   try {
     const agentId = c.req.param('agentId');

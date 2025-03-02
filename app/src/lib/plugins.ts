@@ -1,21 +1,4 @@
-export interface PluginParameter {
-  type: string | number | boolean;
-  description?: string;
-  minLength?: number;
-  maxLength?: number;
-  default?: string | number | boolean;
-  enum?: (string | number | boolean)[];
-}
-
-export interface PluginInfo {
-  name: string;
-  version: string;
-  type: string;
-  agentConfig?: {
-    pluginType: string;
-    pluginParameters: PluginParameter | null;
-  };
-}
+import { type PluginInfo } from '@/types/plugins';
 
 /**
 * Extracts the first paragraph after the title from a README markdown string.
@@ -120,7 +103,7 @@ export const fetchPluginsListing = async (forceRefresh = false) => {
                 value: value,
                 label: formatCapitalizedString(value),
                 category: "Blockchain & Web3",
-                package: name.replace('@elizaos-plugins/', '@elizaos/'),
+                package: name, //.replace('@elizaos-plugins/', '@elizaos/'),
                 description: 'Plugin information unavailable',
               };
             }

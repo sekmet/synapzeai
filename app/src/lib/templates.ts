@@ -1,7 +1,8 @@
 import { useAgentDeployStore, AgentPluginsSecrets } from '@/stores/agentDeployStore';
 import { AgentEnvironmentVars } from '@/types/agent-enviroment-v1';
 import { providerMappings as mMappings, clientMappings as cMappings /*, pluginMappings as pMappings*/ } from './mappings';
-import { loadPluginParameters, type PluginInfo, type PluginParameter } from '@/lib/plugins';
+import { loadPluginParameters } from '@/lib/plugins';
+import { type PluginInfo, type PluginParameter } from '@/types/plugins';
 
 interface Template {
   name: string;
@@ -256,9 +257,9 @@ export async function saveTemplateState(template: Template) {
   const secrets: AgentPluginsSecrets = {};
   // Load the plugin parameters
   template.plugins.forEach(async (plugin) => {
-    const pluginName = plugin.replace('@elizaos/', '');
+    const pluginName = plugin.replace('@elizaos-plugins/', '');
     const pluginInfo: PluginInfo | null = await loadPluginParameters(pluginName);
-    const pluginParams: PluginParameter | null | undefined = pluginInfo?.agentConfig?.pluginParameters;
+    const pluginParams: any = pluginInfo?.agentConfig?.pluginParameters;
     //console.log({pluginParams})
     
     if (pluginParams) {

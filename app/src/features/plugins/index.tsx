@@ -4,7 +4,7 @@ import {
   IconSortAscendingLetters,
   IconSortDescendingLetters,
 } from '@tabler/icons-react';
-import { Button } from '@/components/ui/button';
+//import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -19,34 +19,15 @@ import { Main } from '@/components/layout/main';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Search } from '@/components/search';
 import { ThemeSwitch } from '@/components/theme-switch';
+
+import PluginsProvider from './context/plugins-context'
+import { PluginsDialogs } from './components/plugins-dialogs'
+import { InstallPluginButton } from './components/install-plugin-button'
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchPlugins } from './data/plugins';
+import { type Plugin } from '@/types/plugins';
 
-interface PluginParameters {
-  [key: string]: {
-    type: string;
-    description: string;
-  };
-}
-
-interface AgentConfig {
-  pluginType: string;
-  pluginParameters: PluginParameters;
-}
-
-interface Plugin {
-  logo?: any;
-  icon: any;
-  name: string;
-  value: string;
-  version: string;
-  description: string;
-  author: string;
-  githubUrl: string;
-  package: string;
-  installed: boolean;
-  agentConfig?: AgentConfig;
-}
 
 const pluginText = new Map<string, string>([
   ['all', 'All Plugins'],
@@ -58,6 +39,7 @@ export default function Plugins() {
   const [sort, setSort] = useState('ascending');
   const [pluginType, setPluginType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
   const { data: plugins, isLoading } = useQuery({
     queryKey: ['plugins'],
     queryFn: () => fetchPlugins(),
@@ -77,6 +59,7 @@ export default function Plugins() {
         : true
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
 
   return (
     <>
@@ -167,6 +150,7 @@ export default function Plugins() {
             <span className="mt-2 text-lg text-gray-500">Loading plugins...</span>
           </div>
         ) : (
+          <PluginsProvider>
           <ul className="faded-bottom no-scrollbar grid gap-4 overflow-auto pb-16 pt-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredPlugins.map((plugin) => (
               <li
@@ -179,13 +163,9 @@ export default function Plugins() {
                   >
                     {plugin.icon}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`${plugin.installed ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
-                  >
-                    {plugin.installed ? 'Installed' : 'Install'}
-                  </Button>
+                  <InstallPluginButton
+                    plugin={plugin}
+                  />
                 </div>
                 <div>
                   <div className="flex items-center gap-1 mb-1">
@@ -203,6 +183,8 @@ export default function Plugins() {
               </li>
             ))}
           </ul>
+          <PluginsDialogs />
+          </PluginsProvider>
         )}
       </Main>
     </>

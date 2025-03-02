@@ -436,6 +436,165 @@ export const getDeployedAgentClientId = async (containerId: string, agentName: s
   return agentClientId;
 }
 
+
+export const installElizav1Plugin = async (
+  agentId: string,
+  pluginPackageName: string, 
+  pluginSecrets?: Record<string, string>
+) => {
+
+  if (!agentId || agentId === 'undefined') {
+    console.error('Agent ID is required');
+    return null
+  }
+
+  // Get the agent information by id using getAgentById = async (id: string)
+  const agent = await getAgentById(agentId);
+
+  if (!agent) {
+    console.error('Agent not found');
+    return null;
+  }
+
+  const containerId = agent.container_id;
+  const metadata = agent.metadata ? JSON.parse(agent.metadata) : {};
+  const composePath = metadata.composePath;
+
+  if (!containerId) {
+    console.error('Container ID not found');
+    return null;
+  }
+
+  if (!composePath) {
+    console.error('Compose path not found in agent metadata');
+    return null;
+  }
+
+  // Install the plugin using elizaos
+  const Cmd = ["npx", "elizaos", "plugins", "add", pluginPackageName];  
+  const AttachStdout = true; 
+  const AttachStderr = true;
+
+  const response = await executeCommandOnAgentContainer(containerId, Cmd, AttachStdout, AttachStderr);
+
+  if (!response || !response.output) {
+    throw new Error(`Failed to execute the command on the agent container: ${Cmd}`);
+  }
+  
+  console.log('CLIENT RESPONSE', response.output);
+
+  if (response.output) {
+    // Parse the plugin package name to find if it's a plugin-* or a client-* plugin type
+    // Example client: @elizaos-plugins/client-discord
+    // Example plugin: @elizaos-plugins/plugin-coinmarketcap
+    const isClient = pluginPackageName.includes('client-');
+    const isPlugin = pluginPackageName.includes('plugin-');
+    
+    // Extract the plugin/client name without the prefix
+    const packageNameParts = pluginPackageName.split('/');
+    const nameWithPrefix = packageNameParts[packageNameParts.length - 1];
+    const name = isClient ? nameWithPrefix.replace('client-', '') : 
+                isPlugin ? nameWithPrefix.replace('plugin-', '') : nameWithPrefix;
+
+    // Read and load the default character json from agent composePath
+    const characterJsonResponse = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/read-default-character-json?composePath=${encodeURIComponent(composePath)}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!characterJsonResponse.ok) {
+      console.error('Failed to read default character JSON');
+      return false;
+    }
+
+    const { characterJson } = await characterJsonResponse.json();
+
+    if (!characterJson) {
+      console.error('Default character JSON not found');
+      return false;
+    }
+
+    // Update the "plugins" or "clients" array based on the plugin package name type
+    if (isClient) {
+      // Add to clients array if it doesn't exist
+      if (!characterJson.clients) {
+        characterJson.clients = [];
+      }
+      if (!characterJson.clients.includes(name)) {
+        characterJson.clients.push(name);
+      }
+    } else if (isPlugin) {
+      // Add to plugins array if it doesn't exist
+      if (!characterJson.plugins) {
+        characterJson.plugins = [];
+      }
+      if (!characterJson.plugins.includes(name)) {
+        characterJson.plugins.push(name);
+      }
+    }
+
+    // Update the secrets section of the default character json
+    if (pluginSecrets && Object.keys(pluginSecrets).length > 0) {
+      if (!characterJson.settings) {
+        characterJson.settings = {};
+      }
+      if (!characterJson.settings.secrets) {
+        characterJson.settings.secrets = {};
+      }
+      
+      // Add the plugin secrets to the settings.secrets object
+      Object.keys(pluginSecrets).forEach(key => {
+        characterJson.settings.secrets[key] = pluginSecrets[key];
+      });
+    }
+
+    // Write the updated default character json back to the agent composePath
+    const writeResponse = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/docker/${agentId}/write-default-character-json`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        composePath,
+        characterJson
+      })
+    });
+
+    if (!writeResponse.ok) {
+      console.error('Failed to write updated default character JSON');
+      return false;
+    }
+
+    // Restart the agent container
+    const restartResponse = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers/${containerId}/copy-file`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        containerId,
+        srcPath: `${composePath}/default.character.json`,
+        destPath: '/app/characters/default.character.json'
+      })
+    });
+
+    if (!restartResponse.ok) {
+      console.error('Failed to restart agent container');
+      return false;
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+
 export const updateAgentContainerWithDefaultCharacterJson = async (containerId: string, srcPath: string, destPath: string) => {
   const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/containers/${containerId}/copy-file`, {
     method: "POST",
