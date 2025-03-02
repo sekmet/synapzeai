@@ -220,7 +220,7 @@ export function InstallPluginDialog() {
             <h3 className="font-semibold bg-muted p-2 rounded-md">Plugin Parameters</h3>
             <div className="space-y-4 border p-4 rounded-md max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {Object.entries(pluginParameters.agentConfig.pluginParameters).map(([key, param]) => (
-                <div key={key} className="space-y-1 mb-4">
+                <div key={key} className="space-y-2 mb-4">
                   <Label htmlFor={key} className="block mb-1">
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                     {param.description && <span className="text-xs text-muted-foreground ml-1">({param.description})</span>}
