@@ -280,7 +280,7 @@ export const getAvgSessionSentiment = async (containerId: string) => {
         return []
     }
 
-    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT ROUND(AVG(room_avg_sentiment),2) * 100 AS avg_session_sentiment_percentage FROM (SELECT roomId, AVG(CASE WHEN json_extract(body, '$.sentiment') = 'negative' THEN 0 WHEN json_extract(body, '$.sentiment') = 'neutral' THEN 0.5 WHEN json_extract(body, '$.sentiment') = 'positive' THEN 1 ELSE NULL END ) AS room_avg_sentiment FROM logs WHERE type = 'sentiment' GROUP BY roomId ) AS room_sentiments;"];
+    const Cmd = ["/root/.local/bin/sqlite-utils", "/app/agent/data/db.sqlite", "SELECT ROUND(AVG(room_avg_sentiment) * 100 ,2) AS avg_session_sentiment_percentage FROM (SELECT roomId, AVG(CASE WHEN json_extract(body, '$.sentiment') = 'negative' THEN 0 WHEN json_extract(body, '$.sentiment') = 'neutral' THEN 0.5 WHEN json_extract(body, '$.sentiment') = 'positive' THEN 1 ELSE NULL END ) AS room_avg_sentiment FROM logs WHERE type = 'sentiment' GROUP BY roomId ) AS room_sentiments;"];
     const AttachStdout =  true; 
     const AttachStderr = true;
   
