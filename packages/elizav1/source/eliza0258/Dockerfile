@@ -17,6 +17,7 @@ RUN npm install -g pnpm@9.15.4 && \
     automake \
     libopus-dev \
     make \
+    g++-12 \
     g++ \
     build-essential \
     libcairo2-dev \
@@ -51,6 +52,9 @@ RUN npm install -g pnpm@9.15.4 && \
     apt-get update && \
     apt-get install -y \
     git \
+    make \
+    g++-12 \
+    g++ \
     python3 \
     pipx \
     ffmpeg && \

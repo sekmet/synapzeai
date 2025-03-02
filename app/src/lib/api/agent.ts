@@ -456,9 +456,9 @@ export const installElizav1Plugin = async (
     return null;
   }
 
-  const containerId = agent.container_id;
+  const containerId = `${agent.container_id}`.split(':')[0];
   const metadata = agent.metadata ? JSON.parse(agent.metadata) : {};
-  const composePath = metadata.composePath;
+  const composePath = `${metadata.composePath}/default.character.json`;
 
   if (!containerId) {
     console.error('Container ID not found');
@@ -471,7 +471,7 @@ export const installElizav1Plugin = async (
   }
 
   // Install the plugin using elizaos
-  const Cmd = ["npx", "elizaos", "plugins", "add", pluginPackageName];  
+  const Cmd = ["npx", "elizaos", "plugins", "add", `@elizaos-plugins/${pluginPackageName}`];  
   const AttachStdout = true; 
   const AttachStderr = true;
 
@@ -578,7 +578,7 @@ export const installElizav1Plugin = async (
       },
       body: JSON.stringify({
         containerId,
-        srcPath: `${composePath}/default.character.json`,
+        srcPath: `${composePath}`,
         destPath: '/app/characters/default.character.json'
       })
     });
