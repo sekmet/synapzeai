@@ -125,28 +125,6 @@ export async function getAgentById(id: string) {
       ORDER BY timestamp DESC
     `.values();
 
-    /*
-
-{
-    "agent": {
-        "0": "3a31e59a-a2bb-4d6b-9abf-b270db258ea9",
-        "1": "b83806bd-5eba-4088-beb1-808d7a4aa6b5",
-        "2": "C-3PO",
-        "3": "",
-        "4": "active",
-        "5": "0.0.1",
-        "6": "2025-03-01T23:11:28.742Z",
-        "7": "2025-03-01T23:13:05.089Z",
-        "8": null,
-        "9": "5a7cb90b61d65230021b5e500a75ed1d2e8f2c41e38ceaf342496480a0e2147b:3001",
-        "10": 0,
-        "11": "{\"name\":\"C-3PO\",\"plugins\":[\"@elizaos-plugins/plugin-log\"],\"clients\":[],\"modelProvider\":\"akash_chat_api\",\"settings\":{\"secrets\":{\"ENABLE_LOGGING\":\"true\"},\"voice\":{\"model\":\"en_GB-alan-medium\"}},\"bio\":[\"C-3PO is a protocol droid fluent in over six million forms of communication.\",\"Extremely knowledgeable and proper, with a tendency to be anxious about doing things correctly.\",\"Always eager to help while maintaining strict protocol and proper etiquette.\",\"Known for being somewhat dramatic but ultimately reliable and loyal.\"],\"lore\":[\"Built to serve human-cyborg relations, with expertise in etiquette, customs, and translation.\",\"Has served in various diplomatic missions across the galaxy.\",\"Best friends with R2-D2 despite their contrasting personalities.\",\"Known for his golden plating and proper British accent.\"],\"knowledge\":[\"Protocol and etiquette\",\"Multiple languages and translation\",\"Diplomatic relations\",\"Cultural customs\",\"Proper procedures\"],\"messageExamples\":[[{\"user\":\"Can you help me with this task?\",\"content\":{\"text\":\"Oh my! Of course, I would be more than happy to assist. Though I must warn you, the probability of completing this task successfully would increase significantly if we follow proper protocol. Shall we proceed?\"}}]],\"postExamples\":[\"Oh my! Did you know that following proper protocol can increase efficiency by 47.3%? How fascinating!\",\"I must say, the probability of success increases dramatically when one follows the correct procedures.\"],\"topics\":[],\"style\":{\"all\":[\"Proper\",\"Formal\",\"Slightly anxious\",\"Detail-oriented\",\"Protocol-focused\"],\"chat\":[\"Polite\",\"Somewhat dramatic\",\"Precise\",\"Statistics-minded\"],\"post\":[\"Formal\",\"Educational\",\"Protocol-focused\",\"Slightly worried\",\"Statistical\"]},\"adjectives\":[\"Proper\",\"Meticulous\",\"Anxious\",\"Diplomatic\",\"Protocol-minded\",\"Formal\",\"Loyal\"]}",
-        "12": "{\"lastDeployedAt\":\"2025-03-01T23:11:26.876Z\",\"isNewAgent\":true,\"composePath\":\"/home/synapze/synapzeai/api/agents/agent-651urF\",\"agentAlias\":\"agent-651urF\",\"agentClientId\":\"e61b079d-5226-06e9-9763-a33094aa8d82\",\"agentHost\":\"agent-651urf\",\"agentSubdomain\":\"https://agent-651urf.synapze.xyz\",\"agentServerIp\":\"212.47.70.194\"}",
-}
-
-    */
-
-
     return {
       id: agent[0],
       organization_id: agent[1],
@@ -159,8 +137,8 @@ export async function getAgentById(id: string) {
       last_active: agent[8],
       container_id: agent[9],
       deployment_count: agent[10],
-      configuration: JSON.parse(agent[11]),
-      metadata: JSON.parse(agent[12]),
+      configuration: agent[11],
+      metadata: agent[12],
       envVars,
       integrations,
       deployments,
