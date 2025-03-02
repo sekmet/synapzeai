@@ -530,16 +530,16 @@ export const installElizav1Plugin = async (
       if (!characterJson.plugins) {
         characterJson.plugins = [];
       }
-      if (!characterJson.plugins.includes(name)) {
-        characterJson.plugins.push(name);
+      if (!characterJson.plugins.includes(pluginPackageName)) {
+        characterJson.plugins.push(pluginPackageName);
       }
     } else if (isPlugin) {
       // Add to plugins array if it doesn't exist
       if (!characterJson.plugins) {
         characterJson.plugins = [];
       }
-      if (!characterJson.plugins.includes(name)) {
-        characterJson.plugins.push(name);
+      if (!characterJson.plugins.includes(pluginPackageName)) {
+        characterJson.plugins.push(pluginPackageName);
       }
     }
 
