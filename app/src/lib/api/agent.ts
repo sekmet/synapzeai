@@ -526,6 +526,13 @@ export const installElizav1Plugin = async (
       if (!characterJson.clients.includes(name)) {
         characterJson.clients.push(name);
       }
+      // Add to plugins array if it doesn't exist
+      if (!characterJson.plugins) {
+        characterJson.plugins = [];
+      }
+      if (!characterJson.plugins.includes(name)) {
+        characterJson.plugins.push(name);
+      }
     } else if (isPlugin) {
       // Add to plugins array if it doesn't exist
       if (!characterJson.plugins) {
@@ -885,7 +892,7 @@ export const updateAgentDeployment = async (agentData: AgentData) => {
       const composeResult = await generateAgentDockerComposeFile(
         agentId, 
         agentEnvVariables,
-        'synapze/elizav0258a', 
+        'synapze/elizav0258b', 
         newAgentServerPort ?? '3300',
         `${import.meta.env.VITE_JWT_AGENT_SECRET}`,
         'synapze.xyz'
