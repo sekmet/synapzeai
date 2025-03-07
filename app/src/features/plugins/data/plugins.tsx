@@ -73,6 +73,34 @@ export const fetchPlugins = async (forceRefresh = false) => {
     if (forceRefresh) {
       console.log('Fetching plugins...');
     }
+    
+    const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/plugins`,{
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch plugins');
+    }
+  
+    return response.json();
+
+  } catch (err) {
+    console.error('Failed to fetch plugins:', err);
+    throw err;
+  }
+};
+
+
+
+export const fetchPluginsLocal = async (forceRefresh = false) => {
+  try {
+    if (forceRefresh) {
+      console.log('Fetching plugins...');
+    }
 
     // Fetch the registry index
     const registryResponse = await fetch(

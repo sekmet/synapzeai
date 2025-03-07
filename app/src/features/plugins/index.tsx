@@ -151,7 +151,7 @@ export default function Plugins() {
           </div>
         ) : (
           <PluginsProvider>
-          <ul className="faded-bottom no-scrollbar grid gap-4 overflow-auto pb-16 pt-4 md:grid-cols-2 lg:grid-cols-3">
+          <ul className="faded-bottom no-scrollbar grid gap-4 overflow-auto pb-16 pt-4 md:grid-cols-2 lg:grid-cols-4">
             {filteredPlugins.map((plugin) => (
               <li
                 key={plugin.name}

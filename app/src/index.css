@@ -169,8 +169,17 @@
   }
   html {
     @apply overflow-x-hidden;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply min-h-svh w-full bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -o-font-smoothing: antialiased;
+    -ms-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
   }
 }

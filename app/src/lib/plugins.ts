@@ -147,10 +147,10 @@ export const fetchPluginsListing = async (forceRefresh = false) => {
     } finally {
       console.log('Plugins loaded');
     }
-  };
+};
 
 
-  export async function loadPluginParameters(pluginName: string): Promise<PluginInfo | null> {
+export async function loadPluginParameters(pluginName: string): Promise<PluginInfo | null> {
   
     if (!pluginName) return null;
   
@@ -171,4 +171,4 @@ export const fetchPluginsListing = async (forceRefresh = false) => {
       console.error(`Error loading plugin ${pluginName}:`, error);
       return null;
     }
-  }
+}
