@@ -73,7 +73,7 @@ export const fetchPlugins = async (forceRefresh = false) => {
     if (forceRefresh) {
       console.log('Fetching plugins...');
     }
-    
+
     const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/plugins`,{
       method: 'GET',
       headers: {
@@ -86,7 +86,26 @@ export const fetchPlugins = async (forceRefresh = false) => {
       throw new Error('Failed to fetch plugins');
     }
   
-    return response.json();
+    const plugins = await response.json();
+    const pluginData = [];
+
+    for (const plugin of plugins) {
+      pluginData.push({
+        logo: <img src={plugin.logo} alt={plugin.name} className='rounded-lg' />,
+        icon: getIconForString(plugin.icon),
+        name: plugin.name,
+        value: plugin.name,
+        version: plugin.version,
+        description: plugin.description,
+        author: plugin.author,
+        githubUrl: plugin.githubUrl,
+        package: plugin.package,
+        installed: plugin.installed,
+        agentConfig: plugin.agentConfig,
+      });
+    }
+
+    return pluginData;
 
   } catch (err) {
     console.error('Failed to fetch plugins:', err);

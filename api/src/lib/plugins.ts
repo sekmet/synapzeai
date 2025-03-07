@@ -114,7 +114,7 @@ export const fetchPlugins = async (forceRefresh = false) => {
             try {
               const logoResponse = await fetch(logoUrl, { method: 'HEAD' });
               if (logoResponse.ok) {
-                logo = `<img src="${logoUrl}" alt="${shortName}" className='rounded-lg' />`;
+                logo = logoUrl;
               }
             } catch {
               console.warn(`Failed to check for logo in ${name}`);
