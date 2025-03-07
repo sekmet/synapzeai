@@ -3,6 +3,7 @@ import {
   IconRouter,
   IconPlug,
 } from '@tabler/icons-react'
+import ElizaPluginNoLogo from '@/assets/eliza-plugin.png'
 
 /**
  * Returns an icon component based on the provided string.
@@ -91,7 +92,7 @@ export const fetchPlugins = async (forceRefresh = false) => {
 
     for (const plugin of plugins) {
       pluginData.push({
-        logo: <img src={plugin.logo} alt={plugin.name} className='rounded-lg' />,
+        logo: plugin.logo ? <img src={plugin.logo} alt={plugin.name} className='rounded-lg' /> : <img src={ElizaPluginNoLogo} alt={plugin.name} className='rounded-lg' />,
         icon: getIconForString(plugin.icon),
         name: plugin.name,
         value: plugin.name,

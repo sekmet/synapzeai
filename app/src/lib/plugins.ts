@@ -5,30 +5,30 @@ import { type PluginInfo } from '@/types/plugins';
 * @param {string} readmeContent - The raw README content.
 * @returns {string | null} The extracted description or null if not found.
 */
-  const extractDescriptionFromReadme = (readmeContent: string) => {
-    const lines = readmeContent.split('\n');
-    let titleFound = false;
-    let paragraphLines = [];
-  
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!titleFound && trimmed.startsWith('# ')) {
-        titleFound = true;
-        continue;
-      }
-      if (titleFound) {
-        if (trimmed === '') {
-          if (paragraphLines.length > 0) break; // End of paragraph
-        } else if (trimmed.startsWith('#')) {
-          break; // Another header
-        } else {
-          paragraphLines.push(trimmed);
-        }
+const extractDescriptionFromReadme = (readmeContent: string) => {
+  const lines = readmeContent.split('\n');
+  let titleFound = false;
+  let paragraphLines = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!titleFound && trimmed.startsWith('# ')) {
+      titleFound = true;
+      continue;
+    }
+    if (titleFound) {
+      if (trimmed === '') {
+        if (paragraphLines.length > 0) break; // End of paragraph
+      } else if (trimmed.startsWith('#')) {
+        break; // Another header
+      } else {
+        paragraphLines.push(trimmed);
       }
     }
-  
-    return paragraphLines.length > 0 ? paragraphLines.join(' ') : null;
-  };
+  }
+
+  return paragraphLines.length > 0 ? paragraphLines.join(' ') : null;
+};
 
 function formatCapitalizedString(input: string): string {
  // Handle empty/null cases
@@ -50,7 +50,7 @@ function formatCapitalizedString(input: string): string {
  * @param {boolean} forceRefresh - If true, logs a message indicating a refresh.
  * @returns {Promise<Array<{value: string, label: string, category: string, package: string, description: string}>>} An array of plugin objects.
  */
-export const fetchPluginsListing = async (forceRefresh = false) => {
+export const fetchPluginsListingLocal = async (forceRefresh = false) => {
     try {
       if (forceRefresh) {
         console.log('Fetching plugins...');
@@ -148,6 +148,35 @@ export const fetchPluginsListing = async (forceRefresh = false) => {
       console.log('Plugins loaded');
     }
 };
+
+
+export const fetchPluginsListing = async (forceRefresh = false) => {
+  try {
+    if (forceRefresh) {
+      console.log('Fetching plugins...');
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_HOST_URL}/v1/plugins/listing`,{
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_JWT_AGENT_API}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch plugins');
+    }
+  
+    const plugins = await response.json();
+    return plugins;
+
+  } catch (err) {
+    console.error('Failed to fetch plugins:', err);
+    throw err;
+  }
+};
+
 
 
 export async function loadPluginParameters(pluginName: string): Promise<PluginInfo | null> {

@@ -22,7 +22,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import nodemailer from 'nodemailer';
 import { z } from 'zod';
-import { fetchPlugins } from './lib/plugins';
+import { fetchPlugins, fetchPluginsListing } from './lib/plugins';
 
 const apiPrefix = '/v1';
 const authToken = process.env.JWT_AGENT_API ?? '';
@@ -1667,6 +1667,16 @@ app.get(`${apiPrefix}/templates/:tplname`, async (c) => {
 app.get(`${apiPrefix}/plugins`, async (c) => {
   try {
     const plugins = await fetchPlugins();
+    return c.json(plugins);
+  } catch (err) {
+    return c.json({ error: err}, 500);
+  }
+});
+
+// Get plugins listing endpoint
+app.get(`${apiPrefix}/plugins/listing`, async (c) => {
+  try {
+    const plugins = await fetchPluginsListing();
     return c.json(plugins);
   } catch (err) {
     return c.json({ error: err}, 500);
